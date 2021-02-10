@@ -1,2 +1,2 @@
-# 5project-group
-Repo for group project
+# Ongoing Project: Work-in-Progress
+Repo for LBNL Ultrafast Transient Polarization Spectroscopy (UTPS)
