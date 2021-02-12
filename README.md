@@ -7,7 +7,7 @@
 # LBNL Ultrafast Transient Polarization Spectroscopy (UTPS) Visualization
 ---
 ### Problem Statement:
-> 
+> Physicists, in the Chemical Sciences Division at Berkeley Lab (LBNL), have developed a novel technique for investigation of nonlinear physical processes with time-resolved measurements scaled at the molecular level. This project aims to automate data processing, develop data visualization tools, and advance database management to increase effiency of data acquisition and assist in cutting time-cost of performing redundant visualization tasks.
 
 #### **Exploration of the following specific questions:**
 * 
