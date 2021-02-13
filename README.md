@@ -105,16 +105,20 @@
 ## Acknowledgements and Contact:
 [Back to Top](#back_to_top)
 
+
 ### External Resources:
 * [`Title`] (Platform): ([*source*](https://www.URL.com))
-
+Google folder UTPS Online Analysis that has one example and a header.  
+Starting point - upload example notebook or script (Graphs of 2D time-delay scans), helpful in comparing lab measurements
 ### Papers:
 * [`Time-Resolved Ultrafast Transient Polarization Spectroscopy...`](./assets/TimeResolvedUltrafastTransientPolarizationSpectroscopy.pdf) Review of Scientific Instruments: ([*source*](https://aip.scitation.org/doi/10.1063/1.5144482))
 * [`Ultrafast Dynamics of Excited Electronic States in Nitrobenzene...`](./assets/UltrafastDynamicsofExcitedElectronicStatesinNitrobenzene.pdf) Journal of Physical Chemistry A: ([*source*](https://pubs.acs.org/doi/10.1021/acs.jpca.0c01943?ref=pdf))
 * [*`Title`*](./file_path.pdf) Journal/Blog: ([*source*](https://www.URL.com))
 
-### Contact:
-> * Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
+### Contacts:
+> * Data Scientist: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
+> * Principal Investigator: Richard Thurston  [email](rthurston@lbl.gov)
+> * LBNL Staff Scientist: Daniel Slaughter, PhD  [Website](https://amos.lbl.gov/slaughter/)
 
 <a id='appendix'></a>
 
