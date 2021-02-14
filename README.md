@@ -9,12 +9,12 @@
 ### Problem Statement:
 > Physicists, in the Chemical Sciences Division at Berkeley Lab (LBNL), have developed a novel technique for investigation of nonlinear physical processes with time-resolved measurements scaled at the molecular level. This project aims to automate data processing, develop data visualization tools, and advance database management to increase effiency of data acquisition and assist in cutting time-cost of performing redundant visualization tasks.
 
-#### **Exploration of the following specific questions:**
-* 
-* 
+#### **Exploration of the following specific goals:**
+* Quantify scan (data) qualtiy in reference to the others.
+* Visualize 2D time-delay scans for each of the 8-channels in a way that benefits direct comparisons.
 
 ---
-### Table of Contents
+### Table of Contents (NOTE: This will be reformatted to match the project type!)
 
 * [EDA & Data Cleaning](#eda_and_cleaning)
     * [Data Dictionary](#appendix)
@@ -47,6 +47,16 @@
 * [`file_name.csv`](./filepath.csv): Description
 
 **Notes about the data:**
+1. n = Total number of motors moving, through a set of predetermined positions, during each scan.
+> * n = 1: Motor for...
+> * n = 2: Motor for...
+> * n = 3: Motor for polarization control (hypothetical future implementation)
+> * n = 4: Motor for sample position control (hypothetical future implementation)
+> * Dimensions of motor position are [mm], with a direct conversion to [fs]
+> * NOTE: 1-femtosecond = 10^-15 [sec]
+
+2. 8-Channels(output) from NIDAQ-National Instruments Data Acquisition (sensors/measurement hardware/programmable software)
+> * 0-indexed from 0-7
 
 #### EDA
 - Missing Values:
@@ -84,6 +94,7 @@
 <a id='production_model_and_insights'></a>
 
 ---
+
 ## Production Model & Insights
 [Back to Top](#back_to_top)
 
@@ -130,6 +141,12 @@ Starting point - upload example notebook or script (Graphs of 2D time-delay scan
 |Feature Name|Data Type|Dataset|Category|Description|
 |---|---|---|---|---|
 |**Name**|*DType*|Data Source|'Key' : 'Value'|Type of building|
+|**#errors**|*int*|Data Source|'Key' : 'Value'|Type of building|
+|**scan#**|*int*|Data Source|'Key' : 'Value'|Type of building|
+|**motor-target_n**|*float*|Data Source|'Key' : 'Value'|Position targeted by nth motor|
+|**motor-actual_n**|*float*|Data Source|'Key' : 'Value'|Position reported by nth motor|
+|**data_channel_n**|*float*|Data Source|'Key' : 'Value'|Type of building|
+
 
 [Back to Top](#back_to_top)
 
