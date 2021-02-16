@@ -141,11 +141,11 @@ Starting point - upload example notebook or script (Graphs of 2D time-delay scan
 |Feature Name|Data Type|Dataset|Category|Description|
 |---|---|---|---|---|
 |**Name**|*DType*|Data Source|'Key' : 'Value'|Type of building|
-|**#errors**|*int*|Data Source|'Key' : 'Value'|Type of building|
-|**scan#**|*int*|Data Source|'Key' : 'Value'|Type of building|
+|**#errors**|*int*|Data Source|'Key' : 'Value'|Miscommunication "connection" error|
+|**scan#**|*int*|Data Source|'Key' : 'Value'|12 scans of all motor positions are averaged together|
 |**motor-target_n**|*float*|Data Source|'Key' : 'Value'|Position targeted by nth motor|
 |**motor-actual_n**|*float*|Data Source|'Key' : 'Value'|Position reported by nth motor|
-|**data_channel_n**|*float*|Data Source|'Key' : 'Value'|Type of building|
+|**data_channel_n**|*float*|Data Source|'Key' : 'Value'|Photodiode polarization data (voltages)|
 
 
 [Back to Top](#back_to_top)
