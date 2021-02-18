@@ -12,34 +12,66 @@
 #### **Exploration of the following specific goals:**
 * Quantify scan (data) qualtiy in reference to the others.
 * Visualize 2D time-delay scans for each of the 8-channels in a way that benefits direct comparisons.
-
+    * Convert [mm] --> [fs]
+    * Take "lineouts" of 2D spectra
+    * Zoom into user defined quadrants
+    * View slices in different time-delay axes
+    * View slices in real time
+    * Compare data from start of run to data collected at end of run
 ---
-### Table of Contents (NOTE: This will be reformatted to match the project type!)
+## Table of Contents (NOTE: This will be reformatted!)
 
+* [Experiment Details](#experiment_details)
 * [EDA & Data Cleaning](#eda_and_cleaning)
     * [Data Dictionary](#appendix)
-* [Preprocessing & Feature Engineering](#preprocessing_and_feature_engineering)
-* [Model Benchmarks](#model_benchmarks)
+* [Preprocessing](#preprocessing_and_feature_engineering)
+* [Benchmarks](#model_benchmarks)
 * [Model Tuning](#model_tuning)
-* [Production Model & Insights](#production_model_and_insights)
 * [Recommendations and Next Steps](#recommendations_and_next_steps)
 * [Software Requirements](#software_requirements)
 * [Acknowledgements and Contact](#acknowledgements_and_contact)
+
+<a id='experiment_details'></a>
+
+---
+## Experiment Details
+[Back to Top](#back_to_top)
+
+
+
+### GOAL: Measure 3rd order nonlinear optical resonse
+* Q: OKE from Kerr-media sample due to AC laser E-Field
+
+* *Configuration #1 :* "3-Pulse Experiment"
+    >1. Excitation (pump) Pulse
+    >2. Kerr Gating (drive) Pulse --> Photodiode #3
+    >3. Probing Pulse --> Photodiodes #1 & #2 (no cross polarizer)
+
+* *Configuration #2 :* "No Probe Experiment"
+    >1. Excitation (pump) Pulse
+    >2. Kerr Gating (drive) Pulse
+    >3. Probe BLOCKED
+
+* *Configuration #3 :* "No Drive Experiment"
+    >1. Excitation (pump) Pulse
+    >2. Drive BLOCKED
+    >3. Probing Pulse
 
 <a id='eda_and_cleaning'></a>
 
 ---
 ## EDA & Data Cleaning
+[Back to Top](#back_to_top)
 
 ### Datasets
 
 * [Data Dictionary](#appendix)
 
-#### Raw Training Dataset
+#### Raw Sample Dataset
 
-* [`file_name.csv`](./filepath.csv): Description ([source](http://URL.com) | [data dictionary](http://URL.com))
+* [`trial_output05.tsv`](./data/trial_output05.tsv): Description ([source](http://URL.com) | [data dictionary](http://URL.com))
 
-#### Raw Validation Dataset
+#### Raw Complete Dataset
 
 * [`file_name.csv`](./filepath.csv): Description ([source](http://URL.com) | [data dictionary](http://URL.com))
 
@@ -89,13 +121,6 @@
 
 ---
 ## Model Tuning & Assessment
-[Back to Top](#back_to_top)
-
-<a id='production_model_and_insights'></a>
-
----
-
-## Production Model & Insights
 [Back to Top](#back_to_top)
 
 <a id='recommendations_and_next_steps'></a>
