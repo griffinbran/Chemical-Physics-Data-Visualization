@@ -42,6 +42,10 @@
 ### GOAL: Measure 3rd order nonlinear optical resonse
 * Q: OKE from Kerr-media sample due to AC laser E-Field
 
+* Q: 2 Optical Delay Stages
+>* Time Delay T: "x-time", horizontal axes in the time domain, typically femtoseconds. One femtosecond [fs] equals 1E-15 seconds [secs], Motor-Target_1.<br>
+NOTE: A motor in the experiment moves the beampath of a laser(actually two motors and two beampaths). A laser-pulse moves at the speed of light such that the direction of the beampath requires light to travel twice the distance that the motor-position steps. 
+
 * *Configuration #1 :* "3-Pulse Experiment"
     >1. Excitation (pump) Pulse
     >2. Kerr Gating (drive) Pulse --> Photodiode #3
@@ -104,7 +108,7 @@
 [Back to Top](#back_to_top)
 
 ***Pre-processing***
-> * Set-up Models
+> * Set-up terminology of lab to describe tool optionality
 >* One-hot encode categorical variables
 >* Train/test split the data
 >* Scale the data
@@ -144,8 +148,14 @@
 
 ### External Resources:
 * [`Title`] (Platform): ([*source*](https://www.URL.com))
+
+* [`Overview of AxesGrid toolkit`] (Documentation): ([*source*](https://matplotlib.org/mpl_toolkits/axes_grid/users/overview.html))
+
 Google folder UTPS Online Analysis that has one example and a header.  
 Starting point - upload example notebook or script (Graphs of 2D time-delay scans), helpful in comparing lab measurements
+
+
+
 ### Papers:
 * [`Time-Resolved Ultrafast Transient Polarization Spectroscopy...`](./assets/TimeResolvedUltrafastTransientPolarizationSpectroscopy.pdf) Review of Scientific Instruments: ([*source*](https://aip.scitation.org/doi/10.1063/1.5144482))
 * [`Ultrafast Dynamics of Excited Electronic States in Nitrobenzene...`](./assets/UltrafastDynamicsofExcitedElectronicStatesinNitrobenzene.pdf) Journal of Physical Chemistry A: ([*source*](https://pubs.acs.org/doi/10.1021/acs.jpca.0c01943?ref=pdf))
