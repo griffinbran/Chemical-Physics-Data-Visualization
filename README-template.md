@@ -1,6 +1,6 @@
 # Ongoing Project: Work-in-Progress
 
-<img src="file_name.jpg" alt="Hover-Title" style="height: 310px; width:660px;"/>
+<img src="./images/UnfinishedProject.jpg" alt="Ongoing Project" style="height: 310px; width:660px;"/>
 
 <a id='back_to_top'></a>
 
