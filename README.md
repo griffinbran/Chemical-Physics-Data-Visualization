@@ -21,6 +21,13 @@
 ---
 ## Table of Contents (NOTE: This will be reformatted!)
 
+* [`Multi-Page Apps and URL Support`] (Dash.Plotly Reference Guide): ([*Structuring a Dash App Layout*](https://dash.plotly.com/urls))
+
+- app.py
+- index.py
+- callbacks.py
+- layouts.py
+
 * [Experiment Details](#experiment_details)
 * [EDA & Data Cleaning](#eda_and_cleaning)
     * [Data Dictionary](#appendix)
@@ -162,7 +169,7 @@ Starting point - upload example notebook or script (Graphs of 2D time-delay scan
 * [*`Title`*](./file_path.pdf) Journal/Blog: ([*source*](https://www.URL.com))
 
 ### Contacts:
-> * Data Scientist: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
+> * Data Analyst: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
 > * Principal Investigator: Richard Thurston  [email](rthurston@lbl.gov)
 > * LBNL Staff Scientist: Daniel Slaughter, PhD  [Website](https://amos.lbl.gov/slaughter/)
 
