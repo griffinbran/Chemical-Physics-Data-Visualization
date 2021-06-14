@@ -63,7 +63,7 @@ def add_subplot(graph_clicks, div_children):
                     # Display Title of T=0 Input Button
                     # html.Div(id={'type':'taxis1_container', 'index': graph_clicks}, style={'font-weight':'bold'},children=['Set Motor-1 [mm] T = 0:']),
                     dbc.Label( 'Time-Zero Locator:', id={'type':'taxis1_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis1'),
-                    dbc.InputGroup([
+                    dbc.InputGroup(id = 'm1', children=[
                         dbc.InputGroupAddon('T = 0', addon_type='prepend'),
                         # Add Input Button for Motor-1 Time-0 Selection
                         dbc.Input(id={'type': 'slct_timeaxis1', 'index': graph_clicks},
@@ -71,8 +71,8 @@ def add_subplot(graph_clicks, div_children):
                             debounce=False,
                             inputMode = 'numeric',
                             list='motor1_positions',
-                            max = m1_positions[-1],
-                            min = m1_positions[0],
+                            #max = m1_positions[-1],
+                            #min = m1_positions[0],
                             name = 'input_t1',
                             persistence = True,
                             persistence_type = 'memory',
@@ -83,10 +83,11 @@ def add_subplot(graph_clicks, div_children):
                             type = 'number',
                             value=m1_positions[-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ), # END 'slct_timeaxis1' dcc.Input
-                        dbc.Tooltip(f'Min Pos: {m1_positions[0]}', target = 'slct_timeaxis1'),
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
                         #dbc.FormText('Motor-1 [mm]', color='secondary'),
                     ], className='mb-0', size='sm'),
+                    dbc.Tooltip(f'Scan Range: [{m1_positions[0]}, {m1_positions[-1]}]', target = 'm1'),
+                    #dbc.Tooltip( children=[html.P(f'Min Pos: {m1_positions[0]}'), html.P(f'Max Pos: {m1_positions[-1]}')], target = 'm1'),
                     dbc.FormText('Pump-Probe Delay', color='secondary'),
                     # Add Radio Item for Motor-1 Secondary_xaxis Display
                     dbc.RadioItems(id={'type': 'slct_x2', 'index': graph_clicks},
@@ -111,7 +112,7 @@ def add_subplot(graph_clicks, div_children):
                     #dbc.Label('Set \N{MATHEMATICAL ITALIC SMALL TAU} = 0:', id={'type':'taxis2_container', 'index': graph_clicks}, size='sm', align='end'),
                     # container2= 'Set Motor-2 [mm] \N{MATHEMATICAL ITALIC SMALL TAU} = 0:'
                     dbc.Label( '', id={'type':'taxis2_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis2'),
-                    dbc.InputGroup([
+                    dbc.InputGroup(id = 'm2', children = [
                         dbc.InputGroupAddon('\N{MATHEMATICAL ITALIC SMALL TAU} = 0', addon_type='prepend'),
                         # Add Input Button for Motor-2 TAU-0 Selection
                         dbc.Input(id={'type': 'slct_timeaxis2', 'index': graph_clicks},
@@ -119,8 +120,8 @@ def add_subplot(graph_clicks, div_children):
                             debounce=False,
                             inputMode = 'numeric',
                             list = 'motor2_positions',
-                            max = m2_positions[-1],
-                            min = m2_positions[0],
+                            #max = m2_positions[-1],
+                            #min = m2_positions[0],
                             name = 'input_t2',
                             persistence = True,
                             persistence_type = 'memory',
@@ -130,9 +131,10 @@ def add_subplot(graph_clicks, div_children):
                             step = 0.001, #step2_space, ADD step-size button?
                             type='number',
                             value=m2_positions[-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
-                        ),  # END 'slct_timeaxis1' dcc.Input
+                        ),  # END 'slct_timeaxis2' dash-core-components-Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
                     ], className='mb-0', size='sm'), # m-margin, b-bottom
+                    dbc.Tooltip(f'Scan Range: [{m2_positions[0]}, {m2_positions[-1]}]', target = 'm2'),
                     dbc.FormText('Drive-Probe Delay', color='secondary'),
                     # Add Radio Item for Motor-2 Secondary_yaxis Display
                     dbc.RadioItems(id={'type': 'slct_y2', 'index': graph_clicks},
@@ -365,6 +367,9 @@ def lineout_options(tau_slctd):
     return options, value, placeholder
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#@app.callback(Output)
+#dbc.Tooltip(f'Min Pos: {m1_positions[0]}', target = {'type': 'slct_timeaxis1', 'index': graph_clicks}),
+
 # Update the lineout for the scatter plot
 @app.callback(Output(component_id= {'type':'1d_timescan', 'index': MATCH}, component_property='figure'),
     [Input(component_id={'type':'slct_scans', 'index': MATCH}, component_property='value'),

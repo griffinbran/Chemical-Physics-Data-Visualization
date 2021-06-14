@@ -102,6 +102,7 @@ print(f'\tNo. of Steps: {num_m2steps}')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Step-size for Delay Axis-1: Round for sigfigs
 sigfigs = 3
+nl = '\n'
 step1_space = round(m1_position_range/num_m1steps, sigfigs)
 
 # Time, in femtoseconds[fs], it takes light to travel twice the distance 'step_1'
