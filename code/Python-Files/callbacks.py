@@ -367,9 +367,6 @@ def lineout_options(tau_slctd):
     return options, value, placeholder
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-#@app.callback(Output)
-#dbc.Tooltip(f'Min Pos: {m1_positions[0]}', target = {'type': 'slct_timeaxis1', 'index': graph_clicks}),
-
 # Update the lineout for the scatter plot
 @app.callback(Output(component_id= {'type':'1d_timescan', 'index': MATCH}, component_property='figure'),
     [Input(component_id={'type':'slct_scans', 'index': MATCH}, component_property='value'),
