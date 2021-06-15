@@ -323,7 +323,7 @@ def add_subplot(graph_clicks, div_children):
                                 #dbc.Tooltip('Change X-Axis Display', target = {'type':'axes_bttn', 'index':MATCH}, placement='right'),
                                 #html.Button( 'Secondary Axis', id={'type': 'axes_bttn', 'index': graph_clicks}, title=, n_clicks= 0 ),
                                 width=3), # className='three columns', style={'display':'inline-block', 'vertical-align':'top'}
-                            # SEC COL
+                            # SECOND COL
                             dbc.Col(
                                 # Toggle switches background color from black to white
                                 daq.ToggleSwitch(id={'type': 'bkgnd_color', 'index': graph_clicks},
@@ -332,6 +332,23 @@ def add_subplot(graph_clicks, div_children):
                                     size = 30,
                                     style={'width':'80px'}),
                                 width=3), # className='three columns', style={'display':'inline-block', 'vertical-align':'top', 'margin-top':2, 'margin-left':109}
+                            # THIRD COL
+                            dbc.Col(
+                                # Grid Lines ON/OFF
+                                dbc.Button( 'Grid Lines', id={'type':'grid_bttn', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
+                                width=3),
+                            # FOURTH COL
+                            dbc.Col([
+                                # Modal Button for Legend color picker
+                                dbc.Button( 'Legend', id={'type':'lgnd_modal_open', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
+                                dbc.Modal([
+                                    dbc.ModalHeader('Select a Trace:'),
+                                    dbc.ModalBody('Testing 1, 2, 3....'),
+                                    dbc.ModalFooter(
+                                        dbc.Button('Close', id={'type':'lgnd_modal_close', 'index': graph_clicks}, n_clicks=0, size='sm'),
+                                        ),
+                                    ], id={'type':'lgnd_modal', 'index': graph_clicks}, is_open=False, scrollable=True),
+                                ], width=3),
                         ], justify='start'), # className='row', style={'display':'inline-block', 'vertical-align':'top'}
                     ]), # ] END TAB-2 children, ) END dcc.Tab 'sctr'
                 ], # END TABS children
@@ -346,6 +363,20 @@ def add_subplot(graph_clicks, div_children):
     ) # END 'new_child' <html.Div> 
     div_children.append(new_child)
     return div_children
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Open/Close Modal to change 1D Lineout (Scatter) line & marker colors
+@app.callback(
+    Output({'type':'lgnd_modal', 'index':MATCH}, 'is_open'),
+    [Input({'type':'lgnd_modal_open', 'index':MATCH}, 'n_clicks'),
+    Input({'type':'lgnd_modal_close', 'index':MATCH}, 'n_clicks')],
+    State({'type':'lgnd_modal', 'index':MATCH}, 'is_open')
+    )
+def toggle_modal(nclicks_open, nclicks_close, is_open):
+    print(nclicks_open, nclicks_close, is_open)
+    if nclicks_open | nclicks_close:
+        return not is_open
+    return is_open
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Chained-Callback determines dropdown options displayed
@@ -464,7 +495,8 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                     opacity=1,
                     showlegend = True,
                     xaxis = 'x',
-                    name= f' Ch: {ch}, {lgnd_ttl}',
+                    name= f'[{ch}]   - {lgnd_ttl[5:]}',
+                    legendgroup = str(ch),
                     mode='lines+markers'),)
                 fig.add_trace(go.Scatter(
                     x=xdata_t,
@@ -473,6 +505,10 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                     mode = 'lines+markers',
                     visible = True, # KEEP TRUE FOR SECONDARY AXIS
                     opacity = 0, # KEEP ZERO HIDE TRACE
+                    #line_color = 'white',
+                    line = dict(color='white'),
+                    #marker_color = 'white',
+                    marker = dict(color='white'),
                     showlegend = False)) # KEEP FALSE TO HIDE LEGEND
                 if loc_s == 'top':
                     # Create axis objects and apply formatting
@@ -530,6 +566,7 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                     opacity=1,
                     showlegend = True, # TRUE SHOWS TRACE IN LEGEND
                     name= f' Ch: {ch}, {lgnd_ttl}',
+                    legendgroup = str(ch),
                     mode='lines+markers'),) 
                 if loc == 'top':
                     # Create axis objects and apply formatting
@@ -557,6 +594,7 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                                         #margin_r = 120,
                                         margin_t = 120,
                                         )
+    fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
