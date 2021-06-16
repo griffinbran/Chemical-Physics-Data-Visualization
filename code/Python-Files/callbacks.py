@@ -352,7 +352,7 @@ def add_subplot(graph_clicks, div_children):
                                     dbc.ModalFooter(
                                         dbc.Button('Close', id={'type':'lgnd_modal_close', 'index': graph_clicks}, n_clicks=0, size='sm'),
                                         ),
-                                    ], id={'type':'lgnd_modal', 'index': graph_clicks}, is_open=False, scrollable=True, size='sm'),
+                                    ], id={'type':'lgnd_modal', 'index': graph_clicks}, is_open=False, scrollable=True, size='lg'),
                                 ], width=3),
                         ], justify='start'), # className='row', style={'display':'inline-block', 'vertical-align':'top'}
                     ]), # ] END TAB-2 children, ) END dcc.Tab 'sctr'
@@ -642,7 +642,7 @@ def populate_legend_modal_list(fig, graph_clicks):
                     )
                 )
             )
-            trace_items.append(dbc.Popover([dbc.PopoverBody(daq.ColorPicker(id={'type':f'line_color-{tr}', 'index':graph_clicks}, label='Color Picker', value=dict(hex=color_tr)))], target=f'bttn-wrppr-{tr}-{graph_clicks}', trigger='click') )
+            trace_items.append(dbc.Popover([dbc.PopoverBody(daq.ColorPicker(id={'type':f'line_color-{tr}', 'index':graph_clicks}, label='Color Picker', value=dict(hex=color_tr)))], target=f'bttn-wrppr-{tr}-{graph_clicks}', placement='right-start', trigger='click') )
     return trace_items
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -816,6 +816,7 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
     # https://plotly.com/python/builtin-colorscales/
     palettes = ['Viridis', 'haline', 'Plasma','thermal', 'Hot', 'RdBu_r','RdYlBu_r', 'Spectral_r','PRGn', 'curl', 'delta', 'Tropic', 'Blackbody', 'oxy']
     palette = palettes[0]
+
     # Plotly Graph Objects (GO)
     fig.add_trace(go.Heatmap(x=xdata,
             y = ydata,
