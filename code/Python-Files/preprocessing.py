@@ -188,4 +188,8 @@ for scan in complete_scans:
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 import plotly.express as px
 colors = px.colors.qualitative.Plotly
-print(colors)
+counter = 0
+for i in range(20):
+    print(counter%10)
+    counter+=1
+

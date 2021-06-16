@@ -14,7 +14,9 @@ import pandas as pd
 import numpy as np
 
 # Figures serialized to JSON & rendered by Plotly.js JavaScript library
+import plotly.express as px
 import plotly.graph_objects as go
+
 # Make subplots
 from plotly.subplots import make_subplots
 
@@ -427,12 +429,22 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
     else:
         bkgnd_color = 'black'
         grid_color = 'white'
-        
+    
+    # Counter keeps track of the number of traces for line color control
+    counter = 0
+    #FF6692 is too similar to other color options
+    color_index = 6
+    colors = px.colors.qualitative.Plotly[:color_index] + px.colors.qualitative.Plotly[color_index+1:] 
+    num_colors = len(colors)
+    
     # Modify formatted data dictionary for user input
     for scn in scans_slctd:
         dff = data_dict.copy()
         dff = dff[scn]
         for ch in channels_slctd:
+            # Update color used for each trace
+            trace_color = colors[counter%num_colors]
+
             if time0_slctd == False:
                 xdata_t = np.round( ((dff[ch].index-taxis2_slctd)/step2_space)*step2_time, 1)
                 xdata_s = dff[ch].index
@@ -490,12 +502,15 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                         overlaying = 'x',
                         #range = [ xdata_t[0], xdata_t[-1] ],
                         side = 'bottom')
+
                 # Add two scatter traces b/c we want to display multiple x-axes
                 fig.add_trace(go.Scatter(
                     x=xdata_s,
                     y=ydata,
                     visible = True,
                     opacity=1,
+                    line_color = trace_color,
+                    marker_color = trace_color,
                     showlegend = True,
                     xaxis = 'x',
                     name= f'[{ch}]   - {lgnd_ttl[5:]}',
@@ -509,10 +524,8 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                         mode = 'lines+markers',
                         visible = True, # KEEP TRUE FOR SECONDARY AXIS
                         opacity = 0, # KEEP ZERO HIDE TRACE
-                        #line_color = 'white',
-                        line = dict(color='white'),
-                        #marker_color = 'white',
-                        #marker = dict(color='white'),
+                        line_color = 'white',
+                        marker_color = 'white',
                         showlegend = False)) # KEEP FALSE TO HIDE LEGEND
                 if loc_s == 'top':
                     # Create axis objects and apply formatting
@@ -568,8 +581,10 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                     yaxis = 'y',
                     visible = True,
                     opacity=1,
+                    line_color = trace_color,
+                    marker_color = trace_color,
                     showlegend = True, # TRUE SHOWS TRACE IN LEGEND
-                    name= f' Ch: {ch}, {lgnd_ttl}',
+                    name = f'[{ch}]   - {lgnd_ttl[5:]}',
                     legendgroup = str(ch),
                     mode='lines+markers'),) 
                 if loc == 'top':
@@ -598,6 +613,8 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                                         #margin_r = 120,
                                         margin_t = 120,
                                         )
+            # Counter is keeping track of the number of traces for line color control
+            counter+=1
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -609,14 +626,13 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
               )
 def populate_legend_modal_list(n, fig):
     trace_items = []
-    print(list(fig['data'][1].keys()))
     for tr in range(len(fig['data'])):
         if 'name' in list(fig['data'][tr].keys()):
             idx = tr
             name=fig['data'][tr]['name']
             #marker=fig['data'][tr]['marker']
-            #color=fig['data'][tr]['line']['color']
-            trace_items.append(dbc.ListGroupItem(dbc.Button(f'{name}', size='sm', block=True, active=True) ) )
+            color=fig['data'][tr]['line']['color']
+            trace_items.append(dbc.ListGroupItem(dbc.Button(f'{color}, {name}', size='sm', block=True, active=True) ) )
     return trace_items
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
