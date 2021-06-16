@@ -343,7 +343,10 @@ def add_subplot(graph_clicks, div_children):
                                 dbc.Button( 'Legend', id={'type':'lgnd_modal_open', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
                                 dbc.Modal([
                                     dbc.ModalHeader('Select a Trace:'),
-                                    dbc.ModalBody('Testing 1, 2, 3....'),
+                                    #dbc.ModalBody('Testing 1, 2, 3....'),
+                                    dbc.ModalBody(
+                                        dbc.ListGroup(id={'type':'lgnd_modal_list', 'index': graph_clicks}, children=[])
+                                        ),
                                     dbc.ModalFooter(
                                         dbc.Button('Close', id={'type':'lgnd_modal_close', 'index': graph_clicks}, n_clicks=0, size='sm'),
                                         ),
@@ -498,18 +501,19 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                     name= f'[{ch}]   - {lgnd_ttl[5:]}',
                     legendgroup = str(ch),
                     mode='lines+markers'),)
-                fig.add_trace(go.Scatter(
-                    x=xdata_t,
-                    y=ydata,
-                    xaxis = 'x2',
-                    mode = 'lines+markers',
-                    visible = True, # KEEP TRUE FOR SECONDARY AXIS
-                    opacity = 0, # KEEP ZERO HIDE TRACE
-                    #line_color = 'white',
-                    line = dict(color='white'),
-                    #marker_color = 'white',
-                    marker = dict(color='white'),
-                    showlegend = False)) # KEEP FALSE TO HIDE LEGEND
+                if (ch == channels_slctd[-1]) & (scn == scans_slctd[-1]):
+                    fig.add_trace(go.Scatter(
+                        x=xdata_t,
+                        y=ydata,
+                        xaxis = 'x2',
+                        mode = 'lines+markers',
+                        visible = True, # KEEP TRUE FOR SECONDARY AXIS
+                        opacity = 0, # KEEP ZERO HIDE TRACE
+                        #line_color = 'white',
+                        line = dict(color='white'),
+                        #marker_color = 'white',
+                        #marker = dict(color='white'),
+                        showlegend = False)) # KEEP FALSE TO HIDE LEGEND
                 if loc_s == 'top':
                     # Create axis objects and apply formatting
                     fig.update_layout(xaxis = dict(title = x_ttl_txt_s, title_standoff = stndff, side = loc_s, showgrid=True, gridcolor = grid_color, zerolinecolor = grid_color), # range = [ xdata_s[0], xdata_s[-1] ]
@@ -596,6 +600,24 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                                         )
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')
     return fig
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# List all trace colors and names in legend modal
+@app.callback(Output({'type':'lgnd_modal_list', 'index' : MATCH}, 'children'), 
+              [Input({'type':'lgnd_modal_open', 'index': MATCH}, 'nclicks'),
+              Input({'type':'1d_timescan', 'index' : MATCH}, 'figure') ]
+              )
+def populate_legend_modal_list(n, fig):
+    trace_items = []
+    print(list(fig['data'][1].keys()))
+    for tr in range(len(fig['data'])):
+        if 'name' in list(fig['data'][tr].keys()):
+            idx = tr
+            name=fig['data'][tr]['name']
+            #marker=fig['data'][tr]['marker']
+            #color=fig['data'][tr]['line']['color']
+            trace_items.append(dbc.ListGroupItem(dbc.Button(f'{name}', size='sm', block=True, active=True) ) )
+    return trace_items
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set chained callback for T=0, 'slct_x2', RadioItem
