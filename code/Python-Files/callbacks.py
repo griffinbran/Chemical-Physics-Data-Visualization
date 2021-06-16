@@ -352,7 +352,7 @@ def add_subplot(graph_clicks, div_children):
                                     dbc.ModalFooter(
                                         dbc.Button('Close', id={'type':'lgnd_modal_close', 'index': graph_clicks}, n_clicks=0, size='sm'),
                                         ),
-                                    ], id={'type':'lgnd_modal', 'index': graph_clicks}, is_open=False, scrollable=True),
+                                    ], id={'type':'lgnd_modal', 'index': graph_clicks}, is_open=False, scrollable=True, size='sm'),
                                 ], width=3),
                         ], justify='start'), # className='row', style={'display':'inline-block', 'vertical-align':'top'}
                     ]), # ] END TAB-2 children, ) END dcc.Tab 'sctr'
@@ -621,18 +621,28 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # List all trace colors and names in legend modal
 @app.callback(Output({'type':'lgnd_modal_list', 'index' : MATCH}, 'children'), 
-              [Input({'type':'lgnd_modal_open', 'index': MATCH}, 'nclicks'),
-              Input({'type':'1d_timescan', 'index' : MATCH}, 'figure') ]
+              Input({'type':'1d_timescan', 'index' : MATCH}, 'figure'),
+              #Input({'type':'lgnd_modal_open', 'index': MATCH}, 'nclicks'),
+              State('add_graph', 'n_clicks')
               )
-def populate_legend_modal_list(n, fig):
+def populate_legend_modal_list(fig, graph_clicks):
     trace_items = []
+    pop_overs=[]
     for tr in range(len(fig['data'])):
         if 'name' in list(fig['data'][tr].keys()):
             idx = tr
             name=fig['data'][tr]['name']
+            print(name)
             #marker=fig['data'][tr]['marker']
-            color=fig['data'][tr]['line']['color']
-            trace_items.append(dbc.ListGroupItem(dbc.Button(f'{color}, {name}', size='sm', block=True, active=True) ) )
+            color_tr=fig['data'][tr]['line']['color']
+            trace_items.append(dbc.ListGroupItem(
+                html.Div(
+                    dbc.Button([f'{name}', dbc.Badge(f'{name}', pill=True, color=color_tr, className='ml-5')], size='sm', block=True, active=True, id={'type':str(tr), 'index':graph_clicks}),
+                    id=f'bttn-wrppr-{tr}-{graph_clicks}'
+                    )
+                )
+            )
+            trace_items.append(dbc.Popover([dbc.PopoverBody(daq.ColorPicker(id={'type':f'line_color-{tr}', 'index':graph_clicks}, label='Color Picker', value=dict(hex=color_tr)))], target=f'bttn-wrppr-{tr}-{graph_clicks}', trigger='click') )
     return trace_items
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
