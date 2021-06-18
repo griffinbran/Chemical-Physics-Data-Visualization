@@ -277,7 +277,7 @@ def add_subplot(graph_clicks, div_children):
                         # FormGroup places scan(s) selection Dropdown Menu horizontally inline with a label
                         #dbc.Form([
                             dbc.FormGroup([
-                                # Add Channel Checklist
+                                # Select Scan(s) Multi-Value Dropdown Menu
                                 dbc.Label('Select Scan(s):', html_for={'type': 'slct_scans', 'index': graph_clicks}, width=3),#className = 'mr-2',
                                 dbc.Col(
                                     # Add scan selection dropdown menu
@@ -404,6 +404,53 @@ def lineout_options(tau_slctd):
     return options, value, placeholder
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# List all trace colors and names in legend modal
+@app.callback(Output({'type':'lgnd_modal_list', 'index' : MATCH}, 'children'), 
+              [Input({'type':'slct_scans', 'index' : MATCH}, 'value'),
+              Input({'type':'channel_check', 'index' : MATCH}, 'value')],
+              State('add_graph', 'n_clicks')
+              )
+def populate_legend_modal_list(scn_slctd, ch_slctd, graph_clicks):
+    num_traces = len(scn_slctd)*len(ch_slctd)
+    trace_items = []
+    pop_overs=[]
+
+    #FF6692 is too similar to other color options in the 'Plotly' (default) color swatch
+    color_index = 6
+    colors = px.colors.qualitative.Plotly[:color_index] + px.colors.qualitative.Plotly[color_index+1:] 
+    num_colors = len(colors)
+
+    for tr in range(num_traces):
+        # Unique ID for reference in 'update_1d_timescan' callback
+        idx = (100*graph_clicks) + tr + 10
+        #name=str(idx)
+        color_tr=colors[tr%num_colors]
+
+        trace_items.append(dbc.ListGroupItem(
+                dbc.Button(
+                    [
+                    dbc.Badge(
+                        f'Trace {tr}, Index "graph clicks" {graph_clicks}, IDX {idx}',
+                        id={'type':'badge_color', 'index':idx}, 
+                        pill=True, 
+                        color=color_tr, 
+                        className='ml-5'
+                        ) # END Badge
+                     ],
+                    size='sm', block=True, active=True, id={'type':'badge-bttn', 'index':idx}
+                ), id=f'badge-wrppr-{idx}', color=color_tr
+            ) # END List Group Item (AKA 'Badge wrapper')
+        ) # END call to append trace_items
+        trace_items.append(dbc.Popover(
+            [
+            dbc.PopoverBody(
+               daq.ColorPicker(id={'type':'trace_color', 'index':idx}, label='Color Picker', value=dict(hex=color_tr) )
+               )
+            ], target=f'badge-wrppr-{idx}', placement='right-start', trigger='legacy')
+        )
+    return trace_items
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Update the lineout for the scatter plot
 @app.callback(Output(component_id= {'type':'1d_timescan', 'index': MATCH}, component_property='figure'),
     [Input(component_id={'type':'slct_scans', 'index': MATCH}, component_property='value'),
@@ -414,8 +461,9 @@ def lineout_options(tau_slctd):
     Input(component_id= {'type':'slct_timeaxis2', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'bkgnd_color', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'axes_bttn', 'index': MATCH}, component_property='n_clicks'),
-    Input(component_id={'type':'badge_color', 'index': MATCH}, component_property='color')])
-def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, trace_color_picked):
+    #Input(component_id={'type':'badge_color', 'index': ALL}, component_property='color'),
+    Input(component_id={'type':'lgnd_modal_list', 'index':MATCH}, component_property='children') ] )
+def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, lgnd_modal_child):
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects
                         cols = 1, #Display how many side-by-side?
@@ -429,22 +477,14 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
     trig = ctx.triggered
     stat = ctx.states
     inpu = ctx.inputs
+    
+    print('length of trig neg one value', len(trig[-1]['value']))
+    for element in trig[-1]['value']:
+        if 'color' in list(element['props'].keys()):
+            print('ID:', element['props']['id'])
+            print('Color:', element['props']['color'], '\n')
+            print()
 
-    print('States:')
-    for key, val in list(stat.items()):
-        print('Key:', key, '\n')
-        print('Value:', val, '\n')
-
-    print('Inputs:')
-    for key, val in list(inpu.items()):
-        print('Key:', key, '\n')
-        print('Value:', val, '\n')
-        print()
-    print('Lengths: ', len(trig), len(stat), len(inpu))
-    print('Triggered: ')
-    display(trig)
-    print('Inputs: ')
-    display(inpu)
     
     # Set the scatter plot background color to black or white
     if bkgnd_switch:
@@ -454,12 +494,11 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
         bkgnd_color = 'black'
         grid_color = 'white'
     
-    # Counter keeps track of the number of traces for line color control
+    # Counter helps to map the trace numbers and colors in a controlled order
     counter = 0
-    #FF6692 is too similar to other color options
-    color_index = 6
-    colors = px.colors.qualitative.Plotly[:color_index] + px.colors.qualitative.Plotly[color_index+1:] 
-    num_colors = len(colors)
+    num_colors = len(badge_colors)
+    print('Length of Badge Colors:', num_colors)
+    print('Badge Colors: ', badge_colors)
     
     # Modify formatted data dictionary for user input
     for scn in scans_slctd:
@@ -467,7 +506,7 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
         dff = dff[scn]
         for ch in channels_slctd:
             # Update color used for each trace
-            trace_color = colors[counter%num_colors]
+            trace_color = badge_colors[counter%num_colors]
 
             if time0_slctd == False:
                 xdata_t = np.round( ((dff[ch].index-taxis2_slctd)/step2_space)*step2_time, 1)
@@ -640,59 +679,59 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
             # Counter is keeping track of the number of traces for line color control
             counter+=1
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')
-    print('Trace Color Picked:')
-    print(trace_color_picked)
-    print('Trace Color Type:')
-    print(type(trace_color_picked))
+    print('Badge Colors:')
+    print(badge_colors)
+    print('Badge Colors Type:')
+    print(type(badge_colors))
     #fig.update_traces(line_color=trace_color_picked[trace], selector=trace)
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# List all trace colors and names in legend modal
-@app.callback(Output({'type':'lgnd_modal_list', 'index' : MATCH}, 'children'), 
-              Input({'type':'1d_timescan', 'index' : MATCH}, 'figure'),
-              #Input({'type':'lgnd_modal_open', 'index': MATCH}, 'nclicks'),
-              State('add_graph', 'n_clicks')
-              )
-def populate_legend_modal_list(fig, graph_clicks):
-    trace_items = []
-    pop_overs=[]
-    for tr in range(len(fig['data'])):
-        if 'name' in list(fig['data'][tr].keys()):
-            # Unique ID for reference in 'update_1d_timescan' callback
-            idx = (100*graph_clicks) + tr + 10
-            name=fig['data'][tr]['name']
-            print(f'fig["data"][tr]["name"] for tr={tr}:')
-            print(name)
-            #marker=fig['data'][tr]['marker']
-            color_tr=fig['data'][tr]['line']['color']
 
-            trace_items.append(dbc.ListGroupItem(
-                    dbc.Button(
-                        [
-                        dbc.Badge(
-                            f'{name}',
-                            id={'type':'badge_color', 'index':idx}, 
-                            pill=True, 
-                            color=color_tr, 
-                            className='ml-5'
-                            ) # END Badge
-                         ],
-                        size='sm', block=True, active=True, id={'type':'badge-bttn', 'index':idx}
-                    ), id=f'badge-wrppr-{idx}', color=color_tr
-                ) # END List Group Item (AKA 'Badge wrapper')
-            ) # END call to append trace_items
-            trace_items.append(dbc.Popover(
-                [
-                dbc.PopoverBody(
-                   daq.ColorPicker(id={'type':'trace_color', 'index':idx}, label='Color Picker', value=dict(hex=color_tr) )
-                   )
-                ], target=f'badge-wrppr-{idx}', placement='right-start', trigger='legacy')
-            )
-    return trace_items
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# # List all trace colors and names in legend modal
+# @app.callback(Output({'type':'lgnd_modal_list', 'index' : MATCH}, 'children'), 
+#               Input({'type':'1d_timescan', 'index' : MATCH}, 'figure'),
+#               State('add_graph', 'n_clicks')
+#               )
+# def populate_legend_modal_list(fig, graph_clicks):
+#     trace_items = []
+#     pop_overs=[]
+#     for tr in range(len(fig['data'])):
+#         if 'name' in list(fig['data'][tr].keys()):
+#             # Unique ID for reference in 'update_1d_timescan' callback
+#             idx = (100*graph_clicks) + tr + 10
+#             name=fig['data'][tr]['name']
+#             print(f'fig["data"][tr]["name"] for tr={tr}:')
+#             print(name)
+#             #marker=fig['data'][tr]['marker']
+#             color_tr=fig['data'][tr]['line']['color']
+# 
+#             trace_items.append(dbc.ListGroupItem(
+#                     dbc.Button(
+#                         [
+#                         dbc.Badge(
+#                             f'{name}',
+#                             id={'type':'badge_color', 'index':idx}, 
+#                             pill=True, 
+#                             color=color_tr, 
+#                             className='ml-5'
+#                             ) # END Badge
+#                          ],
+#                         size='sm', block=True, active=True, id={'type':'badge-bttn', 'index':idx}
+#                     ), id=f'badge-wrppr-{idx}', color=color_tr
+#                 ) # END List Group Item (AKA 'Badge wrapper')
+#             ) # END call to append trace_items
+#             trace_items.append(dbc.Popover(
+#                 [
+#                 dbc.PopoverBody(
+#                    daq.ColorPicker(id={'type':'trace_color', 'index':idx}, label='Color Picker', value=dict(hex=color_tr) )
+#                    )
+#                 ], target=f'badge-wrppr-{idx}', placement='right-start', trigger='legacy')
+#             )
+#     return trace_items
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Change badge colors
+# Update Badge color(s) and/or name assignment(s)
 @app.callback(Output({'type':'badge_color', 'index':MATCH}, 'color'),
               Input({'type':'trace_color', 'index':MATCH}, 'value')
               )

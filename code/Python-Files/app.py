@@ -21,7 +21,7 @@ import dash_bootstrap_components as dbc
 app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.SPACELAB])
 # app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.GRID]) # Grid system only, no CSS typography applied to layout
 # app = DashProxy(__name__, transforms=[MultiplexerTransform()], suppress_callback_exceptions=True)
-app.config.suppress_callback_exceptions=True
+#app.config.suppress_callback_exceptions=True
 # Alternatively: Render dashboard in Jupyter
 # from jupyter_dash import JupyterDash
 # app = JupyterDash(__name__)
