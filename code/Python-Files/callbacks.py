@@ -5,6 +5,7 @@
 
 
 # IMPORTS:
+import dash
 import preprocessing as pp
 from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, data_dict
 from app import app
@@ -12,6 +13,7 @@ from app import app
 import pandas as pd
 # Multi-Dimensional Arrays and Matrices Library
 import numpy as np
+from IPython.display import display
 
 # Figures serialized to JSON & rendered by Plotly.js JavaScript library
 import plotly.express as px
@@ -412,8 +414,8 @@ def lineout_options(tau_slctd):
     Input(component_id= {'type':'slct_timeaxis2', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'bkgnd_color', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'axes_bttn', 'index': MATCH}, component_property='n_clicks'),
-    Input(component_id={'type':'line_color', 'index': ALL}, component_property='value')])
-def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, line_color_picked):
+    Input(component_id={'type':'badge_color', 'index': MATCH}, component_property='color')])
+def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, trace_color_picked):
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects
                         cols = 1, #Display how many side-by-side?
@@ -421,6 +423,28 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                         specs=[[{'secondary_y':True}]],
                         shared_xaxes = False,
                         shared_yaxes = False)
+
+    # Global, DASH defined, variable available only inside callbacks
+    ctx = dash.callback_context
+    trig = ctx.triggered
+    stat = ctx.states
+    inpu = ctx.inputs
+
+    print('States:')
+    for key, val in list(stat.items()):
+        print('Key:', key, '\n')
+        print('Value:', val, '\n')
+
+    print('Inputs:')
+    for key, val in list(inpu.items()):
+        print('Key:', key, '\n')
+        print('Value:', val, '\n')
+        print()
+    print('Lengths: ', len(trig), len(stat), len(inpu))
+    print('Triggered: ')
+    display(trig)
+    print('Inputs: ')
+    display(inpu)
     
     # Set the scatter plot background color to black or white
     if bkgnd_switch:
@@ -616,11 +640,11 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
             # Counter is keeping track of the number of traces for line color control
             counter+=1
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')
-    print('Line Color Picked:')
-    print(line_color_picked)
-    print('Line Color Type:')
-    print(type(line_color_picked))
-    #fig.update_traces(line_color=line_color_picked[trace], selector=trace)
+    print('Trace Color Picked:')
+    print(trace_color_picked)
+    print('Trace Color Type:')
+    print(type(trace_color_picked))
+    #fig.update_traces(line_color=trace_color_picked[trace], selector=trace)
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -644,23 +668,39 @@ def populate_legend_modal_list(fig, graph_clicks):
             color_tr=fig['data'][tr]['line']['color']
 
             trace_items.append(dbc.ListGroupItem(
-                html.Div(
-                    dbc.Button([f'{name}', dbc.Badge(f'{name}', id={'type':'badge_color', 'index':idx}, pill=True, color=color_tr, className='ml-5')], size='sm', block=True, active=True, id={'type':str(tr), 'index':graph_clicks}),
-                    id=f'bttn-wrppr-{tr}-{graph_clicks}'
-                    )
-                )
+                    dbc.Button(
+                        [
+                        dbc.Badge(
+                            f'{name}',
+                            id={'type':'badge_color', 'index':idx}, 
+                            pill=True, 
+                            color=color_tr, 
+                            className='ml-5'
+                            ) # END Badge
+                         ],
+                        size='sm', block=True, active=True, id={'type':'badge-bttn', 'index':idx}
+                    ), id=f'badge-wrppr-{idx}', color=color_tr
+                ) # END List Group Item (AKA 'Badge wrapper')
+            ) # END call to append trace_items
+            trace_items.append(dbc.Popover(
+                [
+                dbc.PopoverBody(
+                   daq.ColorPicker(id={'type':'trace_color', 'index':idx}, label='Color Picker', value=dict(hex=color_tr) )
+                   )
+                ], target=f'badge-wrppr-{idx}', placement='right-start', trigger='legacy')
             )
-            trace_items.append(dbc.Popover([dbc.PopoverBody(daq.ColorPicker(id={'type':'line_color', 'index':idx}, label='Color Picker', value=dict(hex=color_tr)))], target=f'bttn-wrppr-{tr}-{graph_clicks}', placement='right-start', trigger='legacy') )
     return trace_items
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Change badge colors
 @app.callback(Output({'type':'badge_color', 'index':MATCH}, 'color'),
-              Input({'type':'line_color', 'index':MATCH}, 'value')
+              Input({'type':'trace_color', 'index':MATCH}, 'value')
               )
-def update_badge_color(line_color):
-    print(line_color)
-    return line_color['hex']
+def update_badge_color(trace_color):
+    ctx = dash.callback_context.triggered
+    print(trace_color)
+    print(ctx)
+    return trace_color['hex']
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set chained callback for T=0, 'slct_x2', RadioItem
