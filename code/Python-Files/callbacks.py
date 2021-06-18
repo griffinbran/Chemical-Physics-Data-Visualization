@@ -349,7 +349,7 @@ def add_subplot(graph_clicks, div_children):
                                     dbc.ModalHeader('Select a Trace:'),
                                     #dbc.ModalBody('Testing 1, 2, 3....'),
                                     dbc.ModalBody(
-                                        dbc.ListGroup(id={'type':'lgnd_modal_list', 'index': graph_clicks}, children=[])
+                                        dbc.ListGroup(id={'type':'lgnd_modal_list', 'index': graph_clicks}, children=[], flush=True)
                                         ),
                                     dbc.ModalFooter(
                                         dbc.Button('Close', id={'type':'lgnd_modal_close', 'index': graph_clicks}, n_clicks=0, size='sm'),
@@ -438,7 +438,7 @@ def populate_legend_modal_list(scn_slctd, ch_slctd, graph_clicks):
                         ) # END Badge
                      ],
                     size='sm', block=True, active=True, id={'type':'badge-bttn', 'index':idx}
-                ), id=f'badge-wrppr-{idx}', color=color_tr
+                ), id=f'badge-wrppr-{idx}', #color=color_tr
             ) # END List Group Item (AKA 'Badge wrapper')
         ) # END call to append trace_items
         trace_items.append(dbc.Popover(
@@ -461,9 +461,9 @@ def populate_legend_modal_list(scn_slctd, ch_slctd, graph_clicks):
     Input(component_id= {'type':'slct_timeaxis2', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'bkgnd_color', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'axes_bttn', 'index': MATCH}, component_property='n_clicks'),
-    #Input(component_id={'type':'badge_color', 'index': ALL}, component_property='color'),
+    Input(component_id={'type':'lgnd_modal_close', 'index': MATCH}, component_property='n_clicks'),
     Input(component_id={'type':'lgnd_modal_list', 'index':MATCH}, component_property='children') ] )
-def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, lgnd_modal_child):
+def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child):
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects
                         cols = 1, #Display how many side-by-side?
@@ -474,17 +474,23 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
 
     # Global, DASH defined, variable available only inside callbacks
     ctx = dash.callback_context
-    trig = ctx.triggered
-    stat = ctx.states
-    inpu = ctx.inputs
-    
-    print('length of trig neg one value', len(trig[-1]['value']))
-    for element in trig[-1]['value']:
-        if 'color' in list(element['props'].keys()):
-            print('ID:', element['props']['id'])
-            print('Color:', element['props']['color'], '\n')
-            print()
+    #trig = ctx.triggered
+    inputs = ctx.inputs
+    lgnd_modal_list_key = list(inputs.keys())[-1]
+    lgnd_modal_list_vals = inputs[lgnd_modal_list_key]
 
+    # Counter helps to map the trace numbers and colors in a controlled order
+    counter = 0
+    badge_colors =[]
+    for element in lgnd_modal_list_vals:
+        if 'id' not in list(element['props'].keys()):
+            #print('Length of pop child dict', len(element['props']['children'][0]['props']))
+            print('Vals of pop child dict', element['props']['children'][0]['props']['children']['props'])
+            badge_colors.append(element['props']['children'][0]['props']['children']['props']['value']['hex']) # popover children
+            #print('ID:', element['props']['id'][13:])
+            #print('Color:', element['props']['color'], '\n')
+            #badge_colors.append(element['props']['color'])
+    print(badge_colors)
     
     # Set the scatter plot background color to black or white
     if bkgnd_switch:
@@ -494,19 +500,13 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
         bkgnd_color = 'black'
         grid_color = 'white'
     
-    # Counter helps to map the trace numbers and colors in a controlled order
-    counter = 0
-    num_colors = len(badge_colors)
-    print('Length of Badge Colors:', num_colors)
-    print('Badge Colors: ', badge_colors)
-    
     # Modify formatted data dictionary for user input
     for scn in scans_slctd:
         dff = data_dict.copy()
         dff = dff[scn]
         for ch in channels_slctd:
             # Update color used for each trace
-            trace_color = badge_colors[counter%num_colors]
+            trace_color = badge_colors[counter]
 
             if time0_slctd == False:
                 xdata_t = np.round( ((dff[ch].index-taxis2_slctd)/step2_space)*step2_time, 1)
