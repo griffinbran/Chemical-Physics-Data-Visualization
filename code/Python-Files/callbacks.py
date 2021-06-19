@@ -19,7 +19,7 @@ from IPython.display import display
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Make subplots
+# Make subplots: In this app this is only used to display secondary_y axes
 from plotly.subplots import make_subplots
 
 # DAQ simplifies integration of data acquisition & controls into Dash
@@ -38,18 +38,18 @@ mag_factor = 9
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set positioning & display of dashboard
 @app.callback(Output({'type':'new_child_div', 'index':MATCH}, 'style'),
-    Input('add_graph','n_clicks'),
-    State({'type':'tabs','index':MATCH}, 'active_tab') )
-def render_child_div(graph_clicks, tab):
+    Input('add_graph','n_clicks'))
+def render_child_div(graph_clicks):
     if (graph_clicks == 0): # & (tab=='tab-1'):
         style={'width':'auto', 'outline': 'thin lightgrey solid', 'padding':5} 
     elif (graph_clicks > 0): # & (tab=='tab-2'):
-        style={'width':'auto', 'outline': 'thin lightgrey solid', 'margin-bottom':'10px','margin-right':10, 'padding':5, 'display': 'inline-block'}
+        style={'width':'auto', 'outline': 'thin lightgrey solid', 'margin-bottom':10,'margin-right':10, 'padding':5, 'display': 'inline-block'}
     return style
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Add tabs to the dashboard
 @app.callback(Output('container', 'children'),
+
     Input('add_graph', 'n_clicks'),
     State('container', 'children')
     )
@@ -61,7 +61,7 @@ def add_subplot(graph_clicks, div_children):
             # Time-overlap Input Fields:
             #=======================================================================================================================================================
             # Style the Dashboard with HTML Div
-            html.Div(style={'width':'185px', 'display':'inline-block', 'padding-bottom':0, 'margin-bottom':0},
+            html.Div(style={'width':185, 'display':'inline-block', 'padding-bottom':0, 'margin-bottom':0},
                 children = [
                     dbc.Label( 'Time-Zero Locator:', id={'type':'taxis1_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis1'),
                     dbc.InputGroup(id = 'm1', children=[
@@ -105,7 +105,7 @@ def add_subplot(graph_clicks, div_children):
                 ] # END of html.Div children=[ slct_timeaxis1, slct_x2 ]
             ), # END of <taxis1> html.Div
             # Add Dropdown Menu for Motor-2 Time-0 Selection
-            html.Div(style={'width':'185px', 'display':'inline-block', 'margin-left':'10px'},
+            html.Div(style={'width':185, 'display':'inline-block', 'margin-left':'10px'},
                 children = [
                     dbc.Label( '', id={'type':'taxis2_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis2'),
                     dbc.InputGroup(id = 'm2', children = [
@@ -139,7 +139,7 @@ def add_subplot(graph_clicks, div_children):
                         persistence = True,
                         persistence_type = 'session',
                         persisted_props = ['value'],
-                        style={'padding-bottom':0, 'margin-bottom':0, 'fontSize':'13px'},
+                        style={'padding-bottom':0, 'margin-bottom':0, 'fontSize':13},
                     ),
                 ] # END of html.Div children=[ slct_timeaxis2, slct_y2 ]
             ), # END of <taxis2> html.Div
