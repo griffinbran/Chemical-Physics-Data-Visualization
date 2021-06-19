@@ -37,12 +37,12 @@ from dash.dependencies import Input, Output, State, ALL, MATCH, ALLSMALLER
 mag_factor = 9
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set positioning & display of dashboard
-@app.callback(Output({'type':'new_child_div', 'index':MATCH}, 'style'),
+@app.callback(Output({'type':'new_graph_container', 'index':MATCH}, 'style'),
     Input('add_graph','n_clicks'))
 def render_child_div(graph_clicks):
-    if (graph_clicks == 0): # & (tab=='tab-1'):
+    if (graph_clicks == 0):
         style={'width':'auto', 'outline': 'thin lightgrey solid', 'padding':5} 
-    elif (graph_clicks > 0): # & (tab=='tab-2'):
+    elif (graph_clicks > 0):
         style={'width':'auto', 'outline': 'thin lightgrey solid', 'margin-bottom':10,'margin-right':10, 'padding':5, 'display': 'inline-block'}
     return style
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -54,16 +54,18 @@ def render_child_div(graph_clicks):
     State('container', 'children')
     )
 def add_subplot(graph_clicks, div_children):
-    new_child = dbc.Container(id={'type':'new_child_div', 'index': graph_clicks},
+    new_graph = dbc.Container(id={'type':'new_graph_container', 'index': graph_clicks},
         style={},       
         children=[
+            dbc.Row(dbc.Col(dbc.Label('Time-Zero Location'))),
+            dbc.Row([
             #=======================================================================================================================================================
             # Time-overlap Input Fields:
             #=======================================================================================================================================================
             # Style the Dashboard with HTML Div
-            html.Div(style={'width':185, 'display':'inline-block', 'padding-bottom':0, 'margin-bottom':0},
+            dbc.Col(style={'width':185, 'display':'inline-block', 'padding-bottom':0, 'margin-bottom':0}, width = 3,
                 children = [
-                    dbc.Label( 'Time-Zero Locator:', id={'type':'taxis1_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis1'),
+                    dbc.Label( 'Delay Axis 1:', id={'type':'taxis1_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis1'),
                     dbc.InputGroup(id = 'm1', children=[
                         dbc.InputGroupAddon('T = 0', addon_type='prepend'),
                         # Add Input Button for Motor-1 Time-0 Selection
@@ -85,29 +87,16 @@ def add_subplot(graph_clicks, div_children):
                             value=m1_positions[-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ), # END 'slct_timeaxis1' dcc.Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
-                        #dbc.FormText('Motor-1 [mm]', color='secondary'),
                     ], className='mb-0', size='sm'),
                     dbc.Tooltip(f'Scan Range: [{m1_positions[0]}, {m1_positions[-1]}]', target = 'm1'),
                     dbc.FormText('Pump-Probe Delay', color='secondary'),
-                    # Add Radio Item for Motor-1 Secondary_xaxis Display
-                    dbc.RadioItems(id={'type': 'slct_x2', 'index': graph_clicks},
-                        options=[],
-                        value='x',
-                        persistence = True,
-                        persistence_type = 'session',
-                        persisted_props = ['value'],
-                        style={'padding-bottom':0, 'margin-bottom':0, 'fontSize':'13px'},
-                    ),
-                    # This currenty does nothing, it can present the user with suggested input values equal to the motor positions, but some formatting with strings is required
-                    html.Datalist(id={'type':'motor1-positions', 'index':graph_clicks},
-                        children=[ html.Option( value=str(m1_positions[i]) ) for i in range(pp.num_m1steps) ]
-                    ) # End Datalist 'motor1-positions'
-                ] # END of html.Div children=[ slct_timeaxis1, slct_x2 ]
-            ), # END of <taxis1> html.Div
+                ] # END of html.Div children=[ slct_timeaxis1, ]
+            ), # END of <taxis1> dbc.Col
+
             # Add Dropdown Menu for Motor-2 Time-0 Selection
-            html.Div(style={'width':185, 'display':'inline-block', 'margin-left':'10px'},
+            dbc.Col(style={'width':185, 'display':'inline-block', 'margin-left':10}, width = 3,
                 children = [
-                    dbc.Label( '', id={'type':'taxis2_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis2'),
+                    dbc.Label( 'Delay Axis 2:', id={'type':'taxis2_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis2'),
                     dbc.InputGroup(id = 'm2', children = [
                         dbc.InputGroupAddon('\N{MATHEMATICAL ITALIC SMALL TAU} = 0', addon_type='prepend'),
                         # Add Input Button for Motor-2 TAU-0 Selection
@@ -132,17 +121,38 @@ def add_subplot(graph_clicks, div_children):
                     ], className='mb-0', size='sm'), # m-margin, b-bottom
                     dbc.Tooltip(f'Scan Range: [{m2_positions[0]}, {m2_positions[-1]}]', target = 'm2'),
                     dbc.FormText('Drive-Probe Delay', color='secondary'),
+                ] # END of dbc.Col children = [ slct_timeaxis2 ]
+            ), # END of <taxis2> dbc.Col
+            ]), # END of First ROW
+            html.Br(),
+            dbc.FormGroup([
+                dbc.Label('Display Options:', html_for={'type':'slct_x2', 'index': graph_clicks}, width=dict(size='auto'), align = 'center'),
+                dbc.Col([
+                    # Add Radio Item for Motor-1 Secondary_xaxis Display
+                    dbc.RadioItems(id={'type': 'slct_x2', 'index': graph_clicks},
+                        options=[],
+                        value='x',
+                        inline = True,
+                        persistence = True,
+                        persistence_type = 'session',
+                        persisted_props = ['value'],
+                        style={'padding-bottom':0, 'margin-top':8, 'fontSize':14},
+                        #className = 'mt-40',
+                    ),
+                ], width='auto'),
+                dbc.Col([
                     # Add Radio Item for Motor-2 Secondary_yaxis Display
                     dbc.RadioItems(id={'type': 'slct_y2', 'index': graph_clicks},
                         options=[],
                         value='y',
+                        inline = True,
                         persistence = True,
                         persistence_type = 'session',
                         persisted_props = ['value'],
-                        style={'padding-bottom':0, 'margin-bottom':0, 'fontSize':13},
-                    ),
-                ] # END of html.Div children=[ slct_timeaxis2, slct_y2 ]
-            ), # END of <taxis2> html.Div
+                        style={'padding-bottom':0, 'margin-top':8, 'fontSize':14},
+                    )
+                ], width='auto')
+            ], row=True),
             #=======================================================================================================================================================
             # TABS LAYOUT
             #=======================================================================================================================================================
@@ -261,10 +271,8 @@ def add_subplot(graph_clicks, div_children):
                                     ], size='sm', className='p-10'), # END of ButtonGroup
                                 width = 'auto', className='p-10'), # END of COL
                             ], row = True, className='p-10'),# END FormGroup, check=True, className='mr-3'), inline=True),
-                        #]), # End Form
-                        #=======================================================================================================================================================
-                        # FormGroup places scan(s) selection Dropdown Menu horizontally inline with a label
-                        #dbc.Form([
+                            #=======================================================================================================================================================
+                            # FormGroup places scan(s) selection Dropdown Menu horizontally inline with a label
                             dbc.FormGroup([
                                 # Select Scan(s) Multi-Value Dropdown Menu
                                 dbc.Label('Select Scan(s):', html_for={'type': 'slct_scans', 'index': graph_clicks}, width=3),#className = 'mr-2',
@@ -283,15 +291,12 @@ def add_subplot(graph_clicks, div_children):
                                     ),
                                 width = 9),
                         ], row = True, className='pt-10'),# END FormGroup, check=True, className='mr-3'), inline=True),
-                        #]), # End Form
-                        # FormGroup places Channel Checklist horizontally inline with a label
-                        #dbc.Form([
+                            # FormGroup places Channel Checklist horizontally inline with a label
                             dbc.FormGroup([
                                 # Add Channel Checklist
-                                dbc.Label('Select Channel(s):', html_for={'type': 'channel_check', 'index': graph_clicks}, width=3),#className = 'mr-2',
+                                dbc.Label('Select Channel(s):', html_for={'type': 'bkgnd_color', 'index': graph_clicks}, width=3),#className = 'mr-2',
                                 dbc.Col(dbc.Checklist(
                                     id={'type': 'channel_check', 'index': graph_clicks},
-                                    #inputStyle={'cursor':'pointer'},
                                     inline = True,
                                     switch = True,
                                     options=[{'label': f'{ch}', 'value': ch} for ch in range(pp.nchannels)],
@@ -307,12 +312,13 @@ def add_subplot(graph_clicks, div_children):
                         # Initialize an empty graph object, The 'figure={}' argument is optional, it will hold the app.callback output
                         dcc.Graph(id={'type': '1d_timescan', 'index': graph_clicks}, figure={}),
                         # NEW ROW
-                        dbc.Row([
+                        dbc.Form([dbc.FormGroup([
+                            dbc.Label('Display Options:', html_for={'type':'bkgnd_color', 'index': graph_clicks}, width=dict(size='auto'), align = 'center'),
                             # FIRST COL
                             dbc.Col(
                                 # Button changes visible axes for space and time
-                                dbc.Button( 'Axes Labels', id={'type':'axes_bttn', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
-                                width=2), # className='three columns', style={'display':'inline-block', 'vertical-align':'top'}
+                                dbc.Button( 'Axis Label', id={'type':'axes_bttn', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
+                                width='auto'), # className='three columns', style={'display':'inline-block', 'vertical-align':'top'}
                             # SECOND COL
                             dbc.Col([
                                 # Modal Button for Legend color picker
@@ -326,12 +332,12 @@ def add_subplot(graph_clicks, div_children):
                                         dbc.Button('Apply Changes', id={'type':'lgnd_modal_close', 'index': graph_clicks}, n_clicks=0, size='sm'),
                                     ),
                                 ], id={'type':'lgnd_modal', 'index': graph_clicks}, is_open=False, scrollable=True, size='lg'),
-                            ], width=2),
+                            ], width='auto'),
                             # THIRD COL
                             dbc.Col(
                                 # Grid Lines ON/OFF
                                 dbc.Button( 'Grid Lines', id={'type':'grid_bttn', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
-                                width=2),
+                                width='auto'),
                             # FOURTH COL
                             dbc.Col(
                                 # Toggle switches background color from black to white
@@ -339,9 +345,10 @@ def add_subplot(graph_clicks, div_children):
                                     label=['Black', 'White'],
                                     value=False,
                                     size = 30,
-                                    style={'width':'80px'}),
-                                width=2), # className='three columns', style={'display':'inline-block', 'vertical-align':'top', 'margin-top':2, 'margin-left':109}
-                        ], justify='between', align='center', no_gutters=True), # className='row', style={'display':'inline-block', 'vertical-align':'top'}
+                                    style={'width':'80px', 'margin-left':10}),
+                                width='auto'), # className='three columns', style={'display':'inline-block', 'vertical-align':'top', 'margin-top':2, 'margin-left':109}
+                        ]) ], inline=True), # END Form
+                        #]) ], form=True, justify='between', align='center', no_gutters=True), # className='row', style={'display':'inline-block', 'vertical-align':'top'}
                     ]), # ] END TAB-2 children, ) END dcc.Tab 'sctr'
                 ], # END TABS children
                 persistence = True,
@@ -351,9 +358,9 @@ def add_subplot(graph_clicks, div_children):
             # Add an 'HTML5 content division element, <div>' w/ the 'Div' wrapper
             html.Div( id={'type': 'tabs-content', 'index': graph_clicks} ),
             # END TABS LAYOUT +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        ] # END 'new_child' <html.Div> children = []
-    ) # END 'new_child' <html.Div> 
-    div_children.append(new_child)
+        ] # END 'new_graph' <dbc.Container> children = []
+    ) # END 'new_graph' <dbc.Container> 
+    div_children.append(new_graph)
     return div_children
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
