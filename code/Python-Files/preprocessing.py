@@ -12,7 +12,8 @@ import scipy.constants as consts
 from jupyter_dash import JupyterDash
 from jupyterthemes import jtplot
 #jtplot.style(theme='solarizedd', context='notebook', ticks=True, grid=False)
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+# +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Identify column names for new DataFrame
 header_names = ['#errors',
                 'scan#', 
@@ -30,33 +31,35 @@ header_names = ['#errors',
                 'data_channel_7']
 
 # Read tsv data and assign to a Pandas DataFrame
-data = pd.read_csv('../../data/trial_output05.tsv', delimiter='\t', names = header_names)
+data = pd.read_csv('../../../UTPS-Data/trial_output05.tsv', delimiter='\t', names = header_names)
+data = pd.read_csv('../../../UTPS-Data/2DHomodyne_Air_drive135_probe0_comp3p46_pump0.dat', delimiter='\t', names = header_names)
 
 # Set dtype of scan# column to int32
 data = data.astype({'scan#':int})
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Count the number of motor positions targeted in each scan
+num_m1steps = len(data['motor-target_1'].value_counts())
+num_m2steps = len(data['motor-target_2'].value_counts())
+
 # Identify # of complete scans performed
 scan_info = data['scan#'].value_counts().sort_index()
 num_scans = len(scan_info)
-complete = max(scan_info)
+#complete = max(scan_info)
+complete = num_m1steps*num_m2steps
+
 complete_scans = []
 incomplete_scans = []
 
-# Count the number of measurements taken in each scan
-num_m1steps = len(data['motor-target_1'].value_counts())
-# Count the number of measurements taken in each scan
-num_m2steps = len(data['motor-target_2'].value_counts())
-
 # Requirements for complete scan
-print(f'Complete scans have {num_m1steps*num_m2steps:,} measurements!\n')
+print(f'Complete scans have at least {num_m1steps*num_m2steps:,} measurements.\n')
 
 print('scan# complete%')
-display(round((data['scan#'].value_counts().sort_index()/(num_m1steps*num_m2steps))*100, 2))
+display(round((data['scan#'].value_counts().sort_index()/(complete))*100, 2))
 print()
 
 # Identify incomplete scans
 for scan in range(num_scans):
-    if scan_info[scan] != complete:
+    if scan_info[scan] < complete:
         incomplete_scans.append(scan)
     elif scan_info[scan] == complete:
         complete_scans.append(scan)
@@ -69,6 +72,7 @@ print(f'COMPLETE scan#:   {complete_scans}')
 data['#errors'].value_counts()
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Display Motor_1 Description
+print()
 print(f'Motor-1 Targets: \n')
 
 # Pre-Processing
@@ -82,7 +86,7 @@ m1_position_range = round(m1_position_max - m1_position_min,3)
 print(f'        Min: {m1_position_min}[mm]\n        Max: {m1_position_max}[mm]\n        Range: {m1_position_range}[mm]')
 
 # Display the number of measurements taken in each scan
-print(f'\tNo. of Steps: {num_m1steps}')
+print(f'\tNo. of Steps: {num_m1steps}\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Display Motor-2 Description
 print(f'Motor-2 Targets: \n')
@@ -98,7 +102,7 @@ m2_position_range = round(m2_position_max - m2_position_min, 3)
 print(f'        Min: {m2_position_min}[mm]\n        Max: {m2_position_max}[mm]\n        Range: {m2_position_range}[mm]')
 
 # Display the number of measurements taken in each scan
-print(f'\tNo. of Steps: {num_m2steps}')
+print(f'\tNo. of Steps: {num_m2steps}\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Step-size for Delay Axis-1: Round for sigfigs
 sigfigs = 3
@@ -119,8 +123,7 @@ step1_time = round((step1_space*twice / (c*K))/fs, 1)
 range_T = step1_time*num_m1steps
 
 print(f'Motor-1 Step-Size:   {step1_space}[mm]  =>  ~ {step1_time}[fs]')
-print(f'Pump-Probe Time-Delay "T" Range:  ~{range_T:,}[fs]')
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
 # Step-size for Delay Axis-2: Round for sigfigs
 sigfigs = 3
 step2_space = round(m2_position_range/num_m2steps, sigfigs)
@@ -129,9 +132,10 @@ step2_space = round(m2_position_range/num_m2steps, sigfigs)
 step2_time = round( (step2_space*twice/(c*K))/fs, 1)
 range_tau = step2_time*num_m2steps
 
-print(f'Motor-2  Step-Size:   {step2_space}[mm]  =>   ~ {step2_time}[fs]')
-print(f'Drive-Probe Time-Delay "TAU" Range: ~{range_tau:,}[fs]')
-print(f'Drive-Probe Time-Delay "$\tau$" Range: ~{range_tau:,}[fs]')
+print(f'Motor-2 Step-Size:   {step2_space}[mm]  =>  ~ {step2_time}[fs]\n')
+
+print(f'Pump-Probe  Time-Delay "T"   Range: ~{range_T:,}[fs]')
+print(f'Drive-Probe Time-Delay "TAU" Range: ~{range_tau:,}[fs]\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Identify range of signal amplitudes
 data_cols = [col_name for col_name in data if 'data_channel' in col_name]
@@ -144,7 +148,7 @@ nchannels = len(signal_df.columns)
 v_min = min(signal_df.min())
 v_max = max(signal_df.max())
 
-print(f'Minimum: {v_min}\nMaximum: {v_max}')
+print(f'Signal Min: {v_min}\nSignal Max: {v_max}\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 signal_mins = []
 signal_maxs = []
@@ -152,7 +156,7 @@ for col in signal_df.columns:
     signal_mins.append(round(min(signal_df[col]),4))
     signal_maxs.append(round(max(signal_df[col]),4))
 print(f'Signal Minimums by channel: {signal_mins}')
-print(f'Signal Maximums by channel: {signal_maxs}')
+print(f'Signal Maximums by channel: {signal_maxs}\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set-up lists to store delay scan DataFrames for each channel (0-7)
 data_to_plot = []
@@ -186,4 +190,3 @@ for scan in complete_scans:
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # END preprocessing.py
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-

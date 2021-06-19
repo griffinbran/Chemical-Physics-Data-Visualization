@@ -60,12 +60,9 @@ def add_subplot(graph_clicks, div_children):
             #=======================================================================================================================================================
             # Time-overlap Input Fields:
             #=======================================================================================================================================================
-            # Label Dashboard section with Dash Interactive Components
-            #html.H3('Time-Zero:', id={'type':'ctrl_panel_container', 'index':graph_clicks}, style={'text-align': 'left'}),
+            # Style the Dashboard with HTML Div
             html.Div(style={'width':'185px', 'display':'inline-block', 'padding-bottom':0, 'margin-bottom':0},
                 children = [
-                    # Display Title of T=0 Input Button
-                    # html.Div(id={'type':'taxis1_container', 'index': graph_clicks}, style={'font-weight':'bold'},children=['Set Motor-1 [mm] T = 0:']),
                     dbc.Label( 'Time-Zero Locator:', id={'type':'taxis1_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis1'),
                     dbc.InputGroup(id = 'm1', children=[
                         dbc.InputGroupAddon('T = 0', addon_type='prepend'),
@@ -91,7 +88,6 @@ def add_subplot(graph_clicks, div_children):
                         #dbc.FormText('Motor-1 [mm]', color='secondary'),
                     ], className='mb-0', size='sm'),
                     dbc.Tooltip(f'Scan Range: [{m1_positions[0]}, {m1_positions[-1]}]', target = 'm1'),
-                    #dbc.Tooltip( children=[html.P(f'Min Pos: {m1_positions[0]}'), html.P(f'Max Pos: {m1_positions[-1]}')], target = 'm1'),
                     dbc.FormText('Pump-Probe Delay', color='secondary'),
                     # Add Radio Item for Motor-1 Secondary_xaxis Display
                     dbc.RadioItems(id={'type': 'slct_x2', 'index': graph_clicks},
@@ -111,10 +107,6 @@ def add_subplot(graph_clicks, div_children):
             # Add Dropdown Menu for Motor-2 Time-0 Selection
             html.Div(style={'width':'185px', 'display':'inline-block', 'margin-left':'10px'},
                 children = [
-                    # Display title of TAU=0 Input Button
-                    #html.Div(id={'type':'taxis2_container', 'index': graph_clicks}, style={'font-weight':'bold'}, children=['Set Motor-2 [mm] \N{MATHEMATICAL ITALIC SMALL TAU} = 0:']),
-                    #dbc.Label('Set \N{MATHEMATICAL ITALIC SMALL TAU} = 0:', id={'type':'taxis2_container', 'index': graph_clicks}, size='sm', align='end'),
-                    # container2= 'Set Motor-2 [mm] \N{MATHEMATICAL ITALIC SMALL TAU} = 0:'
                     dbc.Label( '', id={'type':'taxis2_container', 'index': graph_clicks}, size='sm', html_for='slct_timeaxis2'),
                     dbc.InputGroup(id = 'm2', children = [
                         dbc.InputGroupAddon('\N{MATHEMATICAL ITALIC SMALL TAU} = 0', addon_type='prepend'),
@@ -156,15 +148,12 @@ def add_subplot(graph_clicks, div_children):
             #=======================================================================================================================================================
             # Add tabs to the dashboard
             dbc.Tabs(id={'type': 'tabs', 'index': graph_clicks},
-                className='pt-n50',
-                #vertical = False,
                 active_tab='tab-1',
                 children=[
                     #===========================================================================================================================================================================
                     # Tab-1 Layout
                     #===========================================================================================================================================================================
-                    dbc.Tab(id={'type':'hmap', 'index':graph_clicks}, label='2D Heatmap', tab_id='tab-1',tab_style={'margin-top': '-50'}, tabClassName='ml-auto', children = [# tab_id(dbc.Tab) == value(dcc.Tab)  tab_style={'margin-top':-10},
-                        #html.Div([ 
+                    dbc.Tab(id={'type':'hmap', 'index':graph_clicks}, label='2D Heatmap', tab_id='tab-1', tabClassName='ml-auto', children = [# tab_id(dbc.Tab) == value(dcc.Tab)  tab_style={'margin-top':-10},
                         # FIRST ROW
                         dbc.Row(
                             [
@@ -181,7 +170,7 @@ def add_subplot(graph_clicks, div_children):
                                         persistence_type = 'memory',
                                         persisted_props = ['value'],
                                         ),
-                                    width=2),
+                                    width=3),
                                 # SEC COL
                                 dbc.Col(
                                     # Scan Select Dropdown Menu for TAB-1
@@ -198,7 +187,7 @@ def add_subplot(graph_clicks, div_children):
                                         persistence_type = 'memory',
                                         persisted_props = ['value'],
                                     ), # END 'slct_scan' Dropdown
-                                width=2), # END 'slct_scan' COL
+                                width=3), # END 'slct_scan' COL
                             ], justify='start', style={'padding':5}, # END ROW children  'start', 'center', 'end', 'stretch', 'baseline'
                         ), # END FIRST ROW
                         # START SECOND ROW
@@ -286,7 +275,6 @@ def add_subplot(graph_clicks, div_children):
                                             'value': list(data_dict.keys())[scn]} for scn in range(len(data_dict))],
                                         multi=True,
                                         value=[list(data_dict.keys())[0], list(data_dict.keys())[1], list(data_dict.keys())[-1]],
-                                        #style={'width': '100%', 'float':'left'}, #'display':'inline-block','margin':'auto'
                                         clearable = True,
                                         placeholder = 'Select a scan to display...',
                                         persistence = True,
@@ -323,11 +311,28 @@ def add_subplot(graph_clicks, div_children):
                             # FIRST COL
                             dbc.Col(
                                 # Button changes visible axes for space and time
-                                dbc.Button( 'Secondary Axis', id={'type':'axes_bttn', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
-                                #dbc.Tooltip('Change X-Axis Display', target = {'type':'axes_bttn', 'index':MATCH}, placement='right'),
-                                #html.Button( 'Secondary Axis', id={'type': 'axes_bttn', 'index': graph_clicks}, title=, n_clicks= 0 ),
-                                width=3), # className='three columns', style={'display':'inline-block', 'vertical-align':'top'}
+                                dbc.Button( 'Axes Labels', id={'type':'axes_bttn', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
+                                width=2), # className='three columns', style={'display':'inline-block', 'vertical-align':'top'}
                             # SECOND COL
+                            dbc.Col([
+                                # Modal Button for Legend color picker
+                                dbc.Button( 'Legend Color', id={'type':'lgnd_modal_open', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
+                                dbc.Modal([
+                                    dbc.ModalHeader('Select a Trace:'),
+                                    dbc.ModalBody(
+                                        dbc.ListGroup(id={'type':'lgnd_modal_list', 'index': graph_clicks}, children=[], flush=True)
+                                    ),
+                                    dbc.ModalFooter(
+                                        dbc.Button('Apply Changes', id={'type':'lgnd_modal_close', 'index': graph_clicks}, n_clicks=0, size='sm'),
+                                    ),
+                                ], id={'type':'lgnd_modal', 'index': graph_clicks}, is_open=False, scrollable=True, size='lg'),
+                            ], width=2),
+                            # THIRD COL
+                            dbc.Col(
+                                # Grid Lines ON/OFF
+                                dbc.Button( 'Grid Lines', id={'type':'grid_bttn', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
+                                width=2),
+                            # FOURTH COL
                             dbc.Col(
                                 # Toggle switches background color from black to white
                                 daq.ToggleSwitch(id={'type': 'bkgnd_color', 'index': graph_clicks},
@@ -335,28 +340,8 @@ def add_subplot(graph_clicks, div_children):
                                     value=False,
                                     size = 30,
                                     style={'width':'80px'}),
-                                width=3), # className='three columns', style={'display':'inline-block', 'vertical-align':'top', 'margin-top':2, 'margin-left':109}
-                            # THIRD COL
-                            dbc.Col(
-                                # Grid Lines ON/OFF
-                                dbc.Button( 'Grid Lines', id={'type':'grid_bttn', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
-                                width=3),
-                            # FOURTH COL
-                            dbc.Col([
-                                # Modal Button for Legend color picker
-                                dbc.Button( 'Legend', id={'type':'lgnd_modal_open', 'index': graph_clicks}, n_clicks=0, outline=True, size='sm'),
-                                dbc.Modal([
-                                    dbc.ModalHeader('Select a Trace:'),
-                                    #dbc.ModalBody('Testing 1, 2, 3....'),
-                                    dbc.ModalBody(
-                                        dbc.ListGroup(id={'type':'lgnd_modal_list', 'index': graph_clicks}, children=[], flush=True)
-                                        ),
-                                    dbc.ModalFooter(
-                                        dbc.Button('Apply Changes', id={'type':'lgnd_modal_close', 'index': graph_clicks}, n_clicks=0, size='sm'),
-                                        ),
-                                    ], id={'type':'lgnd_modal', 'index': graph_clicks}, is_open=False, scrollable=True, size='lg'),
-                                ], width=3),
-                        ], justify='start'), # className='row', style={'display':'inline-block', 'vertical-align':'top'}
+                                width=2), # className='three columns', style={'display':'inline-block', 'vertical-align':'top', 'margin-top':2, 'margin-left':109}
+                        ], justify='between', align='center', no_gutters=True), # className='row', style={'display':'inline-block', 'vertical-align':'top'}
                     ]), # ] END TAB-2 children, ) END dcc.Tab 'sctr'
                 ], # END TABS children
                 persistence = True,
@@ -476,7 +461,6 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
 
     # Global, DASH defined, variable available only inside callbacks
     ctx = dash.callback_context
-    #trig = ctx.triggered
     inputs = ctx.inputs
     lgnd_modal_list_key = list(inputs.keys())[-1]
     lgnd_modal_list_vals = inputs[lgnd_modal_list_key]
@@ -486,12 +470,8 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
     badge_colors =[]
     for element in lgnd_modal_list_vals:
         if 'id' not in list(element['props'].keys()):
-            #print('Length of pop child dict', len(element['props']['children'][0]['props']))
             print('Vals of pop child dict', element['props']['children'][0]['props']['children']['props'])
             badge_colors.append(element['props']['children'][0]['props']['children']['props']['value']['hex']) # popover children
-            #print('ID:', element['props']['id'][13:])
-            #print('Color:', element['props']['color'], '\n')
-            #badge_colors.append(element['props']['color'])
     print(badge_colors)
     
     # Set the scatter plot background color to black or white
@@ -680,7 +660,9 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                                         )
             # Counter is keeping track of the number of traces for line color control
             counter+=1
-    fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')
+    fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>',
+                      width=675)
+    print('width', pp.num_m1steps*mag_factor )
     #fig.update_traces(line_color=trace_color_picked[trace], selector=trace)
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -975,7 +957,8 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
                 'range' : y_range },
         'xaxis2': x2_layout, # None (default) or Dict
         'yaxis2': yaxis2, # None (default) or Dict
-        'coloraxis': {'showscale' : False},},coloraxis_colorbar_xpad = 300,coloraxis_colorbar_ypad = 300,coloraxis_colorbar_bgcolor = 'black',coloraxis_colorbar_bordercolor = 'black',coloraxis_colorbar_outlinecolor = 'black',coloraxis_colorbar_tickcolor = 'black',paper_bgcolor = 'rgb(160,160,160)',plot_bgcolor = 'black',title_text = ttl_txt,font_color = 'black',margin_autoexpand = True,margin_l = 110,margin_r = 120,margin_t = 120,autosize = False, width = pp.num_m1steps*mag_factor, height = pp.num_m2steps*mag_factor,)
+        'coloraxis': {'showscale' : False},},
+        coloraxis_colorbar_xpad = 300,coloraxis_colorbar_ypad = 300,coloraxis_colorbar_bgcolor = 'black',coloraxis_colorbar_bordercolor = 'black',coloraxis_colorbar_outlinecolor = 'black',coloraxis_colorbar_tickcolor = 'black',paper_bgcolor = 'rgb(160,160,160)',plot_bgcolor = 'black',title_text = ttl_txt,font_color = 'black',margin_autoexpand = True,margin_l = 110,margin_r = 120,margin_t = 120,autosize = False, width = pp.num_m1steps*mag_factor, height = pp.num_m2steps*mag_factor,)
     #==============================================================================================
     # What is returned here will actually go to the output
     # First:  'component_property = children'
