@@ -53,7 +53,7 @@ def render_child_div(graph_clicks):
     Input('add_graph', 'n_clicks'),
     State('container', 'children')
     )
-def add_subplot(graph_clicks, div_children):
+def add_subplot(graph_clicks, container_children):
     new_graph = dbc.Container(id={'type':'new_graph_container', 'index': graph_clicks},
         style={},       
         children=[
@@ -124,35 +124,6 @@ def add_subplot(graph_clicks, div_children):
                 ] # END of dbc.Col children = [ slct_timeaxis2 ]
             ), # END of <taxis2> dbc.Col
             ]), # END of First ROW
-            html.Br(),
-            dbc.FormGroup([
-                dbc.Label('Display Options:', html_for={'type':'slct_x2', 'index': graph_clicks}, width=dict(size='auto'), align = 'center'),
-                dbc.Col([
-                    # Add Radio Item for Motor-1 Secondary_xaxis Display
-                    dbc.RadioItems(id={'type': 'slct_x2', 'index': graph_clicks},
-                        options=[],
-                        value='x',
-                        inline = True,
-                        persistence = True,
-                        persistence_type = 'session',
-                        persisted_props = ['value'],
-                        style={'padding-bottom':0, 'margin-top':8, 'fontSize':14},
-                        #className = 'mt-40',
-                    ),
-                ], width='auto'),
-                dbc.Col([
-                    # Add Radio Item for Motor-2 Secondary_yaxis Display
-                    dbc.RadioItems(id={'type': 'slct_y2', 'index': graph_clicks},
-                        options=[],
-                        value='y',
-                        inline = True,
-                        persistence = True,
-                        persistence_type = 'session',
-                        persisted_props = ['value'],
-                        style={'padding-bottom':0, 'margin-top':8, 'fontSize':14},
-                    )
-                ], width='auto')
-            ], row=True),
             #=======================================================================================================================================================
             # TABS LAYOUT
             #=======================================================================================================================================================
@@ -228,7 +199,43 @@ def add_subplot(graph_clicks, div_children):
                             ], width={'size':'auto', 'offset':0}, align='end',),# className='mb-30'),
                         #], className='row', style={'display':'inline-block', 'vertical-align':'top'}),
                         ], justify='center', no_gutters=True),# END TAB-1, ROW-2 
-                        #]), # END TAB-1 Div
+                        # START LAST ROW: Display Options
+                        dbc.Row([
+                            # FIRST COL
+                            dbc.Col([
+                                #
+                                ####
+                                dbc.FormGroup([
+                                    dbc.Label('Display Options:', html_for={'type':'slct_x2', 'index': graph_clicks}, width=dict(size='auto'), align = 'center'),
+                                    dbc.Col([
+                                        # Add Radio Item for Motor-1 Secondary_xaxis Display
+                                        dbc.RadioItems(id={'type': 'slct_x2', 'index': graph_clicks},
+                                            options=[],
+                                            value='x',
+                                            inline = True,
+                                            persistence = True,
+                                            persistence_type = 'session',
+                                            persisted_props = ['value'],
+                                            style={'padding-bottom':0, 'margin-top':8, 'fontSize':14},
+                                            #className = 'mt-40',
+                                        ),
+                                    ], width='auto'),
+                                    dbc.Col([
+                                        # Add Radio Item for Motor-2 Secondary_yaxis Display
+                                        dbc.RadioItems(id={'type': 'slct_y2', 'index': graph_clicks},
+                                            options=[],
+                                            value='y',
+                                            inline = True,
+                                            persistence = True,
+                                            persistence_type = 'session',
+                                            persisted_props = ['value'],
+                                            style={'padding-bottom':0, 'margin-top':8, 'fontSize':14},
+                                        )
+                                    ], width='auto')
+                                ], row=True),
+                                ####
+                            ]) # END COL
+                        ]), # END Last ROW TAB-1
                     ]), # END TAB-1 children, and END dcc.Tab 'hmap'
                     #===========================================================================================================================================================================
                     # Tab-2 Layout
@@ -360,8 +367,8 @@ def add_subplot(graph_clicks, div_children):
             # END TABS LAYOUT +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         ] # END 'new_graph' <dbc.Container> children = []
     ) # END 'new_graph' <dbc.Container> 
-    div_children.append(new_graph)
-    return div_children
+    container_children.append(new_graph)
+    return container_children
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Open/Close Modal to change 1D Lineout (Scatter) line & marker colors
