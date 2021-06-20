@@ -90,8 +90,8 @@ def add_subplot(graph_clicks, container_children):
                     ], className='mb-0', size='sm'),
                     dbc.Tooltip(f'Scan Range: [{m1_positions[0]}, {m1_positions[-1]}]', target = 'm1'),
                     dbc.FormText('Pump-Probe Delay', color='secondary'),
-                ] # END of html.Div children=[ slct_timeaxis1, ]
-            ), # END of <taxis1> dbc.Col
+                ] # END of dbc.Col_children = [ slct_timeaxis1 ]
+            ), # END of dbc.Col <taxis1> 
 
             # Add Dropdown Menu for Motor-2 Time-0 Selection
             dbc.Col(style={'width':185, 'display':'inline-block', 'margin-left':10}, width = 3,

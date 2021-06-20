@@ -34,6 +34,21 @@ header_names = ['#errors',
 data = pd.read_csv('../../../UTPS-Data/trial_output05.tsv', delimiter='\t', names = header_names)
 data = pd.read_csv('../../../UTPS-Data/2DHomodyne_Air_drive135_probe0_comp3p46_pump0.dat', delimiter='\t', names = header_names)
 
+import os
+path = '../../../UTPS-Data/'
+datasets = os.listdir(path)
+print('Available Data:\n')
+for d in range(len(datasets)):
+    print(f'[{d+1}] {datasets[d]}')
+a = int(input('\nSelect [int] from above: '))-1
+while a not in range(len(datasets)):
+    a = int(input(f'Invalid entry. Enter an integer from 1 to {len(datasets)}: '))-1
+print()
+print(f'Selected Data: {datasets[a]}')
+print()
+filename = path+datasets[a]
+data = pd.read_csv(filename, delimiter='\t', names = header_names)
+
 # Set dtype of scan# column to int32
 data = data.astype({'scan#':int})
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
