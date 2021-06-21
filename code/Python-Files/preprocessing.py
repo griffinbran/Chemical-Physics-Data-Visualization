@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# For dynamic data loading
+import os
+
 # Data Manipulation, Wrangling & Analysis Library 
 import pandas as pd
+
 # Multi-Dimensional Arrays and Matrices Library
 import numpy as np
 from IPython.display import display
+
 # Import physical constants such as the speed of light
 import scipy.constants as consts
 
@@ -30,23 +35,32 @@ header_names = ['#errors',
                 'data_channel_6',
                 'data_channel_7']
 
-# Read tsv data and assign to a Pandas DataFrame
-data = pd.read_csv('../../../UTPS-Data/trial_output05.tsv', delimiter='\t', names = header_names)
-data = pd.read_csv('../../../UTPS-Data/2DHomodyne_Air_drive135_probe0_comp3p46_pump0.dat', delimiter='\t', names = header_names)
+# Data for public
+data = pd.read_csv('../../data/trial_output05.tsv', delimiter='\t', names = header_names)
 
-import os
+# Assign relative path
 path = '../../../UTPS-Data/'
 datasets = os.listdir(path)
 print('Available Data:\n')
+
+#
 for d in range(len(datasets)):
     print(f'[{d+1}] {datasets[d]}')
 a = int(input('\nSelect [int] from above: '))-1
+
+# Check for valid user input
 while a not in range(len(datasets)):
     a = int(input(f'Invalid entry. Enter an integer from 1 to {len(datasets)}: '))-1
+
+# Inform user of verified data selection
 print()
 print(f'Selected Data: {datasets[a]}')
 print()
+
+# Assign selection to begin analysis
 filename = path+datasets[a]
+
+# Read tsv data and assign to a Pandas DataFrame
 data = pd.read_csv(filename, delimiter='\t', names = header_names)
 
 # Set dtype of scan# column to int32

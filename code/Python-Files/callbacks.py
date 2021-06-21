@@ -9,6 +9,8 @@ import dash
 import preprocessing as pp
 from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, data_dict
 from app import app
+import layouts as lay
+
 # Data Manipulation, Wrangling & Analysis Library 
 import pandas as pd
 # Multi-Dimensional Arrays and Matrices Library
@@ -57,7 +59,9 @@ def add_subplot(graph_clicks, container_children):
     new_graph = dbc.Container(id={'type':'new_graph_container', 'index': graph_clicks},
         style={},       
         children=[
+            # FIRST ROW
             dbc.Row(dbc.Col(dbc.Label('Time-Zero Location'))),
+            # SECOND ROW
             dbc.Row([
             #=======================================================================================================================================================
             # Time-overlap Input Fields:
@@ -87,7 +91,7 @@ def add_subplot(graph_clicks, container_children):
                             value=m1_positions[-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ), # END 'slct_timeaxis1' dcc.Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
-                    ], className='mb-0', size='sm'),
+                    ], className='mb-0', size='sm'), # END InputGroup
                     dbc.Tooltip(f'Scan Range: [{m1_positions[0]}, {m1_positions[-1]}]', target = 'm1'),
                     dbc.FormText('Pump-Probe Delay', color='secondary'),
                 ] # END of dbc.Col_children = [ slct_timeaxis1 ]
@@ -123,7 +127,16 @@ def add_subplot(graph_clicks, container_children):
                     dbc.FormText('Drive-Probe Delay', color='secondary'),
                 ] # END of dbc.Col children = [ slct_timeaxis2 ]
             ), # END of <taxis2> dbc.Col
-            ]), # END of First ROW
+            # Dataset Dropdown Column
+            dbc.Col([
+                dbc.Label( 'filename:', id={'type':'datasets', 'index': graph_clicks}, size='sm', html_for='data-dpdn'),
+                dbc.DropdownMenu(
+                    children = lay.data_dpdn_items, label='Files', bs_size="sm", direction='left',
+                    ),
+                dbc.FormText(f'Available Data', color='secondary'),
+                ], width={'order':'last'} # END of dbc.Col children = [ datasets, data-dpdn ]
+            ) # END of data-dpdn COL
+            ]), # END of SECOND ROW
             #=======================================================================================================================================================
             # TABS LAYOUT
             #=======================================================================================================================================================
@@ -853,7 +866,7 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
         xdata = time_ax1
         ydata = time_ax2
         x_title_txt = '<b>Pump-Probe (T) Delay [fs]<b>'
-        y_title_txt = '<b>Drive-Probe (c) Delay [fs]<b>'
+        y_title_txt = '<b>Drive-Probe (\N{MATHEMATICAL BOLD ITALIC SMALL TAU}) Delay [fs]<b>'
         x_range = [time_ax1[0]-(step1_time/2), time_ax1[-1]+(step1_time/2)]
         y_range = [time_ax2[0]-(step2_time/2), time_ax2[-1]+(step2_time/2)]
 ##############################################################################################################################################################################################      

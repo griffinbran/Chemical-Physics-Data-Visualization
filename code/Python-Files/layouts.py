@@ -10,6 +10,8 @@
 import dash_html_components as html
 # Bootstrap components for Dash to customise CSS theme & grid layout
 import dash_bootstrap_components as dbc
+
+import preprocessing as pp
 #=======================================================================================================================================================
 # App layout:
 # 1. Dash-Bootstrap Components(i.e. rows, cols, dropdown menus, radioItems, tabs etc.)
@@ -29,4 +31,9 @@ layout1 = dbc.Container([
     # All graphs/components go into this empty list: 'children'
     html.Div(id='container', children=[])
     ], fluid=True) # END of app.layout(...)
-
+#=======================================================================================================================================================
+data_dpdn_items = [dbc.DropdownMenuItem('Filename', header=True)]
+for d in pp.datasets:
+    data_dpdn_items.append(dbc.DropdownMenuItem(divider=True))
+    data_dpdn_items.append(dbc.DropdownMenuItem(d))
+#data_dpdn_items.extend([dbc.DropdownMenuItem(d) for d in pp.datasets])

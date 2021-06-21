@@ -3,7 +3,6 @@
 
 # In[ ]:
 
-
 # Load the app on specified URL
 
 # IMPORTS
