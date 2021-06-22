@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# For dynamic data loading
+# IMPORTS
 import os
-
 # Data Manipulation, Wrangling & Analysis Library 
 import pandas as pd
-
 # Multi-Dimensional Arrays and Matrices Library
 import numpy as np
 from IPython.display import display
-
 # Import physical constants such as the speed of light
 import scipy.constants as consts
-
+# Support for Jupyter Lab
 from jupyter_dash import JupyterDash
 from jupyterthemes import jtplot
 #jtplot.style(theme='solarizedd', context='notebook', ticks=True, grid=False)
 
-# +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Identify column names for new DataFrame
 header_names = ['#errors',
                 'scan#', 
@@ -35,136 +31,199 @@ header_names = ['#errors',
                 'data_channel_6',
                 'data_channel_7']
 
-# Data for public
-data = pd.read_csv('../../data/trial_output05.tsv', delimiter='\t', names = header_names)
-
 # Assign relative path
-path = '../../../UTPS-Data/'
-datasets = os.listdir(path)
+relative_path = '../../../UTPS-Data/'
+# List of files in relative path directory
+datasets = os.listdir(relative_path)
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 print('Available Data:\n')
-
-#
+# Display options and prompt user selection
 for d in range(len(datasets)):
     print(f'[{d+1}] {datasets[d]}')
 a = int(input('\nSelect [int] from above: '))-1
-
 # Check for valid user input
 while a not in range(len(datasets)):
     a = int(input(f'Invalid entry. Enter an integer from 1 to {len(datasets)}: '))-1
-
 # Inform user of verified data selection
 print()
 print(f'Selected Data: {datasets[a]}')
 print()
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Prepare for a future data selection change
+filename = []
+for d in range(len(datasets)):
+    filename.append(relative_path+datasets[d])
 
 # Assign selection to begin analysis
-filename = path+datasets[a]
+filename_a = relative_path+datasets[a]
 
 # Read tsv data and assign to a Pandas DataFrame
-data = pd.read_csv(filename, delimiter='\t', names = header_names)
-
+data = []
+for d in range(len(datasets)):
+    # Read each file into a Pandas DataFrame object
+    df = pd.read_csv(filenames[d], delimiter='\t', names = header_names)
+    # Set dtype of 'scan#' column to int32
+    df = df.astype({'scan#':int})
+    data.append(df)
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+data_a = pd.read_csv(filename, delimiter='\t', names = header_names)
 # Set dtype of scan# column to int32
-data = data.astype({'scan#':int})
+data_a = data_a.astype({'scan#':int})
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Count the number of motor positions targeted in each scan
-num_m1steps = len(data['motor-target_1'].value_counts())
-num_m2steps = len(data['motor-target_2'].value_counts())
-
+num_m1steps = []
+num_m2steps = []
+for d in range(len(datasets)):
+    m1steps = len(datas[d]['motor-target_1'].value_counts())
+    m2steps = len(datas[d]['motor-target_2'].value_counts())
+    num_m1steps.append(m1steps)
+    num_m2steps.append(m2steps)
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Count the number of motor positions targeted in each scan
+num_m1steps_a = len(data_a['motor-target_1'].value_counts())
+num_m2steps_a = len(data_a['motor-target_2'].value_counts())
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Identify # of complete scans performed
-scan_info = data['scan#'].value_counts().sort_index()
-num_scans = len(scan_info)
-#complete = max(scan_info)
-complete = num_m1steps*num_m2steps
-
+scan_info = []
+num_scans = []
+complete = []
+for d in range(len(datasets)):
+    scan_info.append(datas[d]['scan#'].value_counts().sort_index())
+    num_scans.append(len(scan_info[d]))
+    complete.append(num_m1steps[d]*num_m2steps[d])
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Identify # of complete scans performed
+scan_info_a = data_a['scan#'].value_counts().sort_index()
+num_scans_a = len(scan_info)
+complete_a = num_m1steps_a*num_m2steps_a
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 complete_scans = []
 incomplete_scans = []
-
-# Requirements for complete scan
-print(f'Complete scans have at least {num_m1steps*num_m2steps:,} measurements.\n')
-
-print('scan# complete%')
-display(round((data['scan#'].value_counts().sort_index()/(complete))*100, 2))
-print()
-
-# Identify incomplete scans
-for scan in range(num_scans):
-    if scan_info[scan] < complete:
-        incomplete_scans.append(scan)
-    elif scan_info[scan] == complete:
-        complete_scans.append(scan)
-print(f'INCOMPLETE scan#: {incomplete_scans}')
-print(f'COMPLETE scan#:   {complete_scans}')
+sigfigs = 3
+# Identify all incomplete scans
+for d in range(len(datasets)):
+    for scan in range(num_scans[d]):
+        if scan_info[d][scan] < complete[d]:
+            incomplete_scans.append(scan)
+        elif scan_info[d][scan] == complete[d]:
+            complete_scans.append(scan)
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# No errors identified in 45,628 measurements!
+# Requirements for complete scan
+print(f'Complete scans have at least {num_m1steps_a*num_m2steps_a:,} measurements.\n')
+print('scan# complete%')
+display(round((data_a['scan#'].value_counts().sort_index()/(complete))*100, sigfigs-1))
+print()
+complete_scans_a = []
+incomplete_scans_a = []
+# Identify incomplete scans
+for scan in range(num_scans_a):
+    if scan_info_a[scan] < complete_a:
+        incomplete_scans_a.append(scan)
+    elif scan_info_a[scan] == complete_a:
+        complete_scans_a.append(scan)
+print(f'INCOMPLETE scan#: {incomplete_scans_a}')
+print(f'COMPLETE scan#:   {complete_scans_a}')
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # An error may consist of a communication error b/w motor & acquisition computer
 # Motors will be reinitialized, and the scan is restarted
-data['#errors'].value_counts()
+for d in range(len(datasets)):
+    data[d]['#errors'].value_counts()
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+data_a['#errors'].value_counts()
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Display Motor_1 Description
+m1_positions = []
+m2_positions = []
+m1_position_range = []
+m2_position_range = []
+for d in range(len(datasets)):
+    # Creates a list of sorted lists of motor target-positions
+    m1_positions.append(sorted(data[d]['motor-target_1'].unique() ) )
+    m2_positions.append(sorted(data[d]['motor-target_2'].unique() ) )
+    # Determine the range of all delay axes
+    m1_position_min = m1_positions[0]
+    m2_position_min = m2_positions[0]
+    m1_position_max = m1_positions[-1]
+    m2_position_max = m2_positions[-1]
+    m1_position_range.append(round(m1_position_max - m1_position_min, sigfigs))
+    m2_position_range.append(round(m2_position_max - m2_position_min, sigfigs))
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Display Motor_1 Description
 print()
 print(f'Motor-1 Targets: \n')
-
-# Pre-Processing
-m1_positions = sorted(data['motor-target_1'].unique())
-
+m1_positions_a = sorted(data_a['motor-target_1'].unique())
 # Determine the range of Motor_1 positions
-m1_position_min = m1_positions[0]
-m1_position_max = m1_positions[-1]
-m1_position_range = round(m1_position_max - m1_position_min,3)
-
-print(f'        Min: {m1_position_min}[mm]\n        Max: {m1_position_max}[mm]\n        Range: {m1_position_range}[mm]')
-
+m1_position_min_a = m1_positions_a[0]
+m1_position_max_a = m1_positions_a[-1]
+m1_position_range_a = round(m1_position_max_a - m1_position_min_a, sigfigs)
+print(f'        Min: {m1_position_min_a}[mm]\n        Max: {m1_position_max_a}[mm]\n        Range: {m1_position_range_a}[mm]')
 # Display the number of measurements taken in each scan
-print(f'\tNo. of Steps: {num_m1steps}\n')
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+print(f'\tNo. of Steps: {num_m1steps_a}\n')
 # Display Motor-2 Description
 print(f'Motor-2 Targets: \n')
-
 # Pre-Processing
-m2_positions = sorted(data['motor-target_2'].unique())
-
+m2_positions_a = sorted(data_a['motor-target_2'].unique())
 # Determine the range of Motor_1 positions
-m2_position_min = m2_positions[0]
-m2_position_max = m2_positions[-1]
-m2_position_range = round(m2_position_max - m2_position_min, 3)
-
-print(f'        Min: {m2_position_min}[mm]\n        Max: {m2_position_max}[mm]\n        Range: {m2_position_range}[mm]')
-
+m2_position_min_a = m2_positions_a[0]
+m2_position_max_a = m2_positions_a[-1]
+m2_position_range_a = round(m2_position_max_a - m2_position_min_a, sigfigs)
+print(f'        Min: {m2_position_min_a}[mm]\n        Max: {m2_position_max_a}[mm]\n        Range: {m2_position_range_a}[mm]')
 # Display the number of measurements taken in each scan
-print(f'\tNo. of Steps: {num_m2steps}\n')
+print(f'\tNo. of Steps: {num_m2steps_a}\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Step-size for Delay Axis-1: Round for sigfigs
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Round to display significant figures
 sigfigs = 3
+# Laser travels twice the motor distance
+twice = 2
+# New line
 nl = '\n'
-step1_space = round(m1_position_range/num_m1steps, sigfigs)
-
-# Time, in femtoseconds[fs], it takes light to travel twice the distance 'step_1'
+# Time, in femtoseconds[fs], it takes light to travel twice the distance
 # One femtosecond in [seconds]:
 fs = 1E-15
 # One thousand
 K = int(1E3)
 # Speed of light in [meters/second]
 c = consts.c
-# Laser travels twice the motor distance
-twice = 2
-
-step1_time = round((step1_space*twice / (c*K))/fs, 1)
-range_T = step1_time*num_m1steps
-
-print(f'Motor-1 Step-Size:   {step1_space}[mm]  =>  ~ {step1_time}[fs]')
-
-# Step-size for Delay Axis-2: Round for sigfigs
-sigfigs = 3
-step2_space = round(m2_position_range/num_m2steps, sigfigs)
-
-# Time [femtoseconds] it takes light to travel twice the distance 'step_2'
-step2_time = round( (step2_space*twice/(c*K))/fs, 1)
-range_tau = step2_time*num_m2steps
-
-print(f'Motor-2 Step-Size:   {step2_space}[mm]  =>  ~ {step2_time}[fs]\n')
-
-print(f'Pump-Probe  Time-Delay "T"   Range: ~{range_T:,}[fs]')
-print(f'Drive-Probe Time-Delay "TAU" Range: ~{range_tau:,}[fs]\n')
+# Step-size for Delay Axes:
+step1_space = []
+step2_space = []
+step1_time = []
+step2_time = []
+range_T = []
+range_tau = []
+for d in range(len(datasets)):
+    # Step-size for Delay Axes: Round for sigfigs
+    step1_space.append(round(m1_position_range[d]/num_m1steps[d], sigfigs))
+    step2_space.append(round(m2_position_range[d]/num_m2steps[d], sigfigs))
+    # Time [femtoseconds] it takes light to travel twice the distance
+    step1_time.append(round((step1_space[d]*twice / (c*K))/fs, 1))
+    step2_time.append(round((step2_space[d]*twice/(c*K))/fs, 1))
+    # Range defined for tick labels
+    range_T.append(step1_time[d]*num_m1steps[d])
+    range_tau.append(step2_time[d]*num_m2steps[d])
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Step-size for Delay Axes: Round for sigfigs
+step1_space_a = round(m1_position_range_a/num_m1steps_a, sigfigs)
+step2_space_a = round(m2_position_range_a/num_m2steps_a, sigfigs)
+# Time [femtoseconds] it takes light to travel twice the distance
+step1_time_a = round((step1_space_a*twice / (c*K))/fs, 1)
+step2_time_a = round((step2_space_a*twice/(c*K))/fs, 1)
+# Time [femtoseconds] it takes light to travel twice the distance
+range_T_a = step1_time_a*num_m1steps_a
+range_tau_a = step2_time_a*num_m2steps_a
+print(f'Motor-1 Step-Size:   {step1_space_a}[mm]  =>  ~ {step1_time_a}[fs]')
+print(f'Motor-2 Step-Size:   {step2_space_a}[mm]  =>  ~ {step2_time_a}[fs]\n')
+print(f'Pump-Probe  Time-Delay "T"   Range: ~{range_T_a:,}[fs]')
+print(f'Drive-Probe Time-Delay "TAU" Range: ~{range_tau_a:,}[fs]\n')
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Identify range of signal amplitudes
 data_cols = [col_name for col_name in data if 'data_channel' in col_name]
