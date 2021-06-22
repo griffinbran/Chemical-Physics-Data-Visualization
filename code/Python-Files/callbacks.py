@@ -131,7 +131,7 @@ def add_subplot(graph_clicks, container_children):
             dbc.Col([
                 dbc.Label( 'filename:', id={'type':'datasets', 'index': graph_clicks}, size='sm', html_for='data-dpdn'),
                 dbc.DropdownMenu(
-                    children = lay.data_dpdn_items, label='Files', bs_size="sm", direction='left',
+                    children = lay.data_dpdn_items, label='Files', bs_size="sm", direction='down',
                     ),
                 dbc.FormText(f'Available Data', color='secondary'),
                 ], width={'order':'last'} # END of dbc.Col children = [ datasets, data-dpdn ]
