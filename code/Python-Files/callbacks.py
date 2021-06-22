@@ -3,7 +3,6 @@
 
 # In[ ]:
 
-
 # IMPORTS:
 import dash
 import preprocessing as pp
@@ -130,7 +129,7 @@ def add_subplot(graph_clicks, container_children):
             # Dataset Dropdown Column
             dbc.Col([
                 dbc.Label( 'filename:', id={'type':'datasets', 'index': graph_clicks}, size='sm', html_for='data-dpdn'),
-                dbc.DropdownMenu(
+                dbc.DropdownMenu(id={'type':'files', 'index': graph_clicks},
                     children = lay.data_dpdn_items, label='Files', bs_size="sm", direction='down',
                     ),
                 dbc.FormText(f'Available Data', color='secondary'),
@@ -557,7 +556,6 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                         zerolinecolor = grid_color,
                         anchor = 'y',
                         overlaying = 'x',
-                        #range = [ xdata_t[0], xdata_t[-1] ],
                         side = 'top')
                 # Time-Delay axes correspond with xaxis-2, 'bottom'
                 elif nclicks%6==1:
@@ -572,7 +570,6 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                         zerolinecolor = grid_color,
                         anchor = 'y',
                         overlaying = 'x',
-                        #range = [ xdata_t[0], xdata_t[-1] ],
                         side = 'bottom')
 
                 # Add two scatter traces b/c we want to display multiple x-axes
@@ -601,7 +598,7 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
                         showlegend = False)) # KEEP FALSE TO HIDE LEGEND
                 if loc_s == 'top':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, title_standoff = stndff, side = loc_s, showgrid=True, gridcolor = grid_color, zerolinecolor = grid_color), # range = [ xdata_s[0], xdata_s[-1] ]
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, title_standoff = stndff, side = loc_s, showgrid=True, gridcolor = grid_color, zerolinecolor = grid_color),
                                         yaxis = dict(title = y_ttl_txt, showgrid=False, zerolinecolor = grid_color),
                                         xaxis2 = xaxis2_layout,
                                         title_text = ttl_txt,

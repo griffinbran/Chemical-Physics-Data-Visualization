@@ -35,5 +35,5 @@ layout1 = dbc.Container([
 data_dpdn_items = [dbc.DropdownMenuItem('Filename', header=True)]
 for d in pp.datasets:
     data_dpdn_items.append(dbc.DropdownMenuItem(divider=True))
-    data_dpdn_items.append(dbc.DropdownMenuItem(d))
+    data_dpdn_items.append(dbc.DropdownMenuItem(d, id={'type':f'filename{d}', 'index':}))
 #data_dpdn_items.extend([dbc.DropdownMenuItem(d) for d in pp.datasets])
