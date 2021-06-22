@@ -33,7 +33,8 @@ layout1 = dbc.Container([
     ], fluid=True) # END of app.layout(...)
 #=======================================================================================================================================================
 data_dpdn_items = [dbc.DropdownMenuItem('Filename', header=True)]
-for d in pp.datasets:
+for idx, d in enumerate(pp.datasets):
     data_dpdn_items.append(dbc.DropdownMenuItem(divider=True))
-    data_dpdn_items.append(dbc.DropdownMenuItem(d, id={'type':f'filename{d}', 'index':}))
+    data_dpdn_items.append(dbc.DropdownMenuItem(str(idx)+d, id=f'filename{idx}', active=(d==pp.active_data)))
 #data_dpdn_items.extend([dbc.DropdownMenuItem(d) for d in pp.datasets])
+#[Input(id=f'filename{idx}', 'active')]

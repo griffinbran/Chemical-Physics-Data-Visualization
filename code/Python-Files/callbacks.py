@@ -6,11 +6,13 @@
 # IMPORTS:
 import dash
 import preprocessing as pp
-from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, data_dict
+from preprocessing import f
+#from preprocessing import step1_space_f as step1_space, step2_space_f as step2_space, step1_time_f as step1_time, step2_time_f as step2_time, m1_positions_f as m1_positions, m2_positions_f as m2_positions, nchannels_f as nchannels, data_dict_f as data_dict, num_m1steps_f as num_m1steps, num_m2steps_f as num_m2steps
+from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps
 from app import app
 import layouts as lay
 
-# Data Manipulation, Wrangling & Analysis Library 
+# Library for importing and filtering datasets in memory
 import pandas as pd
 # Multi-Dimensional Arrays and Matrices Library
 import numpy as np
@@ -50,7 +52,6 @@ def render_child_div(graph_clicks):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Add tabs to the dashboard
 @app.callback(Output('container', 'children'),
-
     Input('add_graph', 'n_clicks'),
     State('container', 'children')
     )
@@ -77,8 +78,8 @@ def add_subplot(graph_clicks, container_children):
                             debounce=False,
                             inputMode = 'numeric',
                             list='motor1_positions',
-                            #max = m1_positions[-1],
-                            #min = m1_positions[0],
+                            #max = m1_positions[f][-1],
+                            #min = m1_positions[f][0],
                             name = 'input_t1',
                             persistence = True,
                             persistence_type = 'memory',
@@ -87,11 +88,11 @@ def add_subplot(graph_clicks, container_children):
                             #required = True,
                             step = 0.001, #step1_space, ADD step-size button?
                             type = 'number',
-                            value=m1_positions[-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
+                            value=m1_positions[f][-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ), # END 'slct_timeaxis1' dcc.Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
                     ], className='mb-0', size='sm'), # END InputGroup
-                    dbc.Tooltip(f'Scan Range: [{m1_positions[0]}, {m1_positions[-1]}]', target = 'm1'),
+                    dbc.Tooltip(f'Scan Range: [{m1_positions[f][0]}, {m1_positions[f][-1]}]', target = 'm1'),
                     dbc.FormText('Pump-Probe Delay', color='secondary'),
                 ] # END of dbc.Col_children = [ slct_timeaxis1 ]
             ), # END of dbc.Col <taxis1> 
@@ -108,8 +109,8 @@ def add_subplot(graph_clicks, container_children):
                             debounce=False,
                             inputMode = 'numeric',
                             list = 'motor2_positions',
-                            #max = m2_positions[-1],
-                            #min = m2_positions[0],
+                            #max = m2_positions[f][-1],
+                            #min = m2_positions[f][0],
                             name = 'input_t2',
                             persistence = True,
                             persistence_type = 'memory',
@@ -118,19 +119,25 @@ def add_subplot(graph_clicks, container_children):
                             #required = True,
                             step = 0.001, #step2_space, ADD step-size button?
                             type='number',
-                            value=m2_positions[-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
+                            value=m2_positions[f][-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ),  # END 'slct_timeaxis2' dash-core-components-Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
                     ], className='mb-0', size='sm'), # m-margin, b-bottom
-                    dbc.Tooltip(f'Scan Range: [{m2_positions[0]}, {m2_positions[-1]}]', target = 'm2'),
+                    dbc.Tooltip(f'Scan Range: [{m2_positions[f][0]}, {m2_positions[f][-1]}]', target = 'm2'),
                     dbc.FormText('Drive-Probe Delay', color='secondary'),
                 ] # END of dbc.Col children = [ slct_timeaxis2 ]
             ), # END of <taxis2> dbc.Col
+            [Input(id=f'filename{idx}', 'active')]
+            function(*[f'filename{idx}' for idx, d in enumerate(pp.datasets)])
+            from itertools import chain
+            [chain.from_iterable((f'filename{idx}', 'nclicks') for idx in range(len(pp.datasets)) ]
             # Dataset Dropdown Column
             dbc.Col([
                 dbc.Label( 'filename:', id={'type':'datasets', 'index': graph_clicks}, size='sm', html_for='data-dpdn'),
                 dbc.DropdownMenu(id={'type':'files', 'index': graph_clicks},
-                    children = lay.data_dpdn_items, label='Files', bs_size="sm", direction='down',
+                    #children = lay.data_dpdn_items, label='Files', bs_size="sm", direction='down',
+                    children = [dbc.DropdownMenuItem(str(idx)+d, id={'type':f'filename{idx}','index':graph_clicks}, active=(d==pp.active_data)) for idx, d in enumerate(pp.datasets)],
+                    label='Files', bs_size="sm", direction='down',
                     ),
                 dbc.FormText(f'Available Data', color='secondary'),
                 ], width={'order':'last'} # END of dbc.Col children = [ datasets, data-dpdn ]
@@ -155,7 +162,7 @@ def add_subplot(graph_clicks, container_children):
                                     # Channel Select Dropdown Menu for TAB-1
                                     dcc.Dropdown(
                                         id={'type': 'slct_channel', 'index': graph_clicks},
-                                        options=[{'label': f'Channel {ch}', 'value': ch} for ch in range(pp.nchannels)],
+                                        options=[{'label': f'Channel {ch}', 'value': ch} for ch in range(nchannels[f])],
                                         multi=False,
                                         value=0,
                                         clearable = False,
@@ -171,10 +178,10 @@ def add_subplot(graph_clicks, container_children):
                                         id={'type': 'slct_scan', 'index': graph_clicks},
                                         options=
                                             [
-                                                {'label': list(data_dict.keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'), 'value': list(data_dict.keys())[scn]} for scn in range(len(data_dict))
+                                                {'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'), 'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
                                             ],
                                         multi=False,
-                                        value=list(data_dict.keys())[0],
+                                        value=list(data_dict[f].keys())[0],
                                         clearable = False,
                                         persistence = True,
                                         persistence_type = 'memory',
@@ -203,7 +210,7 @@ def add_subplot(graph_clicks, container_children):
                                     #dots = True,
                                     tooltip = {'always_visible':False, 'placement':'topLeft'},
                                     vertical=True,
-                                    verticalHeight=(pp.num_m2steps*(mag_factor-1)),
+                                    verticalHeight=(num_m2steps[f]*(mag_factor-1)),
                                     persistence = True,
                                     persistence_type = 'memory',
                                     persisted_props = ['value'],),  
@@ -298,10 +305,10 @@ def add_subplot(graph_clicks, container_children):
                                 dbc.Col(
                                     # Add scan selection dropdown menu
                                     dcc.Dropdown(id={'type': 'slct_scans', 'index': graph_clicks},
-                                        options=[{'label': list(data_dict.keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'),
-                                            'value': list(data_dict.keys())[scn]} for scn in range(len(data_dict))],
+                                        options=[{'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'),
+                                            'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))],
                                         multi=True,
-                                        value=[list(data_dict.keys())[0], list(data_dict.keys())[1], list(data_dict.keys())[-1]],
+                                        value=[list(data_dict[f].keys())[0], list(data_dict[f].keys())[1], list(data_dict[f].keys())[-1]],
                                         clearable = True,
                                         placeholder = 'Select a scan to display...',
                                         persistence = True,
@@ -318,7 +325,7 @@ def add_subplot(graph_clicks, container_children):
                                     id={'type': 'channel_check', 'index': graph_clicks},
                                     inline = True,
                                     switch = True,
-                                    options=[{'label': f'{ch}', 'value': ch} for ch in range(pp.nchannels)],
+                                    options=[{'label': f'{ch}', 'value': ch} for ch in range(nchannels[f])],
                                     value = [1],
                                     persistence = True,
                                     persistence_type = 'memory',
@@ -404,12 +411,12 @@ def toggle_modal(nclicks_open, nclicks_close, is_open):
     Input({'type':'slct_time0', 'index':MATCH}, 'value') )
 def lineout_options(tau_slctd):
     if tau_slctd:
-        options = [ {'label': f'{i} [mm]', 'value': i} for i in m2_positions ]
-        value = m2_positions[0]
+        options = [ {'label': f'{i} [mm]', 'value': i} for i in m2_positions[f] ]
+        value = m2_positions[f][0]
         placeholder = 'Motor-2 Lineout [mm]'
     else:
-        options = [ {'label': f'{i} [mm]', 'value': i} for i in m1_positions ]
-        value = m1_positions[0]
+        options = [ {'label': f'{i} [mm]', 'value': i} for i in m1_positions[f] ]
+        value = m1_positions[f][0]
         placeholder = 'Motor-1 Lineout [mm]'
         
     return options, value, placeholder
@@ -510,26 +517,26 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
     
     # Modify formatted data dictionary for user input
     for scn in scans_slctd:
-        dff = data_dict.copy()
+        dff = data_dict[f].copy()
         dff = dff[scn]
         for ch in channels_slctd:
             # Update color used for each trace
             trace_color = badge_colors[counter]
 
             if time0_slctd == False:
-                xdata_t = np.round( ((dff[ch].index-taxis2_slctd)/step2_space)*step2_time, 1)
+                xdata_t = np.round( ((dff[ch].index-taxis2_slctd)/step2_space[f])*step2_time[f], 1)
                 xdata_s = dff[ch].index
                 ydata = dff[ch].loc[:,[line_slctd]][line_slctd] #<--NO INTERPOLATION/NO CURVE FIT
-                time_conversion = round( ( (line_slctd-taxis1_slctd) / step1_space )*step1_time, 1)
+                time_conversion = round( ( (line_slctd-taxis1_slctd) / step1_space[f] )*step1_time[f], 1)
                 # Create axis labels for TAB-2 scatter plots
                 ttl_txt = f'<b>Lineout: M-1= {line_slctd} [mm], T= {time_conversion} [fs]<b>'
                 x_ttl_txt_t = '<b>Drive-Probe (\N{MATHEMATICAL BOLD ITALIC SMALL TAU}) Delay [fs]<b>'
                 x_ttl_txt_s = '<b>Target-Position: Motor 2 [mm]<b>'
             elif time0_slctd == True:
-                xdata_t = np.round( ((dff[ch].columns-taxis1_slctd)/step1_space)*step1_time, 1)
+                xdata_t = np.round( ((dff[ch].columns-taxis1_slctd)/step1_space[f])*step1_time[f], 1)
                 xdata_s = dff[ch].columns
                 ydata = dff[ch].loc[[line_slctd]].T[line_slctd]
-                time_conversion = round(((line_slctd-taxis2_slctd)/step2_space)*step2_time, 1)
+                time_conversion = round(((line_slctd-taxis2_slctd)/step2_space[f])*step2_time[f], 1)
                 # Create axis labels for TAB-2 scatter plots
                 ttl_txt = f'<b>Lineout: M-2 = {line_slctd} [mm], \N{MATHEMATICAL BOLD ITALIC SMALL TAU} = {time_conversion} [fs]<b>'
                 x_ttl_txt_t = f'<b>Pump-Probe (T) Delay [fs]<b>'
@@ -686,7 +693,7 @@ def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, tax
             counter+=1
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>',
                       width=675)
-    print('width', pp.num_m1steps*mag_factor )
+    print('width', num_m1steps[f]*mag_factor )
     #fig.update_traces(line_color=trace_color_picked[trace], selector=trace)
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -767,7 +774,7 @@ def set_multi_yaxis_value(taxis2_slctd, y2_slctd):
     Input(component_id={'type':'slct_scan', 'index': MATCH}, component_property='value'),])
 def update_rangeslider(channel_slctd, scan_slctd):
     # Modify formatted data dictionary for user input
-    dff = data_dict.copy()
+    dff = data_dict[f].copy()
     dff = dff[scan_slctd][channel_slctd]
     
     # Identify Min/Max/Range for SLider callbacks
@@ -823,7 +830,7 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
                         shared_yaxes = False)
     
     # Modify formatted data dictionary for user input
-    dff = data_dict.copy()
+    dff = data_dict[f].copy()
     dff = dff[scan_slctd][channel_slctd]
         
     # Display Motor-X Positions
@@ -832,40 +839,40 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
         ydata = dff.index
         x_title_txt = '<b>Target-Position: Motor 1 [mm]<b>'
         y_title_txt = '<b>Target Position: Motor 2 [mm]<b>'
-        x_range = [m1_positions[0]-(step1_space/2), m1_positions[-1]+(step1_space/2)]
-        y_range = [m2_positions[0]-(step2_space/2), m2_positions[-1]+(step2_space/2)]
+        x_range = [m1_positions[f][0]-(step1_space[f]/2), m1_positions[f][-1]+(step1_space[f]/2)]
+        y_range = [m2_positions[f][0]-(step2_space[f]/2), m2_positions[f][-1]+(step2_space[f]/2)]
     # Display Pump-Probe Time-Delay Axis: T (from Motor-1 scans)
     elif (taxis1_slctd != None) & (taxis2_slctd == None):
         m1_zero = taxis1_slctd
-        time_ax1 = np.round( ((dff.columns-m1_zero)/step1_space)*step1_time, 1)
+        time_ax1 = np.round( ((dff.columns-m1_zero)/step1_space[f])*step1_time[f], 1)
         xdata = time_ax1
         ydata = dff.index
         x_title_txt = '<b>Pump-Probe (T) Delay [fs]<b>'
         y_title_txt = '<b>Target Position: Motor 2 [mm]<b>'
-        x_range = [time_ax1[0]-(step1_time/2), time_ax1[-1]+(step1_time/2)]   
-        y_range = [m2_positions[0]-(step2_space/2), m2_positions[-1]+(step2_space/2)]
+        x_range = [time_ax1[0]-(step1_time[f]/2), time_ax1[-1]+(step1_time[f]/2)]   
+        y_range = [m2_positions[f][0]-(step2_space[f]/2), m2_positions[f][-1]+(step2_space[f]/2)]
     # Display Drive-Probe Time-Delay Axis: TAU (from Motor-2 scans)
     elif (taxis1_slctd == None) & (taxis2_slctd != None):
         m2_zero = taxis2_slctd
-        time_ax2 = np.round( ((dff.index-m2_zero)/step2_space)*step2_time, 1)
+        time_ax2 = np.round( ((dff.index-m2_zero)/step2_space[f])*step2_time[f], 1)
         xdata = dff.columns
         ydata = time_ax2
         x_title_txt = '<b>Target Position: Motor 1 [mm]<b>'
         y_title_txt = '<b>Drive-Probe (\N{MATHEMATICAL BOLD ITALIC SMALL TAU}) Delay [fs]<b>'
-        x_range = [m1_positions[0]-(step1_space/2), m1_positions[-1]+(step1_space/2)]
-        y_range = [time_ax2[0]-(step2_time/2), time_ax2[-1]+(step2_time/2)]
+        x_range = [m1_positions[f][0]-(step1_space[f]/2), m1_positions[f][-1]+(step1_space[f]/2)]
+        y_range = [time_ax2[0]-(step2_time[f]/2), time_ax2[-1]+(step2_time[f]/2)]
     # Display Both Time-Delay Axes: T & TAU
     elif (taxis1_slctd != None) & (taxis2_slctd != None):
         m1_zero = taxis1_slctd
         m2_zero = taxis2_slctd
-        time_ax1 = np.round( ((dff.columns-m1_zero)/step1_space)*step1_time, 1)
-        time_ax2 = np.round( ((dff.index-m2_zero)/step2_space)*step2_time, 1)
+        time_ax1 = np.round( ((dff.columns-m1_zero)/step1_space[f])*step1_time[f], 1)
+        time_ax2 = np.round( ((dff.index-m2_zero)/step2_space[f])*step2_time[f], 1)
         xdata = time_ax1
         ydata = time_ax2
         x_title_txt = '<b>Pump-Probe (T) Delay [fs]<b>'
         y_title_txt = '<b>Drive-Probe (\N{MATHEMATICAL BOLD ITALIC SMALL TAU}) Delay [fs]<b>'
-        x_range = [time_ax1[0]-(step1_time/2), time_ax1[-1]+(step1_time/2)]
-        y_range = [time_ax2[0]-(step2_time/2), time_ax2[-1]+(step2_time/2)]
+        x_range = [time_ax1[0]-(step1_time[f]/2), time_ax1[-1]+(step1_time[f]/2)]
+        y_range = [time_ax2[0]-(step2_time[f]/2), time_ax2[-1]+(step2_time[f]/2)]
 ##############################################################################################################################################################################################      
     # https://plotly.com/python/builtin-colorscales/
     palettes = ['Viridis', 'haline', 'Plasma','thermal', 'Hot', 'RdBu_r','RdYlBu_r', 'Spectral_r','PRGn', 'curl', 'delta', 'Tropic', 'Blackbody', 'oxy']
@@ -893,7 +900,7 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
     # SECONDARY X-AXIS, display both Motor-1 Position & Time-Delay: T 'Pump-Probe'
     if x2_slctd == 'x2':
         x2_title_txt = '<b>Target Position: Motor 1 [mm]<b>'
-        x2_range = [m1_positions[0]-(step1_space/2), m1_positions[-1]+(step1_space/2)]
+        x2_range = [m1_positions[f][0]-(step1_space[f]/2), m1_positions[f][-1]+(step1_space[f]/2)]
         x2_layout = {'title' : {'text' : x2_title_txt}, 'overlaying':'x', 'side': 'top', 'nticks': 5, 'ticks': 'outside', 'tickson': 'boundaries','color' : 'black','showline': False,'showgrid': False,'zeroline': False, 'range' : x2_range }
     elif x2_slctd == 'x':
         x2_layout = None
@@ -901,7 +908,7 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
     # SECONDARY Y-AXIS, display both Motor-2 Position & Time-Delay: Tau 'Drive-Probe'
     if y2_slctd == 'y2':
         y2_title_txt = '<b>Target Position: Motor 2 [mm]<b>'
-        y2_range =  [m2_positions[0]-(step2_space/2), m2_positions[-1]+(step2_space/2)]
+        y2_range =  [m2_positions[f][0]-(step2_space[f]/2), m2_positions[f][-1]+(step2_space[f]/2)]
         yaxis2 = {'title' : {'text' : y2_title_txt},
                            'overlaying':'y',
                            'side': 'right',
@@ -982,7 +989,7 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
         'xaxis2': x2_layout, # None (default) or Dict
         'yaxis2': yaxis2, # None (default) or Dict
         'coloraxis': {'showscale' : False},},
-        coloraxis_colorbar_xpad = 300,coloraxis_colorbar_ypad = 300,coloraxis_colorbar_bgcolor = 'black',coloraxis_colorbar_bordercolor = 'black',coloraxis_colorbar_outlinecolor = 'black',coloraxis_colorbar_tickcolor = 'black',paper_bgcolor = 'rgb(160,160,160)',plot_bgcolor = 'black',title_text = ttl_txt,font_color = 'black',margin_autoexpand = True,margin_l = 110,margin_r = 120,margin_t = 120,autosize = False, width = pp.num_m1steps*mag_factor, height = pp.num_m2steps*mag_factor,)
+        coloraxis_colorbar_xpad = 300,coloraxis_colorbar_ypad = 300,coloraxis_colorbar_bgcolor = 'black',coloraxis_colorbar_bordercolor = 'black',coloraxis_colorbar_outlinecolor = 'black',coloraxis_colorbar_tickcolor = 'black',paper_bgcolor = 'rgb(160,160,160)',plot_bgcolor = 'black',title_text = ttl_txt,font_color = 'black',margin_autoexpand = True,margin_l = 110,margin_r = 120,margin_t = 120,autosize = False, width = num_m1steps[f]*mag_factor, height = num_m2steps[f]*mag_factor,)
     #==============================================================================================
     # What is returned here will actually go to the output
     # First:  'component_property = children'

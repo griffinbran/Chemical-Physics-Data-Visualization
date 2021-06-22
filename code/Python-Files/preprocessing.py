@@ -40,94 +40,102 @@ print('Available Data:\n')
 # Display options and prompt user selection
 for d in range(len(datasets)):
     print(f'[{d+1}] {datasets[d]}')
-a = int(input('\nSelect [int] from above: '))-1
+f = int(input('\nSelect [int] from above: '))-1
 # Check for valid user input
-while a not in range(len(datasets)):
-    a = int(input(f'Invalid entry. Enter an integer from 1 to {len(datasets)}: '))-1
+while f not in range(len(datasets)):
+    f = int(input(f'Invalid entry. Enter an integer from 1 to {len(datasets)}: '))-1
 # Inform user of verified data selection
 print()
-print(f'Selected Data: {datasets[a]}')
+print(f'Selected Data: {datasets[f]}')
 print()
+active_data = datasets[f]
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Prepare for a future data selection change
+# Assign 'data', a list of DataFrames, for all 'files' dpdn menu
 filename = []
 for d in range(len(datasets)):
     filename.append(relative_path+datasets[d])
-
 # Assign selection to begin analysis
-filename_a = relative_path+datasets[a]
-
+filename_f = relative_path+datasets[f]
 # Read tsv data and assign to a Pandas DataFrame
 data = []
 for d in range(len(datasets)):
     # Read each file into a Pandas DataFrame object
-    df = pd.read_csv(filenames[d], delimiter='\t', names = header_names)
+    df = pd.read_csv(filename[d], delimiter='\t', names = header_names)
     # Set dtype of 'scan#' column to int32
     df = df.astype({'scan#':int})
     data.append(df)
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-data_a = pd.read_csv(filename, delimiter='\t', names = header_names)
+# Assign the 'data_f' DataFrame for initial app loading
+data_f = pd.read_csv(filename_f, delimiter='\t', names = header_names)
 # Set dtype of scan# column to int32
-data_a = data_a.astype({'scan#':int})
+data_f = data_f.astype({'scan#':int})
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Count the number of motor positions targeted in each scan
+# Count the number of motor positions targeted in each scan for 'files' dpdn menu
 num_m1steps = []
 num_m2steps = []
 for d in range(len(datasets)):
-    m1steps = len(datas[d]['motor-target_1'].value_counts())
-    m2steps = len(datas[d]['motor-target_2'].value_counts())
+    m1steps = len(data[d]['motor-target_1'].value_counts())
+    m2steps = len(data[d]['motor-target_2'].value_counts())
     num_m1steps.append(m1steps)
     num_m2steps.append(m2steps)
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Count the number of motor positions targeted in each scan
-num_m1steps_a = len(data_a['motor-target_1'].value_counts())
-num_m2steps_a = len(data_a['motor-target_2'].value_counts())
+# Count the number of motor positions targeted in each scan for initial app loading
+num_m1steps_f = len(data_f['motor-target_1'].value_counts())
+num_m2steps_f = len(data_f['motor-target_2'].value_counts())
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Identify # of complete scans performed
+# Characterize experiment scans performed for 'files' dpdn menu
 scan_info = []
 num_scans = []
 complete = []
 for d in range(len(datasets)):
-    scan_info.append(datas[d]['scan#'].value_counts().sort_index())
+    # Scan Info stores the number of measurements taken during each scan
+    scan_info.append(data[d]['scan#'].value_counts().sort_index())
+    # Num Scans is the total number of measurements recorded, in each scan, in each dataset (each file)
     num_scans.append(len(scan_info[d]))
+    # Complete is a list of integers defining the minimum # of measurements required, in each dataset, for an individual scan to be considered complete
     complete.append(num_m1steps[d]*num_m2steps[d])
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Identify # of complete scans performed
-scan_info_a = data_a['scan#'].value_counts().sort_index()
-num_scans_a = len(scan_info)
-complete_a = num_m1steps_a*num_m2steps_a
+# Characterize experiment scans performed for initial app loading
+# Scan Info stores the number of measurements taken during each scan
+scan_info_f = data_f['scan#'].value_counts().sort_index()
+# Num Scans is the total number of measurements recorded, in each scan, in each dataset (each file)
+num_scans_f = len(scan_info)
+# Complete is a list of integers defining the minimum # of measurements required, in each dataset, for an individual scan to be considered complete
+complete_f = num_m1steps_f*num_m2steps_f
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Identify all complete & incomplete scans for 'files' dpdn menu
 complete_scans = []
 incomplete_scans = []
 sigfigs = 3
-# Identify all incomplete scans
 for d in range(len(datasets)):
+    # Create an empty list element for each dataset loaded
+    complete_scans.append([])
+    incomplete_scans.append([])
     for scan in range(num_scans[d]):
         if scan_info[d][scan] < complete[d]:
-            incomplete_scans.append(scan)
-        elif scan_info[d][scan] == complete[d]:
-            complete_scans.append(scan)
+            incomplete_scans[d].append(scan)
+        elif scan_info[d][scan] >= complete[d]:
+            complete_scans[d].append(scan)
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Requirements for complete scan
-print(f'Complete scans have at least {num_m1steps_a*num_m2steps_a:,} measurements.\n')
+print(f'Complete scans have at least {num_m1steps_f*num_m2steps_f:,} measurements.\n')
 print('scan# complete%')
-display(round((data_a['scan#'].value_counts().sort_index()/(complete))*100, sigfigs-1))
+display(round((data_f['scan#'].value_counts().sort_index()/(complete_f))*100, sigfigs-1))
 print()
-complete_scans_a = []
-incomplete_scans_a = []
-# Identify incomplete scans
-for scan in range(num_scans_a):
-    if scan_info_a[scan] < complete_a:
-        incomplete_scans_a.append(scan)
-    elif scan_info_a[scan] == complete_a:
-        complete_scans_a.append(scan)
-print(f'INCOMPLETE scan#: {incomplete_scans_a}')
-print(f'COMPLETE scan#:   {complete_scans_a}')
+complete_scans_f = []
+incomplete_scans_f = []
+# Identify incomplete scans for initial app loading
+for scan in range(num_scans_f):
+    if scan_info_f[scan] < complete_f:
+        incomplete_scans_f.append(scan)
+    elif scan_info_f[scan] >= complete_f:
+        complete_scans_f.append(scan)
+print(f'INCOMPLETE scan#: {incomplete_scans_f}')
+print(f'COMPLETE scan#:   {complete_scans_f}')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # An error may consist of a communication error b/w motor & acquisition computer
@@ -135,10 +143,11 @@ print(f'COMPLETE scan#:   {complete_scans_a}')
 for d in range(len(datasets)):
     data[d]['#errors'].value_counts()
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-data_a['#errors'].value_counts()
+# For initial app loading
+data_f['#errors'].value_counts()
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Display Motor_1 Description
+# Display Motor_1 Description for 'files' dpdn menu
 m1_positions = []
 m2_positions = []
 m1_position_range = []
@@ -148,35 +157,35 @@ for d in range(len(datasets)):
     m1_positions.append(sorted(data[d]['motor-target_1'].unique() ) )
     m2_positions.append(sorted(data[d]['motor-target_2'].unique() ) )
     # Determine the range of all delay axes
-    m1_position_min = m1_positions[0]
-    m2_position_min = m2_positions[0]
-    m1_position_max = m1_positions[-1]
-    m2_position_max = m2_positions[-1]
+    m1_position_min = m1_positions[d][0]
+    m2_position_min = m2_positions[d][0]
+    m1_position_max = m1_positions[d][-1]
+    m2_position_max = m2_positions[d][-1]
     m1_position_range.append(round(m1_position_max - m1_position_min, sigfigs))
     m2_position_range.append(round(m2_position_max - m2_position_min, sigfigs))
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Display Motor_1 Description
+# Display Motor_1 Description for initial app loading
 print()
 print(f'Motor-1 Targets: \n')
-m1_positions_a = sorted(data_a['motor-target_1'].unique())
+m1_positions_f = sorted(data_f['motor-target_1'].unique())
 # Determine the range of Motor_1 positions
-m1_position_min_a = m1_positions_a[0]
-m1_position_max_a = m1_positions_a[-1]
-m1_position_range_a = round(m1_position_max_a - m1_position_min_a, sigfigs)
-print(f'        Min: {m1_position_min_a}[mm]\n        Max: {m1_position_max_a}[mm]\n        Range: {m1_position_range_a}[mm]')
+m1_position_min_f = m1_positions_f[0]
+m1_position_max_f = m1_positions_f[-1]
+m1_position_range_f = round(m1_position_max_f - m1_position_min_f, sigfigs)
+print(f'        Min: {m1_position_min_f}[mm]\n        Max: {m1_position_max_f}[mm]\n        Range: {m1_position_range_f}[mm]')
 # Display the number of measurements taken in each scan
-print(f'\tNo. of Steps: {num_m1steps_a}\n')
+print(f'\tNo. of Steps: {num_m1steps_f}\n')
 # Display Motor-2 Description
 print(f'Motor-2 Targets: \n')
 # Pre-Processing
-m2_positions_a = sorted(data_a['motor-target_2'].unique())
+m2_positions_f = sorted(data_f['motor-target_2'].unique())
 # Determine the range of Motor_1 positions
-m2_position_min_a = m2_positions_a[0]
-m2_position_max_a = m2_positions_a[-1]
-m2_position_range_a = round(m2_position_max_a - m2_position_min_a, sigfigs)
-print(f'        Min: {m2_position_min_a}[mm]\n        Max: {m2_position_max_a}[mm]\n        Range: {m2_position_range_a}[mm]')
+m2_position_min_f = m2_positions_f[0]
+m2_position_max_f = m2_positions_f[-1]
+m2_position_range_f = round(m2_position_max_f - m2_position_min_f, sigfigs)
+print(f'        Min: {m2_position_min_f}[mm]\n        Max: {m2_position_max_f}[mm]\n        Range: {m2_position_range_f}[mm]')
 # Display the number of measurements taken in each scan
-print(f'\tNo. of Steps: {num_m2steps_a}\n')
+print(f'\tNo. of Steps: {num_m2steps_f}\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Round to display significant figures
@@ -192,7 +201,7 @@ fs = 1E-15
 K = int(1E3)
 # Speed of light in [meters/second]
 c = consts.c
-# Step-size for Delay Axes:
+# Step-size for Delay Axes for 'files' dpdn menu:
 step1_space = []
 step2_space = []
 step1_time = []
@@ -210,22 +219,22 @@ for d in range(len(datasets)):
     range_T.append(step1_time[d]*num_m1steps[d])
     range_tau.append(step2_time[d]*num_m2steps[d])
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Step-size for Delay Axes: Round for sigfigs
-step1_space_a = round(m1_position_range_a/num_m1steps_a, sigfigs)
-step2_space_a = round(m2_position_range_a/num_m2steps_a, sigfigs)
+# Step-size for Delay Axes: Round for sigfigs for initial app loading
+step1_space_f = round(m1_position_range_f/num_m1steps_f, sigfigs)
+step2_space_f = round(m2_position_range_f/num_m2steps_f, sigfigs)
 # Time [femtoseconds] it takes light to travel twice the distance
-step1_time_a = round((step1_space_a*twice / (c*K))/fs, 1)
-step2_time_a = round((step2_space_a*twice/(c*K))/fs, 1)
+step1_time_f = round((step1_space_f*twice / (c*K))/fs, 1)
+step2_time_f = round((step2_space_f*twice/(c*K))/fs, 1)
 # Time [femtoseconds] it takes light to travel twice the distance
-range_T_a = step1_time_a*num_m1steps_a
-range_tau_a = step2_time_a*num_m2steps_a
-print(f'Motor-1 Step-Size:   {step1_space_a}[mm]  =>  ~ {step1_time_a}[fs]')
-print(f'Motor-2 Step-Size:   {step2_space_a}[mm]  =>  ~ {step2_time_a}[fs]\n')
-print(f'Pump-Probe  Time-Delay "T"   Range: ~{range_T_a:,}[fs]')
-print(f'Drive-Probe Time-Delay "TAU" Range: ~{range_tau_a:,}[fs]\n')
+range_T_f = step1_time_f*num_m1steps_f
+range_tau_f = step2_time_f*num_m2steps_f
+print(f'Motor-1 Step-Size:   {step1_space_f}[mm]  =>  ~ {step1_time_f}[fs]')
+print(f'Motor-2 Step-Size:   {step2_space_f}[mm]  =>  ~ {step2_time_f}[fs]\n')
+print(f'Pump-Probe  Time-Delay "T"   Range: ~{range_T_f:,}[fs]')
+print(f'Drive-Probe Time-Delay "TAU" Range: ~{range_tau_f:,}[fs]\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Identify range of signal amplitudes
+# Identify range of signal amplitudes for 'files' dpdn menu
 signal_df = []
 nchannels = []
 for d in range(len(datasets)):
@@ -234,56 +243,87 @@ for d in range(len(datasets)):
     # WARNING: Dropping columns in signal_df will remove those channels from the figure display
     nchannels.append(len(signal_df[d].columns))
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Identify range of signal amplitudes
-data_cols_a = [col_name for col_name in data_a if 'data_channel' in col_name]
-signal_df_a = data_a[data_cols_a]
+# Identify range of signal amplitudes for initial app loading
+data_cols_f = [col_name for col_name in data_f if 'data_channel' in col_name]
+signal_df_f = data_f[data_cols_f]
 # WARNING: Dropping columns in signal_df will remove those channels from the figure display
-nchannels_a = len(signal_df_a.columns)
+nchannels_f = len(signal_df_f.columns)
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Identify the max and min signal strength
-v_min = min(signal_df.min())
-v_max = max(signal_df.max())
-
-print(f'Signal Min: {v_min}\nSignal Max: {v_max}\n')
+v_min_f = min(signal_df_f.min())
+v_max_f = max(signal_df_f.max())
+print(f'Signal Min: {v_min_f}\nSignal Max: {v_max_f}\n')
+signal_mins_f = []
+signal_maxs_f = []
+for col in signal_df_f.columns:
+    signal_mins_f.append(round(min(signal_df_f[col]),4))
+    signal_maxs_f.append(round(max(signal_df_f[col]),4))
+print(f'Signal Minimums by channel: {signal_mins_f}')
+print(f'Signal Maximums by channel: {signal_maxs_f}\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-signal_mins = []
-signal_maxs = []
-for col in signal_df.columns:
-    signal_mins.append(round(min(signal_df[col]),4))
-    signal_maxs.append(round(max(signal_df[col]),4))
-print(f'Signal Minimums by channel: {signal_mins}')
-print(f'Signal Maximums by channel: {signal_maxs}\n')
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Initialize a list of dictionaries for mapping experimental scans to columns for each file in data repo
+data_dict = []
+for d in range(len(datasets)):
+    # Set-up lists to store delay scan DataFrames for each channel (0-7)
+    data_to_plot = []
+    # Average all scans together
+    data_mean = data[d].groupby(['motor-target_1', 'motor-target_2']).mean()
+    # data_to_plot
+    for channel in range(nchannels[d]):
+        # Append data for each channel
+        data_to_plot.append(data_mean['data_channel_'+str(channel)].reset_index().pivot(index='motor-target_2', columns='motor-target_1'))
+        # Rename multi-indexed columns so they are not tuples of the format ('data_channel_x', <motor-target_1>)
+        data_to_plot[channel].columns = data_to_plot[channel].columns.droplevel(0)
+    # Initialize 'data dictionary' to keep track of all complete scans and the average of all scans(A.K.A 'data_mean')
+    data_dict.append({'scan_avg':data_to_plot})
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set-up lists to store delay scan DataFrames for each channel (0-7)
-data_to_plot = []
+data_to_plot_f = []
 
 # Average all scans together
-data_mean = data.groupby(['motor-target_1', 'motor-target_2']).mean()
+data_mean_f = data_f.groupby(['motor-target_1', 'motor-target_2']).mean()
 
 # data_to_plot
-for channel in range(nchannels):
+for channel in range(nchannels_f):
     # Append data for each channel
-    data_to_plot.append(data_mean['data_channel_'+str(channel)].reset_index().pivot(index='motor-target_2', columns='motor-target_1'))
+    data_to_plot_f.append(data_mean_f['data_channel_'+str(channel)].reset_index().pivot(index='motor-target_2', columns='motor-target_1'))
     
     # Rename multi-indexed columns so they are not tuples of the format ('data_channel_x', <motor-target_1>)
-    data_to_plot[channel].columns = data_to_plot[channel].columns.droplevel(0)
+    data_to_plot_f[channel].columns = data_to_plot_f[channel].columns.droplevel(0)
     
 # Initialize 'data dictionary' to keep track of all complete scans and the average of all scans(A.K.A 'data_mean')
-data_dict = {'scan_avg':data_to_plot}
+data_dict_f = {'scan_avg':data_to_plot_f}
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-for scan in complete_scans:
+for d in range(len(datasets)):
+    # Now append each individual complete scan
+    for scan in complete_scans[d]:
+        dummy_scan_list = []
+        data_scan = data[d][data[d]['scan#']==scan].copy()
+        data_scan = data_scan.groupby(['motor-target_1', 'motor-target_2']).mean().copy()
+        
+        for channel in range(nchannels[d]):
+            # Append data for each channel
+            dummy_scan_list.append(data_scan['data_channel_'+str(channel)].reset_index().pivot(index='motor-target_2', columns='motor-target_1'))
+            # Rename multi-indexed columns so they are not tuples of the format ('data_channel_x', <motor-target_1>)
+            dummy_scan_list[channel].columns = dummy_scan_list[channel].columns.droplevel(0)
+        # Append scan to data_dict
+        data_dict[d]['scan#'+str(scan)] = dummy_scan_list
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Now append each individual complete scan
+for scan in complete_scans_f:
     dummy_scan_list = []
-    data_scan = data[data['scan#']==scan].copy()
+    data_scan = data_f[data_f['scan#']==scan].copy()
     data_scan = data_scan.groupby(['motor-target_1', 'motor-target_2']).mean().copy()
     
-    for channel in range(nchannels):
+    for channel in range(nchannels_f):
         # Append data for each channel
         dummy_scan_list.append(data_scan['data_channel_'+str(channel)].reset_index().pivot(index='motor-target_2', columns='motor-target_1'))
         # Rename multi-indexed columns so they are not tuples of the format ('data_channel_x', <motor-target_1>)
         dummy_scan_list[channel].columns = dummy_scan_list[channel].columns.droplevel(0)
     # Append scan to data_dict
-    data_dict['scan#'+str(scan)] = dummy_scan_list
+    data_dict_f['scan#'+str(scan)] = dummy_scan_list
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # END preprocessing.py
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
