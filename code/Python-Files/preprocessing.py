@@ -226,12 +226,21 @@ print(f'Drive-Probe Time-Delay "TAU" Range: ~{range_tau_a:,}[fs]\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Identify range of signal amplitudes
-data_cols = [col_name for col_name in data if 'data_channel' in col_name]
-signal_df = data[data_cols]
-
+signal_df = []
+nchannels = []
+for d in range(len(datasets)):
+    data_cols = [col_name for col_name in data[d] if 'data_channel' in col_name]
+    signal_df.append(data[d][data_cols])
+    # WARNING: Dropping columns in signal_df will remove those channels from the figure display
+    nchannels.append(len(signal_df[d].columns))
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Identify range of signal amplitudes
+data_cols_a = [col_name for col_name in data_a if 'data_channel' in col_name]
+signal_df_a = data_a[data_cols_a]
 # WARNING: Dropping columns in signal_df will remove those channels from the figure display
-nchannels = len(signal_df.columns)
-
+nchannels_a = len(signal_df_a.columns)
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Identify the max and min signal strength
 v_min = min(signal_df.min())
 v_max = max(signal_df.max())
