@@ -37,4 +37,7 @@ for idx, d in enumerate(pp.datasets):
     data_dpdn_items.append(dbc.DropdownMenuItem(divider=True))
     data_dpdn_items.append(dbc.DropdownMenuItem(str(idx)+d, id=f'filename{idx}', active=(d==pp.active_data)))
 #data_dpdn_items.extend([dbc.DropdownMenuItem(d) for d in pp.datasets])
-#[Input(id=f'filename{idx}', 'active')]
+     #[Input(id=f'filename{idx}', 'active')]
+     #       function(*[f'filename{idx}' for idx, d in enumerate(pp.datasets)])
+     #       from itertools import chain
+     #       [chain.from_iterable((f'filename{idx}', 'nclicks') for idx in range(len(pp.datasets)) ]

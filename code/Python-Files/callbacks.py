@@ -6,7 +6,7 @@
 # IMPORTS:
 import dash
 import preprocessing as pp
-from preprocessing import f
+from preprocessing import f #as f_pp
 #from preprocessing import step1_space_f as step1_space, step2_space_f as step2_space, step1_time_f as step1_time, step2_time_f as step2_time, m1_positions_f as m1_positions, m2_positions_f as m2_positions, nchannels_f as nchannels, data_dict_f as data_dict, num_m1steps_f as num_m1steps, num_m2steps_f as num_m2steps
 from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps
 from app import app
@@ -127,10 +127,6 @@ def add_subplot(graph_clicks, container_children):
                     dbc.FormText('Drive-Probe Delay', color='secondary'),
                 ] # END of dbc.Col children = [ slct_timeaxis2 ]
             ), # END of <taxis2> dbc.Col
-            [Input(id=f'filename{idx}', 'active')]
-            function(*[f'filename{idx}' for idx, d in enumerate(pp.datasets)])
-            from itertools import chain
-            [chain.from_iterable((f'filename{idx}', 'nclicks') for idx in range(len(pp.datasets)) ]
             # Dataset Dropdown Column
             dbc.Col([
                 dbc.Label( 'filename:', id={'type':'datasets', 'index': graph_clicks}, size='sm', html_for='data-dpdn'),
@@ -336,7 +332,7 @@ def add_subplot(graph_clicks, container_children):
                             ], row = True, className = 'mt-n10')# END FormGroup, check=True, className='mr-3'), inline=True),
                         ], className='p-10'), # END Form
                         # Initialize an empty graph object, The 'figure={}' argument is optional, it will hold the app.callback output
-                        dcc.Graph(id={'type': '1d_timescan', 'index': graph_clicks}, figure={}),
+                        dcc.Graph(id={'type': 'scatter', 'index': graph_clicks}, figure={}),
                         # NEW ROW
                         dbc.Form([dbc.FormGroup([
                             dbc.Label('Display Options:', html_for={'type':'bkgnd_color', 'index': graph_clicks}, width=dict(size='auto'), align = 'center'),
@@ -390,6 +386,26 @@ def add_subplot(graph_clicks, container_children):
     return container_children
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Update active DropdownMenuItem in 'files' DropdownMenu
+args = [f'nclicks{idx}' for idx in range(len(pp.datasets))]
+out = [(t == 0) for t in range(len(pp.datasets))]
+@app.callback(
+    [Output({'type':f'filename{idx}', 'index':MATCH}, 'active') for idx in range(len(pp.datasets))],
+    [Input({'type':f'filename{idx}', 'index':MATCH}, 'n_clicks') for idx in range(len(pp.datasets))])
+def update_active_filename(*args):
+    # https://dash.plotly.com/dash-html-components/button
+    ctx = dash.callback_context.triggered[0]
+    changed_id = [q['prop_id'] for q in ctx]
+    print('type(q["prop_id"])')
+    [print(type(q['prop_id'])) for q in ctx]
+    for idx in range(len(ctx)):
+        print('changed_id', changed_id)
+        print('ctx[0]:', ctx[0])
+        print('ctx.triggered[0]:', ctx)
+    #p = *out
+    return (True*len(ctx))
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Open/Close Modal to change 1D Lineout (Scatter) line & marker colors
 @app.callback(
     Output({'type':'lgnd_modal', 'index':MATCH}, 'is_open'),
@@ -441,7 +457,7 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     num_colors = len(colors)
 
     for tr in range(num_traces):
-        # Unique ID for reference in 'update_1d_timescan' callback
+        # Unique ID for reference in 'update_scatter' callback
         idx = (100*MATCH_index) + tr + 10
         #name=str(idx)
         color_tr=colors[tr%num_colors]
@@ -472,7 +488,7 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Update the lineout for the scatter plot
-@app.callback(Output(component_id= {'type':'1d_timescan', 'index': MATCH}, component_property='figure'),
+@app.callback(Output(component_id= {'type':'scatter', 'index': MATCH}, component_property='figure'),
     [Input(component_id={'type':'slct_scans', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'channel_check', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'slct_time0', 'index': MATCH}, component_property='value'),
@@ -483,7 +499,7 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     Input(component_id= {'type':'axes_bttn', 'index': MATCH}, component_property='n_clicks'),
     Input(component_id={'type':'lgnd_modal_close', 'index': MATCH}, component_property='n_clicks'),
     Input(component_id={'type':'lgnd_modal_list', 'index':MATCH}, component_property='children') ] )
-def update_1d_timescan(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child):
+def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child):
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects
                         cols = 1, #Display how many side-by-side?
@@ -820,7 +836,7 @@ def update_rangeslider(channel_slctd, scan_slctd):
                 Input(component_id={'type':'slct_timeaxis2', 'index': MATCH}, component_property='value'),
                 Input(component_id={'type':'slct_y2', 'index': MATCH}, component_property='value'),
                 Input(component_id={'type':'signal_range', 'index': MATCH}, component_property='value')])
-def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd, y2_slctd, cbar_range):    
+def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd, y2_slctd, cbar_range):    
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects 
                         cols = 1, #Display how many side-by-side?
@@ -828,7 +844,11 @@ def update_hmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd,
                         specs=[[{'secondary_y':True}]],
                         shared_xaxes = False,
                         shared_yaxes = False)
-    
+    # SOME IF STATEMENT:
+    # if nclicks == 0:
+        # f = f_pp
+    # elif nclicks != 0:
+        # f = active_dataindex
     # Modify formatted data dictionary for user input
     dff = data_dict[f].copy()
     dff = dff[scan_slctd][channel_slctd]
