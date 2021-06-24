@@ -6,7 +6,8 @@
 # IMPORTS:
 import dash
 import preprocessing as pp
-from preprocessing import f #as f_pp
+from preprocessing import f as f_pp
+from preprocessing import f
 #from preprocessing import step1_space_f as step1_space, step2_space_f as step2_space, step1_time_f as step1_time, step2_time_f as step2_time, m1_positions_f as m1_positions, m2_positions_f as m2_positions, nchannels_f as nchannels, data_dict_f as data_dict, num_m1steps_f as num_m1steps, num_m2steps_f as num_m2steps
 from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps
 from app import app
@@ -132,7 +133,7 @@ def add_subplot(graph_clicks, container_children):
                 dbc.Label( 'filename:', id={'type':'datasets', 'index': graph_clicks}, size='sm', html_for='data-dpdn'),
                 dbc.DropdownMenu(id={'type':'files', 'index': graph_clicks},
                     #children = lay.data_dpdn_items, label='Files', bs_size="sm", direction='down',
-                    children = [dbc.DropdownMenuItem(str(idx)+d, id={'type':f'filename{idx}','index':graph_clicks}, active=(d==pp.active_data)) for idx, d in enumerate(pp.datasets)],
+                    children = [dbc.DropdownMenuItem(d, id={'type':f'filename{idx}','index':graph_clicks}, active=(d==pp.active_data)) for idx, d in enumerate(pp.datasets)],
                     label='Files', bs_size="sm", direction='down',
                     ),
                 dbc.FormText(f'Available Data', color='secondary'),
@@ -387,23 +388,28 @@ def add_subplot(graph_clicks, container_children):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Update active DropdownMenuItem in 'files' DropdownMenu
-args = [f'nclicks{idx}' for idx in range(len(pp.datasets))]
-out = [(t == 0) for t in range(len(pp.datasets))]
+args_nclick = [f'nclicks{idx}' for idx in range(len(pp.datasets))]
 @app.callback(
     [Output({'type':f'filename{idx}', 'index':MATCH}, 'active') for idx in range(len(pp.datasets))],
     [Input({'type':f'filename{idx}', 'index':MATCH}, 'n_clicks') for idx in range(len(pp.datasets))])
-def update_active_filename(*args):
+def update_active_filename(*args_nclick):
     # https://dash.plotly.com/dash-html-components/button
-    ctx = dash.callback_context.triggered[0]
-    changed_id = [q['prop_id'] for q in ctx]
-    print('type(q["prop_id"])')
-    [print(type(q['prop_id'])) for q in ctx]
-    for idx in range(len(ctx)):
-        print('changed_id', changed_id)
-        print('ctx[0]:', ctx[0])
-        print('ctx.triggered[0]:', ctx)
-    #p = *out
-    return (True*len(ctx))
+    ctx = dash.callback_context
+    ctxt = ctx.triggered[0] # There is no loss of generality in hardcoding 0, since here only one triggered input will ever be listed.
+    ctxi = ctx.inputs
+    changed_id = ctxt['prop_id'] # FORMAT of string: '{"index":0,"type":"filename<>"}.n_clicks',  where <> is 0, 1, 2 ,...
+    active_boolean = []
+    for input_id in list(ctxi.keys()):
+        if (input_id[:-9] == changed_id[:-9]):
+            active_boolean.append(True)
+        elif (input_id[:-9] != changed_id[:-9]):
+            active_boolean.append(False)
+    # Else if no change has been made from user's initial dataset selection
+    if True not in active_boolean:
+        active_boolean = []
+        for d in pp.datasets:
+            active_boolean.append(d == pp.active_data)
+    return active_boolean
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Open/Close Modal to change 1D Lineout (Scatter) line & marker colors
@@ -448,8 +454,10 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     trace_items = []
     pop_overs=[]
     ctx = dash.callback_context
+    ctxi = ctx.inputs
     # Hardcoded values: 0 grabs first list element (a stringified dictionary), 9 grabs ninth character in string (the subplot index)
-    MATCH_index = int(list(ctx.inputs.keys())[0][9])
+    print('populate_legend_modal_list ctxi.keys()', ctxi.keys())
+    MATCH_index = int(list(ctxi.keys())[0][9])
     print('MATCH_index', MATCH_index)
     #FF6692 is too similar to other color options in the 'Plotly' (default) color swatch
     color_index = 6
@@ -459,7 +467,6 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     for tr in range(num_traces):
         # Unique ID for reference in 'update_scatter' callback
         idx = (100*MATCH_index) + tr + 10
-        #name=str(idx)
         color_tr=colors[tr%num_colors]
 
         trace_items.append(dbc.ListGroupItem(
@@ -488,8 +495,8 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Update the lineout for the scatter plot
-@app.callback(Output(component_id= {'type':'scatter', 'index': MATCH}, component_property='figure'),
-    [Input(component_id={'type':'slct_scans', 'index': MATCH}, component_property='value'),
+all_inputs = [
+    Input(component_id={'type':'slct_scans', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'channel_check', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'slct_time0', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'slct_lineout', 'index': MATCH}, component_property='value'),
@@ -498,8 +505,17 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     Input(component_id= {'type':'bkgnd_color', 'index': MATCH}, component_property='value'),
     Input(component_id= {'type':'axes_bttn', 'index': MATCH}, component_property='n_clicks'),
     Input(component_id={'type':'lgnd_modal_close', 'index': MATCH}, component_property='n_clicks'),
-    Input(component_id={'type':'lgnd_modal_list', 'index':MATCH}, component_property='children') ] )
-def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child):
+    Input(component_id={'type':'lgnd_modal_list', 'index':MATCH}, component_property='children')
+    ]
+# List of components in DropdownMenu representing filenames of datasets available for analysis in the local directory
+active_file_inputs = [Input({'type':f'filename{idx}', 'index':MATCH}, 'active') for idx in range(len(pp.datasets))]
+# Combine all Inputs into a single list before using in callback paramater space
+all_inputs.extend(active_file_inputs)
+# List to unpack and call inside callback function
+args_active = [f'active_status{idx}' for idx in range(len(pp.datasets))]
+# Create Figure object to display data on a scatter plot
+@app.callback(Output(component_id= {'type':'scatter', 'index': MATCH}, component_property='figure'), all_inputs)
+def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child, *args_active):
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects
                         cols = 1, #Display how many side-by-side?
@@ -507,12 +523,32 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                         specs=[[{'secondary_y':True}]],
                         shared_xaxes = False,
                         shared_yaxes = False)
-
     # Global, DASH defined, variable available only inside callbacks
     ctx = dash.callback_context
-    inputs = ctx.inputs
-    lgnd_modal_list_key = list(inputs.keys())[-1]
-    lgnd_modal_list_vals = inputs[lgnd_modal_list_key]
+    ctxi = ctx.inputs
+    ctxt = ctx.triggered
+    # Assign correct dataset for analysis
+    for i in range(len(ctxt)):
+        if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
+            # Drop component_property tag 'active'
+            active_id = ctxt[i]['prop_id'][:-len('.active')]
+            print('ctxt active_id', active_id)
+            # Convert stringified dictionary
+            active_id = eval(active_id)
+            if f_pp == int(active_id['type'][len('filename'):]):
+                f = f_pp
+            else:
+                f = int(active_id['type'][len('filename'):])
+
+    # Keys contain the stringified component_ids, and values hold the state of the component_property passed to the callback function
+    for key in ctxi.keys():
+        if 'lgnd_modal_list' in key:
+            lgnd_modal_list_key = key
+            lgnd_modal_list_vals = ctxi[lgnd_modal_list_key]
+        elif ('filename' in key) & (ctxi[key] == True):
+            active_id = eval(key[:-len('.active')])
+            print('ctxi active_id', active_id)
+
 
     # Counter helps to map the trace numbers and colors in a controlled order
     counter = 0

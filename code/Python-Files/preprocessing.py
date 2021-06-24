@@ -39,11 +39,11 @@ datasets = os.listdir(relative_path)
 print('Available Data:\n')
 # Display options and prompt user selection
 for d in range(len(datasets)):
-    print(f'[{d+1}] {datasets[d]}')
-f = int(input('\nSelect [int] from above: '))-1
+    print(f'[{d}] {datasets[d]}')
+f = int(input('\nSelect [int] from above: '))
 # Check for valid user input
 while f not in range(len(datasets)):
-    f = int(input(f'Invalid entry. Enter an integer from 1 to {len(datasets)}: '))-1
+    f = int(input(f'Invalid entry. Enter an integer from 0 to {len(datasets)}: '))
 # Inform user of verified data selection
 print()
 print(f'Selected Data: {datasets[f]}')
