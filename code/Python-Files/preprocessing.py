@@ -40,7 +40,8 @@ print('Available Data:\n')
 # Display options and prompt user selection
 for d in range(len(datasets)):
     print(f'[{d}] {datasets[d]}')
-f = int(input('\nSelect [int] from above: '))
+f = 0
+#f = int(input('\nSelect [int] from above: '))
 # Check for valid user input
 while f not in range(len(datasets)):
     f = int(input(f'Invalid entry. Enter an integer from 0 to {len(datasets)}: '))
