@@ -5,8 +5,9 @@
 
 # IMPORTS:
 import dash
+from dash.dash import no_update
 import preprocessing as pp
-from preprocessing import f as f_pp
+#from preprocessing import f as f_pp
 #from preprocessing import f
 #from preprocessing import step1_space_f as step1_space, step2_space_f as step2_space, step1_time_f as step1_time, step2_time_f as step2_time, m1_positions_f as m1_positions, m2_positions_f as m2_positions, nchannels_f as nchannels, data_dict_f as data_dict, num_m1steps_f as num_m1steps, num_m2steps_f as num_m2steps
 from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps
@@ -46,30 +47,55 @@ active_file_inputs = [Input(f'filename{idx}', 'active') for idx in range(len(pp.
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Update active DropdownMenuItem in 'files' DropdownMenu
-args_nclick = [f'nclicks{idx}' for idx in range(len(pp.datasets))]
+args_nclicks = [f'nclicks{idx}' for idx in range(len(pp.datasets))]
 @app.callback([Output(f'filename{idx}', 'active') for idx in range(len(pp.datasets))],
     [Input(f'filename{idx}', 'n_clicks') for idx in range(len(pp.datasets))])
-def update_active_filename(*args_nclick):
+def update_active_filename(*args_nclicks):
+    # Global, DASH defined, variable available only inside callbacks
     # https://dash.plotly.com/dash-html-components/button
     ctx = dash.callback_context
-    ctxt = ctx.triggered[0] # There is no loss of generality in hardcoding 0, since here only one triggered input will ever be listed.
-    ctxi = ctx.inputs
-    # f equals int(changed_id[len('filename'):-len('.n_clicks')])
-    changed_id = ctxt['prop_id'] # FORMAT of string: '"filename*".n_clicks',  where * is 0, 1, 2 ,...
-    #print('Changed_id', changed_id)
-    active_boolean = []
-    for input_id in list(ctxi.keys()):
+    ctxt = ctx.triggered # List of inputs triggering callback
+    ctxi = ctx.inputs # Dictionary of all callback inputs
+    # Check for callback trigger type
+    print()
+    print('update_active_filename')
+    for i in range(len(ctxt)):
+        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
         # ID FORMAT: str(filename{idx}.n_clicks) or '.' upon initial call
-        if (input_id == changed_id):
-            active_boolean.append(True)
-        elif (input_id != changed_id):
-            active_boolean.append(False)
-    # Else if no change has been made from user's initial dataset selection
-    if True not in active_boolean:
-        active_boolean = []
-        for d in pp.datasets:
-            active_boolean.append(d == pp.datasets[0])
-    return active_boolean
+        if ('filename' in ctxt[i]['prop_id']): #& (ctxt[i]['value'] == True)
+            triggered_id = ctxt[i]['prop_id']
+            triggered_val = ctxt[i]['value']
+            print('ctxt triggered_id', triggered_id)
+            print('ctxt triggered_val', triggered_val)
+            active_boolean = [(input_id == triggered_id) for input_id in list(ctxi.keys())]
+            return active_boolean
+        # ID FORMAT: '.' upon initial call
+        elif ('filename' not in ctxt[i]['prop_id']):
+            # No change was made from user's prior data selection
+            return no_update
+    print()
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Store intermediate data
+@app.callback(Output('memory-data', 'data'), active_file_inputs)
+def save_data_selection(*args_active):
+    ctx = dash.callback_context # Global, DASH defined, variable available only inside callbacks
+    ctxt = ctx.triggered # List of inputs triggering callback
+    ctxi = ctx.inputs # Dictionary of all callback inputs
+    # Check for callback trigger type
+    print()
+    print('save_data_selection')
+    for i in range(len(ctxt)):
+        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
+        # ID FORMAT: str(filename{idx}.n_clicks) or '.' upon initial call
+        if ('filename' not in ctxt[i]['prop_id']):
+            print('initial call, memory-data is None')
+            return None
+        elif ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
+            active_id = ctxt[i]['prop_id']
+            active_f = int(active_id[len('filename'):-len('.active')])
+            print('ctxt active_f', active_f)
+            return active_f
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set positioning & display of dashboard
@@ -84,12 +110,12 @@ def render_child_div(graph_clicks):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Input n_clicks property from 'add_graph' bttn to dynamically add subplots via pattern-matching callbacks
-all_inputs_add_subplot = [Input('add_graph', 'n_clicks')]
-all_inputs_add_subplot.extend(active_file_inputs)
+#all_inputs_add_subplot = [Input('add_graph', 'n_clicks')]
+#all_inputs_add_subplot.extend(active_file_inputs)
 # Add plots to the dashboard
 # NOTE: for container_children = State('container', 'children'), then type =  <class 'dash.dependencies.State'>
-@app.callback(Output('container', 'children'), all_inputs_add_subplot, State('container', 'children') )
-def add_subplot(graph_clicks, active_status0, active_status1, container_children):
+@app.callback(Output('container', 'children'), [Input('add_graph', 'n_clicks'), Input('memory-data', 'data')], State('container', 'children') )
+def add_subplot(graph_clicks, active_f, container_children):
 #def add_subplot(graph_clicks, *args_active_add_subplot, container_children):
     # Global, DASH defined, variable available only inside callbacks
     ctx = dash.callback_context
@@ -98,23 +124,27 @@ def add_subplot(graph_clicks, active_status0, active_status1, container_children
     # Assign correct dataset for analysis
     print()
     print('add_subplot')
-    active_id = '.'
-    for i in range(len(ctxt)):
-        print("ctxt[i]['prop_id']", ctxt[i]['prop_id'])
-        if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-            active_id = ctxt[i]['prop_id']
-            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-            print('ctxt active_id', active_id)
-            print('f equals:', f)
-    # Find active input ID if active property did not trigger callback
-    if active_id == '.':
-        for input_id in list(ctxi.keys()):
-            if ('filename' in input_id) & (ctxi[input_id]==True):
-                print('ctxi active_id', input_id)
-                active_id = input_id
-                f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-                print('f equals:', f)
-    print()
+    #active_id = '.'
+    #for i in range(len(ctxt)):
+    #    print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
+    #    if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
+    #        active_id = ctxt[i]['prop_id']
+    #        f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+    #        print('ctxt active_id', active_id)
+    #        print('f equals:', f)
+    ## Find active input ID if active property did not trigger callback
+    #if active_id == '.':
+    #    for input_id in list(ctxi.keys()):
+    #        if ('filename' in input_id) & (ctxi[input_id]==True):
+    #            print('ctxi active_id', input_id)
+    #            active_id = input_id
+    #            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+    #            print('f equals:', f)
+    print('active_f', active_f)
+    print('active_f type', type(active_f))
+    if active_f is None:
+        raise PreventUpdate
+    f = active_f.copy()
 
     # Add new graph object to dashboard
     new_graph = dbc.Container(id={'type':'new_graph_container', 'index': graph_clicks},
@@ -139,8 +169,6 @@ def add_subplot(graph_clicks, active_status0, active_status1, container_children
                             debounce=False,
                             inputMode = 'numeric',
                             list='motor1_positions',
-                            #max = m1_positions[f][-1],
-                            #min = m1_positions[f][0],
                             name = 'input_t1',
                             persistence = True,
                             persistence_type = 'memory',
@@ -444,6 +472,15 @@ def add_subplot(graph_clicks, active_status0, active_status1, container_children
     State({'type':'lgnd_modal', 'index':MATCH}, 'is_open')
     )
 def toggle_modal(nclicks_open, nclicks_close, is_open):
+    # Global, DASH defined, variable available only inside callbacks
+    ctx = dash.callback_context
+    ctxt = ctx.triggered
+    # Check for callback trigger
+    print()
+    print('toggle_modal')
+    for i in range(len(ctxt)):
+        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
+    print()
     if nclicks_open | nclicks_close:
         return not is_open
     return is_open
@@ -467,7 +504,7 @@ def lineout_options(tau_slctd, *args_active):
     print('lineout_options')
     active_id = '.'
     for i in range(len(ctxt)):
-        print("ctxt[i]['prop_id']", ctxt[i]['prop_id'])
+        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
         if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
             active_id = ctxt[i]['prop_id']
             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
@@ -504,8 +541,16 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     num_traces = len(scn_slctd)*len(ch_slctd)
     trace_items = []
     pop_overs=[]
+    # Global, DASH defined, variable available only inside callbacks
     ctx = dash.callback_context
     ctxi = ctx.inputs
+    ctxt = ctx.triggered
+    # Check for callback trigger
+    print()
+    print('populate_legend_modal_list')
+    for i in range(len(ctxt)):
+        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
+    print()
     # Hardcoded values: 0 grabs first list element (a stringified dictionary), 9 grabs ninth character in string (the subplot index)
     #print('populate_legend_modal_list ctxi.keys()', ctxi.keys())
     MATCH_index = int(list(ctxi.keys())[0][9])
@@ -579,7 +624,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
     print('update_scatter')
     active_id = '.'
     for i in range(len(ctxt)):
-        print("ctxt[i]['prop_id']", ctxt[i]['prop_id'])
+        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
         if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
             active_id = ctxt[i]['prop_id']
             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
@@ -602,7 +647,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
             lgnd_modal_list_vals = ctxi[lgnd_modal_list_key]
         elif ('filename' in key) & (ctxi[key] == True):
             active_id = key[:-len('.active')]
-            print('ctxi active_id', active_id)
+            #print('ctxi active_id', active_id)
 
 
     # Counter helps to map the trace numbers and colors in a controlled order
@@ -800,7 +845,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
             counter+=1
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>',
                       width=675)
-    print('width', num_m1steps[f]*mag_factor )
+    #print('width', num_m1steps[f]*mag_factor )
     #fig.update_traces(line_color=trace_color_picked[trace], selector=trace)
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -843,11 +888,11 @@ def set_multi_xaxis_value(taxis1_slctd, x2_slctd):
     return new_x2
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Set chained callback for Tau=0, 'slct_y2', RadioItem
+# Show/Hide colorbar/yaxis2, 'slct_y2', RadioItem controls display of second y-axis
 @app.callback(Output({'type':'slct_y2', 'index': MATCH}, 'options'),
     [Input({'type':'slct_timeaxis2', 'index': MATCH}, 'value'),
     Input({'type':'tabs', 'index':MATCH}, 'active_tab')] )
-def set_multi_yaxis_options(taxis2_slctd, tab):
+def display_colorbar(taxis2_slctd, tab):
     # When Input is cleared, display no options (= [])
     if (taxis2_slctd == None) | (tab == 'tab-2'):
         #opt6=[{'label': 'Choose Motor-2 "TAU=0"','value':'y', 'disabled':False}]
@@ -858,7 +903,7 @@ def set_multi_yaxis_options(taxis2_slctd, tab):
     return y2_opts
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Set chained callback for Tau=0, 'slct_y2', RadioItems
+# Show/Hide colorbar/yaxis2, 'slct_y2', RadioItem controls display of second y-axis
 @app.callback(Output({'type':'slct_y2', 'index':MATCH}, 'value'),
     [Input({'type':'slct_timeaxis2', 'index': MATCH}, 'value'),
     Input({'type':'slct_y2', 'index':MATCH}, 'value')])
@@ -891,7 +936,7 @@ def update_rangeslider(channel_slctd, scan_slctd, *args_active):
     print('update_rangeslider')
     active_id = '.'
     for i in range(len(ctxt)):
-        print("ctxt[i]['prop_id']", ctxt[i]['prop_id'])
+        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
         if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
             active_id = ctxt[i]['prop_id']
             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
@@ -974,17 +1019,19 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
     print('update_heatmap')
     active_id = '.'
     for i in range(len(ctxt)):
-        print("ctxt[i]['prop_id']", ctxt[i]['prop_id'])
+        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
         if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
             active_id = ctxt[i]['prop_id']
             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
             print('ctxt active_id', active_id)
             print('f equals:', f)
+    print()
     # Find active input ID if active property did not trigger callback
     if active_id == '.':
+        print('hmap active not triggered')
         for input_id in list(ctxi.keys()):
             if ('filename' in input_id) & (ctxi[input_id]==True):
-                print('ctxi active_id', input_id)
+                print('ctxi active input_id', input_id)
                 active_id = input_id
                 f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
                 print('f equals:', f)
