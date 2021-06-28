@@ -6,6 +6,7 @@
 # IMPORTS:
 import dash
 from dash.dash import no_update
+from dash.exceptions import PreventUpdate
 import preprocessing as pp
 #from preprocessing import f as f_pp
 #from preprocessing import f
@@ -143,8 +144,10 @@ def add_subplot(graph_clicks, active_f, container_children):
     print('active_f', active_f)
     print('active_f type', type(active_f))
     if active_f is None:
-        raise PreventUpdate
-    f = active_f.copy()
+        f = 0
+        #raise PreventUpdate
+    else:
+        f = active_f
 
     # Add new graph object to dashboard
     new_graph = dbc.Container(id={'type':'new_graph_container', 'index': graph_clicks},
@@ -487,39 +490,48 @@ def toggle_modal(nclicks_open, nclicks_close, is_open):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Input n_clicks property from 'add_graph' bttn to dynamically add subplots via pattern-matching callbacks
-all_inputs_lineout_options = [Input({'type':'slct_time0', 'index':MATCH}, 'value')]
-all_inputs_lineout_options.extend(active_file_inputs)
+# all_inputs_lineout_options = [Input({'type':'slct_time0', 'index':MATCH}, 'value')]
+# all_inputs_lineout_options.extend(active_file_inputs)
 # Chained-Callback determines dropdown options displayed
 @app.callback(
     [Output({'type':'slct_lineout', 'index':MATCH}, 'options'),
     Output({'type':'slct_lineout', 'index':MATCH}, 'value'),
-    Output({'type':'slct_lineout', 'index':MATCH}, 'placeholder')], all_inputs_lineout_options)
-def lineout_options(tau_slctd, *args_active):
-    # Global, DASH defined, variable available only inside callbacks
-    ctx = dash.callback_context
-    ctxi = ctx.inputs
-    ctxt = ctx.triggered
-    # Assign correct dataset for analysis
-    print()
+    Output({'type':'slct_lineout', 'index':MATCH}, 'placeholder')], 
+    [Input({'type':'slct_time0', 'index':MATCH}, 'value'),
+    Input('memory-data', 'data')])
+def lineout_options(tau_slctd, active_f):
+    ## Global, DASH defined, variable available only inside callbacks
+    #ctx = dash.callback_context
+    #ctxi = ctx.inputs
+    #ctxt = ctx.triggered
+    ## Assign correct dataset for analysis
+    #print()
+    #active_id = '.'
+    #for i in range(len(ctxt)):
+    #    print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
+    #    if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
+    #        active_id = ctxt[i]['prop_id']
+    #        f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+    #        print('ctxt active_id', active_id)
+    #        print('f equals:', f)
+    ## Find active input ID if active property did not trigger callback
+    #if active_id == '.':
+    #    for input_id in list(ctxi.keys()):
+    #        if ('filename' in input_id) & (ctxi[input_id]==True):
+    #            print('ctxi active_id', input_id)
+    #            active_id = input_id
+    #            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+    #            print('f equals:', f)
+    #print()
     print('lineout_options')
-    active_id = '.'
-    for i in range(len(ctxt)):
-        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-        if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-            active_id = ctxt[i]['prop_id']
-            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-            print('ctxt active_id', active_id)
-            print('f equals:', f)
-    # Find active input ID if active property did not trigger callback
-    if active_id == '.':
-        for input_id in list(ctxi.keys()):
-            if ('filename' in input_id) & (ctxi[input_id]==True):
-                print('ctxi active_id', input_id)
-                active_id = input_id
-                f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-                print('f equals:', f)
+    print('active_f:', active_f)
+    print('active_f type:', type(active_f))
     print()
 
+    if active_f is None:
+        f = 0
+    elif active_f is not None:
+        f = active_f
     if tau_slctd:
         options = [ {'label': f'{i} [mm]', 'value': i} for i in m2_positions[f] ]
         value = m2_positions[f][0]
@@ -590,23 +602,20 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     return trace_items
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Update the lineout for the scatter plot
-all_inputs_update_scatter = [
-    Input(component_id={'type':'slct_scans', 'index': MATCH}, component_property='value'),
-    Input(component_id= {'type':'channel_check', 'index': MATCH}, component_property='value'),
-    Input(component_id= {'type':'slct_time0', 'index': MATCH}, component_property='value'),
-    Input(component_id= {'type':'slct_lineout', 'index': MATCH}, component_property='value'),
-    Input(component_id= {'type':'slct_timeaxis1', 'index': MATCH}, component_property='value'),
-    Input(component_id= {'type':'slct_timeaxis2', 'index': MATCH}, component_property='value'),
-    Input(component_id= {'type':'bkgnd_color', 'index': MATCH}, component_property='value'),
-    Input(component_id= {'type':'axes_bttn', 'index': MATCH}, component_property='n_clicks'),
-    Input(component_id={'type':'lgnd_modal_close', 'index': MATCH}, component_property='n_clicks'),
-    Input(component_id={'type':'lgnd_modal_list', 'index':MATCH}, component_property='children')
-    ]
-all_inputs_update_scatter.extend(active_file_inputs)
-# Create Figure object to display data on a scatter plot
-@app.callback(Output(component_id= {'type':'scatter', 'index': MATCH}, component_property='figure'), all_inputs_update_scatter)
-def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child, *args_active):
+# Create/Update a figure-object for displaying data on a scatter plot w/ lines + markers
+@app.callback(Output({'type':'scatter', 'index': MATCH},'figure'),
+    [Input({'type':'slct_scans', 'index': MATCH},'value'),
+    Input({'type':'channel_check', 'index': MATCH},'value'),
+    Input({'type':'slct_time0', 'index': MATCH},'value'),
+    Input({'type':'slct_lineout', 'index': MATCH},'value'),
+    Input({'type':'slct_timeaxis1', 'index': MATCH},'value'),
+    Input({'type':'slct_timeaxis2', 'index': MATCH},'value'),
+    Input({'type':'bkgnd_color', 'index': MATCH},'value'),
+    Input({'type':'axes_bttn', 'index': MATCH},'n_clicks'),
+    Input({'type':'lgnd_modal_close', 'index': MATCH},'n_clicks'),
+    Input({'type':'lgnd_modal_list', 'index':MATCH},'children'),
+    Input('memory-data', 'data')])
+def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child, active_f):
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects
                         cols = 1, #Display how many side-by-side?
@@ -618,37 +627,46 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
     # Global, DASH defined, variable available only inside callbacks
     ctx = dash.callback_context
     ctxi = ctx.inputs
-    ctxt = ctx.triggered
-    # Assign correct dataset for analysis
+    #ctxt = ctx.triggered
+   # # Assign correct dataset for analysis
+   # print()
+   # print('update_scatter')
+   # active_id = '.'
+   # for i in range(len(ctxt)):
+   #     print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
+   #     if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
+   #         active_id = ctxt[i]['prop_id']
+   #         f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+   #         print('ctxt active_id', active_id)
+   #         print('f equals:', f)
+   # # Find active input ID if active property did not trigger callback
+   # if active_id == '.':
+   #     for input_id in list(ctxi.keys()):
+   #         if ('filename' in input_id) & (ctxi[input_id]==True):
+   #             print('ctxi active_id', input_id)
+   #             active_id = input_id
+   #             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+   #             print('f equals:', f)
     print()
     print('update_scatter')
-    active_id = '.'
-    for i in range(len(ctxt)):
-        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-        if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-            active_id = ctxt[i]['prop_id']
-            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-            print('ctxt active_id', active_id)
-            print('f equals:', f)
-    # Find active input ID if active property did not trigger callback
-    if active_id == '.':
-        for input_id in list(ctxi.keys()):
-            if ('filename' in input_id) & (ctxi[input_id]==True):
-                print('ctxi active_id', input_id)
-                active_id = input_id
-                f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-                print('f equals:', f)
+    print('active_f:', active_f)
+    print('active_f type:', type(active_f))
     print()
-
+    # Try/Except
+    if active_f is None:
+        f = 0
+    elif active_f is not None:
+        f = active_f
     # Keys contain the stringified component_ids, and values hold the state of the component_property passed to the callback function
     for key in ctxi.keys():
         if 'lgnd_modal_list' in key:
             lgnd_modal_list_key = key
             lgnd_modal_list_vals = ctxi[lgnd_modal_list_key]
         elif ('filename' in key) & (ctxi[key] == True):
-            active_id = key[:-len('.active')]
-            #print('ctxi active_id', active_id)
-
+            active_id = key[:-len('.active')] # .split('.')[0]
+            print('ctxi active_id', active_id)
+            active_id2 = key.split('.')[0]
+            print('ctxi active_id 2', active_id2)
 
     # Counter helps to map the trace numbers and colors in a controlled order
     counter = 0
@@ -917,41 +935,48 @@ def set_multi_yaxis_value(taxis2_slctd, y2_slctd):
     return y2_val
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-all_inputs_update_rangeslider = [
-    Input(component_id={'type':'slct_channel', 'index': MATCH}, component_property='value'),
-    Input(component_id={'type':'slct_scan', 'index': MATCH}, component_property='value')]
-all_inputs_update_rangeslider.extend(active_file_inputs)
-@app.callback([Output(component_id={'type':'signal_range', 'index': MATCH}, component_property='min'),
-    Output(component_id={'type':'signal_range', 'index': MATCH}, component_property='max'),
-    Output(component_id={'type':'signal_range', 'index': MATCH}, component_property='step'),
-    Output(component_id={'type':'signal_range', 'index': MATCH}, component_property='value'),
-    Output(component_id={'type':'signal_range', 'index': MATCH}, component_property='marks')], all_inputs_update_rangeslider)
-def update_rangeslider(channel_slctd, scan_slctd, *args_active):
-    # Global, DASH defined, variable available only inside callbacks
-    ctx = dash.callback_context
-    ctxi = ctx.inputs
-    ctxt = ctx.triggered
-    # Assign correct dataset for analysis
+@app.callback([Output({'type':'signal_range', 'index': MATCH},'min'),
+    Output({'type':'signal_range', 'index': MATCH},'max'),
+    Output({'type':'signal_range', 'index': MATCH},'step'),
+    Output({'type':'signal_range', 'index': MATCH},'value'),
+    Output({'type':'signal_range', 'index': MATCH},'marks')], 
+    [Input({'type':'slct_channel', 'index': MATCH},'value'),
+    Input({'type':'slct_scan', 'index': MATCH},'value'),
+    Input('memory-data', 'data')])
+def update_rangeslider(channel_slctd, scan_slctd, active_f):
+   # # Global, DASH defined, variable available only inside callbacks
+   # ctx = dash.callback_context
+   # ctxi = ctx.inputs
+   # ctxt = ctx.triggered
+   # # Assign correct dataset for analysis
+   # print()
+   # print('update_rangeslider')
+   # active_id = '.'
+   # for i in range(len(ctxt)):
+   #     print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
+   #     if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
+   #         active_id = ctxt[i]['prop_id']
+   #         f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+   #         print('ctxt active_id', active_id)
+   #         print('f equals:', f)
+   # # Find active input ID if active property did not trigger callback
+   # if active_id == '.':
+   #     for input_id in list(ctxi.keys()):
+   #         if ('filename' in input_id) & (ctxi[input_id]==True):
+   #             print('ctxi active_id', input_id)
+   #             active_id = input_id
+   #             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+   #             print('f equals:', f)
+   # print()
     print()
     print('update_rangeslider')
-    active_id = '.'
-    for i in range(len(ctxt)):
-        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-        if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-            active_id = ctxt[i]['prop_id']
-            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-            print('ctxt active_id', active_id)
-            print('f equals:', f)
-    # Find active input ID if active property did not trigger callback
-    if active_id == '.':
-        for input_id in list(ctxi.keys()):
-            if ('filename' in input_id) & (ctxi[input_id]==True):
-                print('ctxi active_id', input_id)
-                active_id = input_id
-                f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-                print('f equals:', f)
+    print('active_f:', active_f)
+    print('active_f type:', type(active_f))
     print()
-
+    if active_f is None:
+        f = 0
+    elif active_f is not None:
+        f = active_f
     # Modify formatted data dictionary for user input
     dff = data_dict[f].copy()
     dff = dff[scan_slctd][channel_slctd]
@@ -990,18 +1015,16 @@ def update_rangeslider(channel_slctd, scan_slctd, *args_active):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Input n_clicks property from 'add_graph' bttn to dynamically add subplots via pattern-matching callbacks
-all_inputs_update_heatmap = [
-    Input(component_id={'type':'slct_channel', 'index': MATCH}, component_property='value'),
-    Input(component_id={'type':'slct_scan', 'index': MATCH}, component_property='value'),
-    Input(component_id={'type':'slct_timeaxis1', 'index': MATCH}, component_property='value'),
-    Input(component_id={'type':'slct_x2', 'index': MATCH}, component_property='value'),
-    Input(component_id={'type':'slct_timeaxis2', 'index': MATCH}, component_property='value'),
-    Input(component_id={'type':'slct_y2', 'index': MATCH}, component_property='value'),
-    Input(component_id={'type':'signal_range', 'index': MATCH}, component_property='value')]
-all_inputs_update_heatmap.extend(active_file_inputs)
-# Returned component_property, 'children', from update_hmap function, must be in form of a list
-@app.callback(Output(component_id={'type':'2d_scan_surf', 'index': MATCH}, component_property='figure'), all_inputs_update_heatmap)
-def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd, y2_slctd, cbar_range, *args_active):    
+@app.callback(Output({'type':'2d_scan_surf', 'index': MATCH},'figure'),
+    [Input({'type':'slct_channel', 'index': MATCH},'value'),
+    Input({'type':'slct_scan', 'index': MATCH},'value'),
+    Input({'type':'slct_timeaxis1', 'index': MATCH},'value'),
+    Input({'type':'slct_x2', 'index': MATCH},'value'),
+    Input({'type':'slct_timeaxis2', 'index': MATCH},'value'),
+    Input({'type':'slct_y2', 'index': MATCH},'value'),
+    Input({'type':'signal_range', 'index': MATCH},'value'),
+    Input('memory-data', 'data')])
+def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd, y2_slctd, cbar_range, active_f):    
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects 
                         cols = 1, #Display how many side-by-side?
@@ -1010,33 +1033,42 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
                         shared_xaxes = False,
                         shared_yaxes = False)
 
-    # Global, DASH defined, variable available only inside callbacks
-    ctx = dash.callback_context
-    ctxi = ctx.inputs
-    ctxt = ctx.triggered
-    # Assign correct dataset for analysis
+   # # Global, DASH defined, variable available only inside callbacks
+   # ctx = dash.callback_context
+   # ctxi = ctx.inputs
+   # ctxt = ctx.triggered
+   # # Assign correct dataset for analysis
+   # print()
+   # print('update_heatmap')
+   # active_id = '.'
+   # for i in range(len(ctxt)):
+   #     print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
+   #     if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
+   #         active_id = ctxt[i]['prop_id']
+   #         f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+   #         print('ctxt active_id', active_id)
+   #         print('f equals:', f)
+   # print()
+   # # Find active input ID if active property did not trigger callback
+   # if active_id == '.':
+   #     print('hmap active not triggered')
+   #     for input_id in list(ctxi.keys()):
+   #         if ('filename' in input_id) & (ctxi[input_id]==True):
+   #             print('ctxi active input_id', input_id)
+   #             active_id = input_id
+   #             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
+   #             print('f equals:', f)
+   # print()
     print()
     print('update_heatmap')
-    active_id = '.'
-    for i in range(len(ctxt)):
-        print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-        if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-            active_id = ctxt[i]['prop_id']
-            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-            print('ctxt active_id', active_id)
-            print('f equals:', f)
+    print('active_f:', active_f)
+    print('active_f type:', type(active_f))
     print()
-    # Find active input ID if active property did not trigger callback
-    if active_id == '.':
-        print('hmap active not triggered')
-        for input_id in list(ctxi.keys()):
-            if ('filename' in input_id) & (ctxi[input_id]==True):
-                print('ctxi active input_id', input_id)
-                active_id = input_id
-                f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-                print('f equals:', f)
-    print()
-
+    # Try/Except
+    if active_f is None:
+        f = 0
+    elif active_f is not None:
+        f = active_f
     # Modify formatted data dictionary for user input
     dff = data_dict[f].copy()
     dff = dff[scan_slctd][channel_slctd]
