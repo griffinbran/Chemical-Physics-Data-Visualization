@@ -44,14 +44,23 @@ for d in range(len(datasets)):
 # Determine which file 'f' to analyze
 f = 0
 #f = int(input('\nSelect [int] from above: '))
-sigfigs = 3
+
+# Time, in femtoseconds[fs], it takes light to travel twice the distance
+sigfigs = 3 # Round for DISPLAY only
+twice = 2 # Laser travels twice the motor distance
+fs = 1E-15 # One femtosecond in [seconds]:
+K = int(1E3) # One thousand
+c = consts.c # Speed of light in [meters/second]
+
 # Check for valid user input
 while f not in range(len(datasets)):
     f = int(input(f'Invalid entry. Enter an integer from 0 to {len(datasets)}: '))
 
 # Inform user of verified data selection
 print()
-print(f'Selected Data: {datasets[f]}')
+print(f'Selected Data: [{f}] {datasets[f]}')
+print()
+print('Data Synopsis:')
 print()
 active_data = datasets[f]
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -60,8 +69,8 @@ active_data = datasets[f]
 filename = []
 for d in range(len(datasets)):
     filename.append(relative_path+datasets[d])
-    print(f'filename[d={d}]: ', filename[d])
-print()
+    #print(f'filename[d={d}]: ', filename[d])
+
 # Read tsv data and assign to a Pandas DataFrame
 data = []
 for d in range(len(datasets)):
@@ -73,8 +82,8 @@ for d in range(len(datasets)):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Assign selection to begin analysis
 filename_f = relative_path+active_data
-print('filename_f: ', filename_f)
-print()
+#print('filename_f: ', filename_f)
+
 # Assign the 'data_f' DataFrame for initial app loading
 data_f = pd.read_csv(filename_f, delimiter='\t', names = header_names)
 # Set dtype of scan# column to int32
@@ -91,18 +100,31 @@ num_scans = []
 # Identify all complete & incomplete scans for 'files' dpdn menu
 complete_scans = []
 incomplete_scans = []
+# Target Motor Positions
+m1_positions = []
+m2_positions = []
+m1_position_range = []
+m2_position_range = []
+
+# Step-size for Delay Axes for 'files' dpdn menu:
+step1_space = []
+step2_space = []
+step1_time = []
+step2_time = []
+range_T = []
+range_tau = []
+# Characterize data for initial app loading
 for d in range(len(datasets)):
     m1steps = len(data[d]['motor-target_1'].value_counts())
     m2steps = len(data[d]['motor-target_2'].value_counts())
     num_m1steps.append(m1steps)
     num_m2steps.append(m2steps)
-    # Complete is a list of integers defining the minimum # of measurements required, in each dataset, for an individual scan to be considered complete
+    # Complete is a list of integers defining the minimum # of measurements required, in each dataset, for each scan to be considered complete
     complete.append(num_m1steps[d]*num_m2steps[d])
-    # Scan Info stores the number of measurements taken during each trial scan
+    # Number of measurements taken during each trial scan
     scan_info.append(data[d]['scan#'].value_counts().sort_index())
     # Number of Scans is the total number of times the experiment was repeated in each dataset (each file)
     num_scans.append(len(scan_info[d]))
-
     # Create an empty list element for each dataset loaded
     complete_scans.append([])
     incomplete_scans.append([])
@@ -112,15 +134,39 @@ for d in range(len(datasets)):
             incomplete_scans[d].append(scan)
         elif scan_info[d][scan] >= complete[d]:
             complete_scans[d].append(scan)
+    # List of lists: sorted target-positions of delay-axis motors
+    m1_positions.append(sorted(data[d]['motor-target_1'].unique() ) )
+    m2_positions.append(sorted(data[d]['motor-target_2'].unique() ) )
+    # Temporary variables for readability
+    m1_position_min = m1_positions[d][0]
+    m2_position_min = m2_positions[d][0]
+    m1_position_max = m1_positions[d][-1]
+    m2_position_max = m2_positions[d][-1]
+    # Determine the range of all delay axes
+    m1_position_range.append(round(m1_position_max - m1_position_min, sigfigs))
+    m2_position_range.append(round(m2_position_max - m2_position_min, sigfigs))
+    # Step-size for Delay Axes: Round for sigfigs
+    step1_space.append(round(m1_position_range[d]/num_m1steps[d], sigfigs))
+    step2_space.append(round(m2_position_range[d]/num_m2steps[d], sigfigs))
+    # Time [femtoseconds] it takes light to travel twice the distance
+    step1_time.append(round((step1_space[d]*twice / (c*K))/fs, 1))
+    step2_time.append(round((step2_space[d]*twice/(c*K))/fs, 1))
+    # Range defined for tick labels
+    range_T.append(step1_time[d]*num_m1steps[d])
+    range_tau.append(step2_time[d]*num_m2steps[d])
 
     # Display the number of measurements taken in each scan
     print(f'data: [{d}]')
     print(f'\tNo. of M1 Steps: {num_m1steps[d]}')
+    print(f'        \tMin: {m1_position_min}[mm]\n        \tMax: {m1_position_max}[mm]\n        \tRange: {m1_position_range[d]}[mm]  =>  ~{range_T[d]:,}[fs]')
+    print(f'        \tStep-Size:   {step1_space[d]}[mm]  =>  ~ {step1_time[d]}[fs]\n')
     print(f'\tNo. of M2 Steps: {num_m2steps[d]}')
+    print(f'        \tMin: {m2_position_min}[mm]\n        \tMax: {m2_position_max}[mm]\n        \tRange: {m2_position_range[d]}[mm]  =>  ~{range_tau[d]:,}[fs]')
+    print(f'        \tStep-Size:   {step2_space[d]}[mm]  =>  ~ {step2_time[d]}[fs]\n')
     print(f'\tNo. of Experimental Scans Stored: {num_scans[d]}')
+
     # Display requirements for complete scan
     print(f'\tComplete scans have at least {complete[d]:,} measurements.\n')
-
     print(f'\tINCOMPLETE scan#: {incomplete_scans[d]}')
     print(f'\tCOMPLETE scan#:   {complete_scans[d]}\n')
     print('scan# complete%')
@@ -130,7 +176,6 @@ for d in range(len(datasets)):
 # Count the number of motor positions targeted in each scan for initial app loading
 num_m1steps_f = len(data_f['motor-target_1'].value_counts())
 num_m2steps_f = len(data_f['motor-target_2'].value_counts())
-# Characterize experiment scans performed for initial app loading
 # Scan Info stores the number of measurements taken during each scan
 scan_info_f = data_f['scan#'].value_counts().sort_index()
 # Num Scans is the total number of measurements recorded, in each scan, in each dataset (each file)
@@ -178,15 +223,15 @@ for d in range(len(datasets)):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Display Motor_1 Description for initial app loading
 print()
-print(f'\tMotor-1 Targets: \n')
+print(f'Motor-1 Targets: \n')
 m1_positions_f = sorted(data_f['motor-target_1'].unique())
 # Determine the range of Motor_1 positions
 m1_position_min_f = m1_positions_f[0]
 m1_position_max_f = m1_positions_f[-1]
 m1_position_range_f = round(m1_position_max_f - m1_position_min_f, sigfigs)
-print(f'\t        Min: {m1_position_min_f}[mm]\n        \tMax: {m1_position_max_f}[mm]\n        \tRange: {m1_position_range_f}[mm]')
+print(f'        Min: {m1_position_min_f}[mm]\n        Max: {m1_position_max_f}[mm]\n        Range: {m1_position_range_f}[mm]')
 # Display the number of measurements taken in each scan
-print(f'\tNo. of Steps: {num_m1steps_f}\n')
+print(f'No. of Steps: {num_m1steps_f}\n')
 # Display Motor-2 Description
 print(f'Motor-2 Targets: \n')
 # Pre-Processing
@@ -200,19 +245,6 @@ print(f'        Min: {m2_position_min_f}[mm]\n        Max: {m2_position_max_f}[m
 print(f'\tNo. of Steps: {num_m2steps_f}\n')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Round to display significant figures
-sigfigs = 3
-# Laser travels twice the motor distance
-twice = 2
-# New line
-nl = '\n'
-# Time, in femtoseconds[fs], it takes light to travel twice the distance
-# One femtosecond in [seconds]:
-fs = 1E-15
-# One thousand
-K = int(1E3)
-# Speed of light in [meters/second]
-c = consts.c
 # Step-size for Delay Axes for 'files' dpdn menu:
 step1_space = []
 step2_space = []
