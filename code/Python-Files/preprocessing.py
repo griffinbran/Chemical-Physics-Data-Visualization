@@ -40,11 +40,15 @@ print('Available Data:\n')
 # Display options and prompt user selection
 for d in range(len(datasets)):
     print(f'[{d}] {datasets[d]}')
+
+# Determine which file 'f' to analyze
 f = 0
 #f = int(input('\nSelect [int] from above: '))
+sigfigs = 3
 # Check for valid user input
 while f not in range(len(datasets)):
     f = int(input(f'Invalid entry. Enter an integer from 0 to {len(datasets)}: '))
+
 # Inform user of verified data selection
 print()
 print(f'Selected Data: {datasets[f]}')
@@ -56,8 +60,8 @@ active_data = datasets[f]
 filename = []
 for d in range(len(datasets)):
     filename.append(relative_path+datasets[d])
-# Assign selection to begin analysis
-filename_f = relative_path+datasets[f]
+    print(f'filename[d={d}]: ', filename[d])
+print()
 # Read tsv data and assign to a Pandas DataFrame
 data = []
 for d in range(len(datasets)):
@@ -67,6 +71,10 @@ for d in range(len(datasets)):
     df = df.astype({'scan#':int})
     data.append(df)
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Assign selection to begin analysis
+filename_f = relative_path+active_data
+print('filename_f: ', filename_f)
+print()
 # Assign the 'data_f' DataFrame for initial app loading
 data_f = pd.read_csv(filename_f, delimiter='\t', names = header_names)
 # Set dtype of scan# column to int32
@@ -76,29 +84,52 @@ data_f = data_f.astype({'scan#':int})
 # Count the number of motor positions targeted in each scan for 'files' dpdn menu
 num_m1steps = []
 num_m2steps = []
+# Characterize experiment scans performed for 'files' dpdn menu
+scan_info = []
+complete = []
+num_scans = []
+# Identify all complete & incomplete scans for 'files' dpdn menu
+complete_scans = []
+incomplete_scans = []
 for d in range(len(datasets)):
     m1steps = len(data[d]['motor-target_1'].value_counts())
     m2steps = len(data[d]['motor-target_2'].value_counts())
     num_m1steps.append(m1steps)
     num_m2steps.append(m2steps)
+    # Complete is a list of integers defining the minimum # of measurements required, in each dataset, for an individual scan to be considered complete
+    complete.append(num_m1steps[d]*num_m2steps[d])
+    # Scan Info stores the number of measurements taken during each trial scan
+    scan_info.append(data[d]['scan#'].value_counts().sort_index())
+    # Number of Scans is the total number of times the experiment was repeated in each dataset (each file)
+    num_scans.append(len(scan_info[d]))
+
+    # Create an empty list element for each dataset loaded
+    complete_scans.append([])
+    incomplete_scans.append([])
+    # Identify the incomplete scans
+    for scan in range(num_scans[d]):
+        if scan_info[d][scan] < complete[d]:
+            incomplete_scans[d].append(scan)
+        elif scan_info[d][scan] >= complete[d]:
+            complete_scans[d].append(scan)
+
+    # Display the number of measurements taken in each scan
+    print(f'data: [{d}]')
+    print(f'\tNo. of M1 Steps: {num_m1steps[d]}')
+    print(f'\tNo. of M2 Steps: {num_m2steps[d]}')
+    print(f'\tNo. of Experimental Scans Stored: {num_scans[d]}')
+    # Display requirements for complete scan
+    print(f'\tComplete scans have at least {complete[d]:,} measurements.\n')
+
+    print(f'\tINCOMPLETE scan#: {incomplete_scans[d]}')
+    print(f'\tCOMPLETE scan#:   {complete_scans[d]}\n')
+    print('scan# complete%')
+    display(round((data[d]['scan#'].value_counts().sort_index()/(complete[d]))*100, sigfigs-1))
+    print()
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Count the number of motor positions targeted in each scan for initial app loading
 num_m1steps_f = len(data_f['motor-target_1'].value_counts())
 num_m2steps_f = len(data_f['motor-target_2'].value_counts())
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Characterize experiment scans performed for 'files' dpdn menu
-scan_info = []
-num_scans = []
-complete = []
-for d in range(len(datasets)):
-    # Scan Info stores the number of measurements taken during each scan
-    scan_info.append(data[d]['scan#'].value_counts().sort_index())
-    # Num Scans is the total number of measurements recorded, in each scan, in each dataset (each file)
-    num_scans.append(len(scan_info[d]))
-    # Complete is a list of integers defining the minimum # of measurements required, in each dataset, for an individual scan to be considered complete
-    complete.append(num_m1steps[d]*num_m2steps[d])
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Characterize experiment scans performed for initial app loading
 # Scan Info stores the number of measurements taken during each scan
 scan_info_f = data_f['scan#'].value_counts().sort_index()
@@ -106,27 +137,7 @@ scan_info_f = data_f['scan#'].value_counts().sort_index()
 num_scans_f = len(scan_info)
 # Complete is a list of integers defining the minimum # of measurements required, in each dataset, for an individual scan to be considered complete
 complete_f = num_m1steps_f*num_m2steps_f
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Identify all complete & incomplete scans for 'files' dpdn menu
-complete_scans = []
-incomplete_scans = []
-sigfigs = 3
-for d in range(len(datasets)):
-    # Create an empty list element for each dataset loaded
-    complete_scans.append([])
-    incomplete_scans.append([])
-    for scan in range(num_scans[d]):
-        if scan_info[d][scan] < complete[d]:
-            incomplete_scans[d].append(scan)
-        elif scan_info[d][scan] >= complete[d]:
-            complete_scans[d].append(scan)
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Requirements for complete scan
-print(f'Complete scans have at least {num_m1steps_f*num_m2steps_f:,} measurements.\n')
-print('scan# complete%')
-display(round((data_f['scan#'].value_counts().sort_index()/(complete_f))*100, sigfigs-1))
-print()
 complete_scans_f = []
 incomplete_scans_f = []
 # Identify incomplete scans for initial app loading
@@ -135,8 +146,8 @@ for scan in range(num_scans_f):
         incomplete_scans_f.append(scan)
     elif scan_info_f[scan] >= complete_f:
         complete_scans_f.append(scan)
-print(f'INCOMPLETE scan#: {incomplete_scans_f}')
-print(f'COMPLETE scan#:   {complete_scans_f}')
+#print(f'INCOMPLETE scan#: {incomplete_scans_f}')
+#print(f'COMPLETE scan#:   {complete_scans_f}')
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # An error may consist of a communication error b/w motor & acquisition computer
@@ -167,13 +178,13 @@ for d in range(len(datasets)):
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Display Motor_1 Description for initial app loading
 print()
-print(f'Motor-1 Targets: \n')
+print(f'\tMotor-1 Targets: \n')
 m1_positions_f = sorted(data_f['motor-target_1'].unique())
 # Determine the range of Motor_1 positions
 m1_position_min_f = m1_positions_f[0]
 m1_position_max_f = m1_positions_f[-1]
 m1_position_range_f = round(m1_position_max_f - m1_position_min_f, sigfigs)
-print(f'        Min: {m1_position_min_f}[mm]\n        Max: {m1_position_max_f}[mm]\n        Range: {m1_position_range_f}[mm]')
+print(f'\t        Min: {m1_position_min_f}[mm]\n        \tMax: {m1_position_max_f}[mm]\n        \tRange: {m1_position_range_f}[mm]')
 # Display the number of measurements taken in each scan
 print(f'\tNo. of Steps: {num_m1steps_f}\n')
 # Display Motor-2 Description

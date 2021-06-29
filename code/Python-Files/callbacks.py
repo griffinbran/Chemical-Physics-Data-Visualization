@@ -99,6 +99,58 @@ def save_data_selection(*args_active):
             return active_f
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# Update components
+@app.callback([Output({'type':'slct_timeaxis1', 'index':MATCH}, 'value'),
+    Output({'type':'delayaxis1_tooltip', 'index':MATCH}, 'children'),
+    Output({'type':'slct_timeaxis2', 'index':MATCH}, 'value'),
+    Output({'type':'delayaxis2_tooltip', 'index':MATCH}, 'children'),
+    Output({'type':'slct_channel', 'index':MATCH}, 'options'),
+    Output({'type':'slct_scan', 'index':MATCH}, 'options'),
+    Output({'type':'slct_scan', 'index':MATCH}, 'value'),
+    Output({'type':'signal_range', 'index':MATCH}, 'verticalHeight'),
+    Output({'type':'slct_scans', 'index':MATCH}, 'options'),
+    Output({'type':'slct_scans', 'index':MATCH}, 'value'),
+    Output({'type':'channel_check', 'index':MATCH}, 'options')],
+    Input('memory-data', 'data'))
+def update_components(active_f):
+    print('update_components')
+    if active_f is None:
+        f = 0
+    elif active_f is not None:
+        f = active_f
+    print('active_f', active_f)
+    print('f', f)
+    # 'slct_timeaxis1' value
+    delay1_value = m1_positions[f][-1]
+    # 'delayaxis1_tooltip' children
+    tooltip1 = f'Scan Range: [{m1_positions[f][0]}, {m1_positions[f][-1]}]'
+    # 'slct_timeaxis2' value
+    delay2_value = m2_positions[f][-1]
+    # 'delayaxis2_tooltip' children
+    tooltip2 = f'Scan Range: [{m2_positions[f][0]}, {m2_positions[f][-1]}]'
+    # 'slct_channel' options
+    ch_opt = [{'label': f'Channel {ch}', 'value': ch} for ch in range(nchannels[f])]
+    # 'slct_scan' options
+    scan_opt = [
+        {'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'),
+        'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
+        ]
+    # 'slct_scan' value
+    scan_val = list(data_dict[f].keys())[0]
+    # 'signal_range' verticalHeight
+    range_height = num_m2steps[f]*(mag_factor-1)
+    # 'slct_scans' options
+    scans_opt = [
+        {'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'), 
+        'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
+        ]
+    # 'slct_scans' value
+    scans_val = [list(data_dict[f].keys())[0], list(data_dict[f].keys())[1], list(data_dict[f].keys())[-1]]
+    # 'channel_check' options
+    chnnl_opt = [{'label': f'{ch}', 'value': ch} for ch in range(nchannels[f])]
+    return delay1_value, tooltip1, delay2_value, tooltip2, ch_opt, scan_opt, scan_val, range_height, scans_opt, scans_val, chnnl_opt
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set positioning & display of dashboard
 @app.callback(Output({'type':'new_graph_container', 'index':MATCH}, 'style'),
     Input('add_graph','n_clicks'))
@@ -115,7 +167,7 @@ def render_child_div(graph_clicks):
 #all_inputs_add_subplot.extend(active_file_inputs)
 # Add plots to the dashboard
 # NOTE: for container_children = State('container', 'children'), then type =  <class 'dash.dependencies.State'>
-@app.callback(Output('container', 'children'), [Input('add_graph', 'n_clicks'), Input('memory-data', 'data')], State('container', 'children') )
+@app.callback(Output('container', 'children'), Input('add_graph', 'n_clicks'), [State('memory-data', 'data'), State('container', 'children')] )
 def add_subplot(graph_clicks, active_f, container_children):
 #def add_subplot(graph_clicks, *args_active_add_subplot, container_children):
     # Global, DASH defined, variable available only inside callbacks
@@ -180,11 +232,13 @@ def add_subplot(graph_clicks, active_f, container_children):
                             #required = True,
                             step = 0.001, #step1_space, ADD step-size button?
                             type = 'number',
-                            value=m1_positions[f][-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
+                            #value=m1_positions[f][-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ), # END 'slct_timeaxis1' dcc.Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
                     ], className='mb-0', size='sm'), # END InputGroup
-                    dbc.Tooltip(f'Scan Range: [{m1_positions[f][0]}, {m1_positions[f][-1]}]', target = 'm1'),
+                    dbc.Tooltip(#children = f'Scan Range: [{m1_positions[f][0]}, {m1_positions[f][-1]}]', 
+                                target = 'm1', 
+                                id={'type':'delayaxis1_tooltip', 'index':graph_clicks}),
                     dbc.FormText('Pump-Probe Delay', color='secondary'),
                 ] # END of dbc.Col_children = [ slct_timeaxis1 ]
             ), # END of dbc.Col <taxis1> 
@@ -201,8 +255,6 @@ def add_subplot(graph_clicks, active_f, container_children):
                             debounce=False,
                             inputMode = 'numeric',
                             list = 'motor2_positions',
-                            #max = m2_positions[f][-1],
-                            #min = m2_positions[f][0],
                             name = 'input_t2',
                             persistence = True,
                             persistence_type = 'memory',
@@ -211,11 +263,13 @@ def add_subplot(graph_clicks, active_f, container_children):
                             #required = True,
                             step = 0.001, #step2_space, ADD step-size button?
                             type='number',
-                            value=m2_positions[f][-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
+                            #value=m2_positions[f][-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ),  # END 'slct_timeaxis2' dash-core-components-Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
                     ], className='mb-0', size='sm'), # m-margin, b-bottom
-                    dbc.Tooltip(f'Scan Range: [{m2_positions[f][0]}, {m2_positions[f][-1]}]', target = 'm2'),
+                    dbc.Tooltip(#children = f'Scan Range: [{m2_positions[f][0]}, {m2_positions[f][-1]}]',
+                                target = 'm2',
+                                id={'type':'delayaxis2_tooltip', 'index':graph_clicks}),
                     dbc.FormText('Drive-Probe Delay', color='secondary'),
                 ] # END of dbc.Col children = [ slct_timeaxis2 ]
             ), # END of <taxis2> dbc.Col
@@ -239,7 +293,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     # Channel Select Dropdown Menu for TAB-1
                                     dcc.Dropdown(
                                         id={'type': 'slct_channel', 'index': graph_clicks},
-                                        options=[{'label': f'Channel {ch}', 'value': ch} for ch in range(nchannels[f])],
+                                        #options=[{'label': f'Channel {ch}', 'value': ch} for ch in range(nchannels[f])],
                                         multi=False,
                                         value=0,
                                         clearable = False,
@@ -253,12 +307,11 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     # Scan Select Dropdown Menu for TAB-1
                                     dcc.Dropdown(
                                         id={'type': 'slct_scan', 'index': graph_clicks},
-                                        options=
-                                            [
-                                                {'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'), 'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
-                                            ],
+                                        options=[],
+                                        #{'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'), 
+                                        #    'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
                                         multi=False,
-                                        value=list(data_dict[f].keys())[0],
+                                        #value=list(data_dict[f].keys())[0],
                                         clearable = False,
                                         persistence = True,
                                         persistence_type = 'memory',
@@ -287,7 +340,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     #dots = True,
                                     tooltip = {'always_visible':False, 'placement':'topLeft'},
                                     vertical=True,
-                                    verticalHeight=(num_m2steps[f]*(mag_factor-1)),
+                                    #verticalHeight = (num_m2steps[f]*(mag_factor-1)),
                                     persistence = True,
                                     persistence_type = 'memory',
                                     persisted_props = ['value'],),  
@@ -382,10 +435,11 @@ def add_subplot(graph_clicks, active_f, container_children):
                                 dbc.Col(
                                     # Add scan selection dropdown menu
                                     dcc.Dropdown(id={'type': 'slct_scans', 'index': graph_clicks},
-                                        options=[{'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'),
-                                            'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))],
+                                        options=[],
+                                        #{'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'),
+                                        #    'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
                                         multi=True,
-                                        value=[list(data_dict[f].keys())[0], list(data_dict[f].keys())[1], list(data_dict[f].keys())[-1]],
+                                        #value=[list(data_dict[f].keys())[0], list(data_dict[f].keys())[1], list(data_dict[f].keys())[-1]],
                                         clearable = True,
                                         placeholder = 'Select a scan to display...',
                                         persistence = True,
@@ -402,7 +456,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     id={'type': 'channel_check', 'index': graph_clicks},
                                     inline = True,
                                     switch = True,
-                                    options=[{'label': f'{ch}', 'value': ch} for ch in range(nchannels[f])],
+                                    #options=[{'label': f'{ch}', 'value': ch} for ch in range(nchannels[f])],
                                     value = [1],
                                     persistence = True,
                                     persistence_type = 'memory',
