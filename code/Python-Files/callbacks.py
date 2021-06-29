@@ -1167,7 +1167,7 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
 ##############################################################################################################################################################################################      
     # https://plotly.com/python/builtin-colorscales/
     palettes = ['Viridis', 'haline', 'Plasma','thermal', 'Hot', 'RdBu_r','RdYlBu_r', 'Spectral_r','PRGn', 'curl', 'delta', 'Tropic', 'Blackbody', 'oxy']
-    palette = palettes[0]
+    palette = palettes[-3]
 
     # Plotly Graph Objects (GO)
     fig.add_trace(go.Heatmap(x=xdata,

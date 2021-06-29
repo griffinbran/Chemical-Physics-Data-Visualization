@@ -8,7 +8,7 @@ import numpy as np # Multi-Dimensional Arrays and Matrices Library
 import scipy.constants as consts # Import physical constants such as the speed of light
 
 # CONSTANTS
-sigfigs = 3 # Round for readability & time conversion
+sigfigs = 3 # Supports readability & proper time conversion
 twice = 2 # Laser travels twice the motor distance
 fs = 1E-15 # One femtosecond in [seconds]
 K = int(1E3) # One thousand
