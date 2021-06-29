@@ -8,9 +8,6 @@ import dash
 from dash.dash import no_update
 from dash.exceptions import PreventUpdate
 import preprocessing as pp
-#from preprocessing import f as f_pp
-#from preprocessing import f
-#from preprocessing import step1_space_f as step1_space, step2_space_f as step2_space, step1_time_f as step1_time, step2_time_f as step2_time, m1_positions_f as m1_positions, m2_positions_f as m2_positions, nchannels_f as nchannels, data_dict_f as data_dict, num_m1steps_f as num_m1steps, num_m2steps_f as num_m2steps
 from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps
 from app import app
 import layouts as lay
