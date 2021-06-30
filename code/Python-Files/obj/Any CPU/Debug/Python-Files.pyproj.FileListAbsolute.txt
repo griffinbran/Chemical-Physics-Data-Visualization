@@ -1,3 +1,0 @@
-C:\Users\bgrif\Downloads\github\portfolio\Chemical-Physics-Data-Visualization\code\Python-Files\obj\Any CPU\Debug\Python-Files.pyproj.CoreCompileInputs.cache
-C:\Users\bgrif\Downloads\github\portfolio\Chemical-Physics-Data-Visualization\code\Python-Files\bin\Microsoft.PythonTools.WebRole.dll
-C:\Users\bgrif\Downloads\github\portfolio\Chemical-Physics-Data-Visualization\code\Python-Files\bin\wfastcgi.py
