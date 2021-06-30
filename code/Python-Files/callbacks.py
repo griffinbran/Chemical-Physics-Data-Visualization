@@ -1227,7 +1227,7 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
         'xaxis2': x2_layout, # None (default) or Dict
         'yaxis2': yaxis2, # None (default) or Dict
         'coloraxis': {'showscale' : False},},
-        width = 530, #int(xwidth[f])*mag_factor, 
+        width = 580, #int(xwidth[f])*mag_factor, 
         height = 530, #int(ywidth[f])*mag_factor,
         coloraxis_colorbar_xpad = 300,coloraxis_colorbar_ypad = 300,coloraxis_colorbar_bgcolor = 'black',coloraxis_colorbar_bordercolor = 'black',coloraxis_colorbar_outlinecolor = 'black',coloraxis_colorbar_tickcolor = 'black',paper_bgcolor = 'rgb(160,160,160)',plot_bgcolor = 'black',title_text = ttl_txt,font_color = 'black',margin_autoexpand = True,margin_l = 110,margin_r = 120,margin_t = 120,autosize = False)
     #==============================================================================================
