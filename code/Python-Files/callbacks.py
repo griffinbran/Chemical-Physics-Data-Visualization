@@ -8,7 +8,7 @@ import dash
 from dash.dash import no_update
 from dash.exceptions import PreventUpdate
 import preprocessing as pp
-from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps
+from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps, m1_position_range as xwidth, m2_position_range as ywidth
 from app import app
 import layouts as lay
 
@@ -104,12 +104,12 @@ def save_data_selection(*args_active):
     Output({'type':'slct_channel', 'index':MATCH}, 'options'),
     Output({'type':'slct_scan', 'index':MATCH}, 'options'),
     Output({'type':'slct_scan', 'index':MATCH}, 'value'),
-    Output({'type':'signal_range', 'index':MATCH}, 'verticalHeight'),
     Output({'type':'slct_scans', 'index':MATCH}, 'options'),
     Output({'type':'slct_scans', 'index':MATCH}, 'value'),
     Output({'type':'channel_check', 'index':MATCH}, 'options')],
     Input('memory-data', 'data'))
 def update_components(active_f):
+    print()
     print('update_components')
     if active_f is None:
         f = 0
@@ -117,46 +117,62 @@ def update_components(active_f):
         f = active_f
     print('active_f', active_f)
     print('f', f)
+
     # 'slct_timeaxis1' value
     delay1_value = m1_positions[f][-1]
+
     # 'delayaxis1_tooltip' children
     tooltip1 = f'Scan Range: [{m1_positions[f][0]}, {m1_positions[f][-1]}]'
     # 'slct_timeaxis2' value
     delay2_value = m2_positions[f][-1]
+
     # 'delayaxis2_tooltip' children
     tooltip2 = f'Scan Range: [{m2_positions[f][0]}, {m2_positions[f][-1]}]'
+
     # 'slct_channel' options
     ch_opt = [{'label': f'Channel {ch}', 'value': ch} for ch in range(nchannels[f])]
+
     # 'slct_scan' options
     scan_opt = [
         {'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'),
         'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
         ]
+
     # 'slct_scan' value
     scan_val = list(data_dict[f].keys())[0]
-    # 'signal_range' verticalHeight
-    range_height = num_m2steps[f]*(mag_factor-1)
+
     # 'slct_scans' options
     scans_opt = [
         {'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'), 
         'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
         ]
+
     # 'slct_scans' value
     scans_val = [list(data_dict[f].keys())[0], list(data_dict[f].keys())[1], list(data_dict[f].keys())[-1]]
+
     # 'channel_check' options
     chnnl_opt = [{'label': f'{ch}', 'value': ch} for ch in range(nchannels[f])]
-    return delay1_value, tooltip1, delay2_value, tooltip2, ch_opt, scan_opt, scan_val, range_height, scans_opt, scans_val, chnnl_opt
+
+    return delay1_value, tooltip1, delay2_value, tooltip2, ch_opt, scan_opt, scan_val, scans_opt, scans_val, chnnl_opt
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+# 
 # Set positioning & display of dashboard
-@app.callback(Output({'type':'new_graph_container', 'index':MATCH}, 'style'),
-    Input('add_graph','n_clicks'))
-def render_child_div(graph_clicks):
+@app.callback(Output({'type':'new_graph_container', 'index':ALL}, 'style'),
+    Input('add_graph','n_clicks'),
+    State({'type':'new_graph_container', 'index':ALL}, 'style'))
+def render_child_div(graph_clicks, container_style_states):
+    print()
+    print('render_child_div')
+    print('graph_clicks:', graph_clicks)
+    print('container style states', container_style_states)
     if (graph_clicks == 0):
-        style={'width':'auto', 'outline': 'thin lightgrey solid', 'padding':5} 
-    elif (graph_clicks > 0):
-        style={'width':'auto', 'outline': 'thin lightgrey solid', 'margin-bottom':10,'margin-right':10, 'padding':5, 'display': 'inline-block'}
-    return style
+        container_style_states[0] = {'width':'auto', 'outline': 'thin lightgrey solid', 'padding':5}
+        return container_style_states
+    else:
+        for i in range(len(container_style_states)):
+            container_style_states[i] = {'width':680, 'outline': 'thin lightgrey solid', 'margin-bottom':10,'margin-right':10, 'padding':5, 'display': 'inline-block'}
+        return container_style_states
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Input n_clicks property from 'add_graph' bttn to dynamically add subplots via pattern-matching callbacks
@@ -326,7 +342,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                             #], className='five columns', style={'display':'inline-block', 'vertical-align':'top'}),
                             ], width='auto', align='center'),
                             # SEC COL
-                            dbc.Col([ # html.Div([
+                            dbc.Col([
                                 # Slider controls the signal range displayed with colorbar
                                 dcc.RangeSlider(id={'type': 'signal_range', 'index': graph_clicks},
                                     marks={},
@@ -337,20 +353,16 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     #dots = True,
                                     tooltip = {'always_visible':False, 'placement':'topLeft'},
                                     vertical=True,
-                                    #verticalHeight = (num_m2steps[f]*(mag_factor-1)),
+                                    verticalHeight = 460,# For some reason callback not updating
                                     persistence = True,
                                     persistence_type = 'memory',
                                     persisted_props = ['value'],),  
-                            #], className='two columns', style={'display':'inline-block', 'vertical-align':'top', 'margin-top':-10}),
                             ], width={'size':'auto', 'offset':0}, align='end',),# className='mb-30'),
-                        #], className='row', style={'display':'inline-block', 'vertical-align':'top'}),
                         ], justify='center', no_gutters=True),# END TAB-1, ROW-2 
                         # START LAST ROW: Display Options
                         dbc.Row([
                             # FIRST COL
                             dbc.Col([
-                                #
-                                ####
                                 dbc.FormGroup([
                                     dbc.Label('Display Options:', html_for={'type':'slct_x2', 'index': graph_clicks}, width=dict(size='auto'), align = 'center'),
                                     dbc.Col([
@@ -379,7 +391,6 @@ def add_subplot(graph_clicks, active_f, container_children):
                                         )
                                     ], width='auto')
                                 ], row=True),
-                                ####
                             ]) # END COL
                         ]), # END Last ROW TAB-1
                     ]), # END TAB-1 children, and END dcc.Tab 'hmap'
@@ -573,7 +584,7 @@ def lineout_options(tau_slctd, active_f):
     #            active_id = input_id
     #            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
     #            print('f equals:', f)
-    #print()
+    print()
     print('lineout_options')
     print('active_f:', active_f)
     print('active_f type:', type(active_f))
@@ -665,8 +676,9 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     Input({'type':'axes_bttn', 'index': MATCH},'n_clicks'),
     Input({'type':'lgnd_modal_close', 'index': MATCH},'n_clicks'),
     Input({'type':'lgnd_modal_list', 'index':MATCH},'children'),
+    Input({'type':'grid_bttn', 'index':MATCH},'n_clicks'),
     Input('memory-data', 'data')])
-def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child, active_f):
+def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child, grid_clicks, active_f):
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects
                         cols = 1, #Display how many side-by-side?
@@ -679,25 +691,6 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
     ctx = dash.callback_context
     ctxi = ctx.inputs
     #ctxt = ctx.triggered
-   # # Assign correct dataset for analysis
-   # print()
-   # print('update_scatter')
-   # active_id = '.'
-   # for i in range(len(ctxt)):
-   #     print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-   #     if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-   #         active_id = ctxt[i]['prop_id']
-   #         f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-   #         print('ctxt active_id', active_id)
-   #         print('f equals:', f)
-   # # Find active input ID if active property did not trigger callback
-   # if active_id == '.':
-   #     for input_id in list(ctxi.keys()):
-   #         if ('filename' in input_id) & (ctxi[input_id]==True):
-   #             print('ctxi active_id', input_id)
-   #             active_id = input_id
-   #             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-   #             print('f equals:', f)
     print()
     print('update_scatter')
     print('active_f:', active_f)
@@ -778,9 +771,9 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                     xaxis2_layout = dict(title =
                         x_ttl_txt_t,
                         title_standoff = stndff,
-                        showgrid = True,
+                        showgrid = (grid_clicks%2 == 0),#True,
                         gridcolor = grid_color,
-                        #zeroline = True,
+                        zeroline = (grid_clicks%2 == 0),#True,
                         zerolinecolor = grid_color,
                         anchor = 'y',
                         overlaying = 'x',
@@ -792,9 +785,9 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                     # No need for standoff param on bottom xaxis
                     xaxis2_layout = dict(title =
                         x_ttl_txt_t,
-                        showgrid = True,
+                        showgrid = (grid_clicks%2 == 0),
                         gridcolor = grid_color,
-                        #zeroline = True,
+                        zeroline = (grid_clicks%2 == 0),
                         zerolinecolor = grid_color,
                         anchor = 'y',
                         overlaying = 'x',
@@ -826,8 +819,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                         showlegend = False)) # KEEP FALSE TO HIDE LEGEND
                 if loc_s == 'top':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, title_standoff = stndff, side = loc_s, showgrid=True, gridcolor = grid_color, zerolinecolor = grid_color),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zerolinecolor = grid_color),
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, title_standoff = stndff, side = loc_s, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline = (grid_clicks%2 == 0), zerolinecolor = grid_color),
+                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline = (grid_clicks%2 == 0), zerolinecolor = grid_color),
                                         xaxis2 = xaxis2_layout,
                                         title_text = ttl_txt,
                                         paper_bgcolor = 'rgb(160,160,160)',
@@ -840,8 +833,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                                         )
                 elif loc_s == 'bottom':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, side = loc_s, showgrid=True, gridcolor = grid_color, zerolinecolor = grid_color),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zerolinecolor = grid_color),
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, side = loc_s, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
+                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
                                         xaxis2 = xaxis2_layout,
                                         title_text = ttl_txt,
                                         paper_bgcolor = 'rgb(160,160,160)',
@@ -886,8 +879,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                     mode='lines+markers'),) 
                 if loc == 'top':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt, title_standoff = 0, side = loc, showgrid= True, gridcolor = grid_color, zerolinecolor = grid_color),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zerolinecolor = grid_color),
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt, title_standoff = 0, side = loc, showgrid= (grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
+                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
                                         title_text = ttl_txt,
                                         paper_bgcolor = 'rgb(160,160,160)',
                                         plot_bgcolor = bkgnd_color,
@@ -899,8 +892,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                                         )
                 elif loc == 'bottom':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt, side = loc, showgrid=True, gridcolor = grid_color, zerolinecolor = grid_color),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zerolinecolor = grid_color),
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt, side = loc, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
+                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
                                         title_text = ttl_txt,
                                         paper_bgcolor = 'rgb(160,160,160)',
                                         plot_bgcolor = bkgnd_color,
@@ -912,8 +905,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                                         )
             # Counter is keeping track of the number of traces for line color control
             counter+=1
-    fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>',
-                      width=675)
+    fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')#, width=675)
     #print('width', num_m1steps[f]*mag_factor )
     #fig.update_traces(line_color=trace_color_picked[trace], selector=trace)
     return fig
@@ -990,35 +982,12 @@ def set_multi_yaxis_value(taxis2_slctd, y2_slctd):
     Output({'type':'signal_range', 'index': MATCH},'max'),
     Output({'type':'signal_range', 'index': MATCH},'step'),
     Output({'type':'signal_range', 'index': MATCH},'value'),
-    Output({'type':'signal_range', 'index': MATCH},'marks')], 
+    Output({'type':'signal_range', 'index': MATCH},'marks'),
+    Output({'type':'signal_range', 'index': MATCH},'verticalHeight')], 
     [Input({'type':'slct_channel', 'index': MATCH},'value'),
     Input({'type':'slct_scan', 'index': MATCH},'value'),
     Input('memory-data', 'data')])
 def update_rangeslider(channel_slctd, scan_slctd, active_f):
-   # # Global, DASH defined, variable available only inside callbacks
-   # ctx = dash.callback_context
-   # ctxi = ctx.inputs
-   # ctxt = ctx.triggered
-   # # Assign correct dataset for analysis
-   # print()
-   # print('update_rangeslider')
-   # active_id = '.'
-   # for i in range(len(ctxt)):
-   #     print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-   #     if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-   #         active_id = ctxt[i]['prop_id']
-   #         f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-   #         print('ctxt active_id', active_id)
-   #         print('f equals:', f)
-   # # Find active input ID if active property did not trigger callback
-   # if active_id == '.':
-   #     for input_id in list(ctxi.keys()):
-   #         if ('filename' in input_id) & (ctxi[input_id]==True):
-   #             print('ctxi active_id', input_id)
-   #             active_id = input_id
-   #             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-   #             print('f equals:', f)
-   # print()
     print()
     print('update_rangeslider')
     print('active_f:', active_f)
@@ -1038,31 +1007,9 @@ def update_rangeslider(channel_slctd, scan_slctd, active_f):
     vals = [min_min, max_max]
     sig_step = round((max_max - min_min)/100,7)
     range_marks={min_min:{'label':'Sig Min: '+str(min_min), 'style':{'color':'blue', 'font-weight':'bold', 'right':'40px'} }, max_max:{'label':'Sig Max: '+str(max_max), 'style':{'color':'#f50', 'font-weight':'bold', 'vertical-align':'text-top','right':'40px'}}}
-    #range_marks={min_min:{'label':'Sig Min: '+str(min_min), 'style':{'color':'blue', 'right':'40px'} }, max_max:{'label':'Sig Max: '+str(max_max), 'style':{'color':'#f50', 'vertical-align':'text-top','right':'40px'}}}
-    return min_min, max_max, sig_step, vals, range_marks
-    
-    abs_min = abs(min_min)
-    abs_max = abs(max_max)
-    
-    # Identify cbar range values
-    if (min_min>0) | (max_max<0):
-        trace_min = min_min
-        trace_max = max_max
-        # Initial RangeSlider values
-        range_marks={min_min:{'label':'Min: '+str(min_min), 'style':{'color':'blue', 'font-weight':'bold', 'right':'40px'} }, max_max:{'label':'Max: '+str(max_max), 'style':{'color':'#f50', 'font-weight':'bold', 'vertical-align':'text-top','right':'40px'}}}
-    elif abs_max > abs_min:
-        trace_min = round(-1*max_max, 6)
-        trace_max = max_max
-        range_marks={trace_min:{'label':''}, min_min:{'label':'Min: '+str(min_min), 'style':{'color':'blue', 'font-weight':'bold', 'right':'40px'}}, 0:{'label':str(0), 'style':{'color':'black', 'font-weight':'bold', 'right':'40px'}}, max_max:{'label':'Max: '+str(max_max), 'style':{'color':'#f50', 'font-weight':'bold',  'right':'40px'}}}
-    elif abs_max < abs_min:
-        trace_min = min_min
-        trace_max = round(-1*min_min, 6)
-        range_marks={min_min:{'label':'Min: '+str(min_min), 'style':{'color':'blue', 'font-weight':'bold', 'right':'40px'}}, 0:{'label':str(0), 'style':{'color':'black', 'font-weight':'bold','right':'40px'}}, max_max:{'label':'Max: '+str(max_max), 'style':{'color':'#f50', 'font-weight':'bold', 'right':'40px'}}, trace_max:{'label':''}}
-
-    # Initial RangeSlider values
-    vals = [min_min, max_max]
-    
-    return trace_min, trace_max, sig_step, vals, range_marks
+    # 'signal_range' verticalHeight
+    range_height = 30 # num_m2steps[f]*(mag_factor+5)
+    return min_min, max_max, sig_step, vals, range_marks, range_height
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Input n_clicks property from 'add_graph' bttn to dynamically add subplots via pattern-matching callbacks
@@ -1166,8 +1113,8 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
         y_range = [time_ax2[0]-(step2_time[f]/2), time_ax2[-1]+(step2_time[f]/2)]
 ##############################################################################################################################################################################################      
     # https://plotly.com/python/builtin-colorscales/
-    palettes = ['Viridis', 'haline', 'Plasma','thermal', 'Hot', 'RdBu_r','RdYlBu_r', 'Spectral_r','PRGn', 'curl', 'delta', 'Tropic', 'Blackbody', 'oxy']
-    palette = palettes[-3]
+    palettes = ['Viridis', 'Magma', 'haline', 'Plasma','thermal', 'Hot', 'RdBu_r','RdYlBu_r', 'Spectral_r','PRGn', 'curl', 'delta', 'Tropic', 'Blackbody', 'oxy']
+    palette = palettes[1]
 
     # Plotly Graph Objects (GO)
     fig.add_trace(go.Heatmap(x=xdata,
@@ -1280,7 +1227,9 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
         'xaxis2': x2_layout, # None (default) or Dict
         'yaxis2': yaxis2, # None (default) or Dict
         'coloraxis': {'showscale' : False},},
-        coloraxis_colorbar_xpad = 300,coloraxis_colorbar_ypad = 300,coloraxis_colorbar_bgcolor = 'black',coloraxis_colorbar_bordercolor = 'black',coloraxis_colorbar_outlinecolor = 'black',coloraxis_colorbar_tickcolor = 'black',paper_bgcolor = 'rgb(160,160,160)',plot_bgcolor = 'black',title_text = ttl_txt,font_color = 'black',margin_autoexpand = True,margin_l = 110,margin_r = 120,margin_t = 120,autosize = False, width = num_m1steps[f]*mag_factor, height = num_m2steps[f]*mag_factor,)
+        width = 530, #int(xwidth[f])*mag_factor, 
+        height = 530, #int(ywidth[f])*mag_factor,
+        coloraxis_colorbar_xpad = 300,coloraxis_colorbar_ypad = 300,coloraxis_colorbar_bgcolor = 'black',coloraxis_colorbar_bordercolor = 'black',coloraxis_colorbar_outlinecolor = 'black',coloraxis_colorbar_tickcolor = 'black',paper_bgcolor = 'rgb(160,160,160)',plot_bgcolor = 'black',title_text = ttl_txt,font_color = 'black',margin_autoexpand = True,margin_l = 110,margin_r = 120,margin_t = 120,autosize = False)
     #==============================================================================================
     # What is returned here will actually go to the output
     # First:  'component_property = children'

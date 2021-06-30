@@ -10,10 +10,10 @@ import preprocessing
 from app import app
 from layouts import layout1
 import callbacks
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
 app.layout = layout1
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Entry point for running the app locatd in 'index.py' avoids circular imports
+
+# Entry point for running the app located in 'index.py' avoids circular imports
 # See https://dash-docs.herokuapp.com/reference for more info
 if __name__ == '__main__':
     # Run app on local server: http://127.0.0.1:8050/
