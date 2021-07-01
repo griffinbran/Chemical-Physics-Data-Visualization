@@ -1,25 +1,25 @@
-# Ongoing Project: Work-in-Progress
-
-<img src="file_name.jpg" alt="UTPS" style="height: 310px; width:660px;"/>
-
 <a id='back_to_top'></a>
 
-# LBNL Ultrafast Transient Polarization Spectroscopy (UTPS) Visualization
+# Dashboard for Data Analysis & Visualization:
+### Supporting Ultrafast Transient Polarization Spectroscopy (UTPS)
+
 ---
 ### Problem Statement:
-> Physicists, in the Chemical Sciences Division at Berkeley Lab (LBNL), have developed a novel technique for investigation of nonlinear physical processes with time-resolved measurements scaled at the molecular level. This project aims to automate data processing, develop data visualization tools, and advance database management to increase effiency of data acquisition and assist in cutting time-cost of performing redundant visualization tasks.
+> Researchers in the Atomic-Molecular-&-Optical-Sciences Group, within the Chemical Sciences Division at Berkeley Lab (LBNL), have developed a novel technique for investigation of nonlinear physical processes with time-resolved measurements scaled at the molecular level. This project was performed to support automation of redundant data processing tasks and to develop open-source visualization tools that increase effiency of data analysis performed in the laboratory.
 
 #### **Exploration of the following specific goals:**
-* Quantify scan (data) qualtiy in reference to the others.
-* Visualize 2D time-delay scans for each of the 8-channels in a way that benefits direct comparisons.
-    * Convert [mm] --> [fs]
-    * Take "lineouts" of 2D spectra
-    * Zoom into user defined quadrants
-    * View slices in different time-delay axes
-    * View slices in real time
-    * Compare data from start of run to data collected at end of run
+* Alleviate restrictive dependencies on generic proprietary visualization software.
+    * Oversee DAQ remotely, from multiple machines.
+    * Provide flexibility of display through additional control options.
+    * Allow for user driven modifications as the technique evolves.<br><br>
+* Quantify quality of data throughout DAQ procedures.<br><br>
+* Visualize data from multiple sources, for direct comparisons.
+    * Dynamically generate interactive graph traces of multidimensional data.
+    * Zoom into user defined quadrants of interest.<br><br>
+    * Import datasets from multiple files.
+* Enhance ease of analytic collaboration between researchers.
 ---
-## Table of Contents (NOTE: This will be reformatted!)
+## Table of Contents
 
 * [`Multi-Page Apps and URL Support`] (Dash.Plotly Reference Guide): ([*Structuring a Dash App Layout*](https://dash.plotly.com/urls))
 
@@ -34,7 +34,7 @@
 * [Preprocessing](#preprocessing_and_feature_engineering)
 * [Benchmarks](#model_benchmarks)
 * [Model Tuning](#model_tuning)
-* [Recommendations and Next Steps](#recommendations_and_next_steps)
+* [Next Steps](#recommendations_and_next_steps)
 * [Software Requirements](#software_requirements)
 * [Acknowledgements and Contact](#acknowledgements_and_contact)
 
@@ -42,11 +42,13 @@
 
 ---
 ## Experiment Details
+    NOTE: This section is a simplified overview of the experimental setup. For advanced readers interested in a rigorous breakdown, see assets folder contents.
+
 [Back to Top](#back_to_top)
 
+The raw data are voltage signals representing variations to well characterized laser light, after it interacts with molecules in carefully prepared energy states. The process requires three laser pulses to irradiate the molecular target in a precisely timed sequence. Two motors are remotely operated which direct The response of a molecule to light occurs very quickly so timing is everything. The researchers overcome this challenge by conducting a scan. The bottom line is researchers are using two motors 
 
-
-### GOAL: Measure 3rd order nonlinear optical resonse
+### Experiment goal: Measure 3rd order nonlinear optical response
 * Q: OKE from Kerr-media sample due to AC laser E-Field
 
 * Q: 2 Optical Delay Stages
@@ -78,16 +80,9 @@ NOTE: A motor in the experiment moves the beampath of a laser(actually two motor
 
 * [Data Dictionary](#appendix)
 
-#### Raw Sample Dataset
+#### Sample Dataset
 
 * [`trial_output05.tsv`](./data/trial_output05.tsv): Description ([source](http://URL.com) | [data dictionary](http://URL.com))
-
-#### Raw Complete Dataset
-
-* [`file_name.csv`](./filepath.csv): Description ([source](http://URL.com) | [data dictionary](http://URL.com))
-
-#### Processed Datasets:
-* [`file_name.csv`](./filepath.csv): Description
 
 **Notes about the data:**
 1. n = Total number of motors moving, through a set of predetermined positions, during each scan.
@@ -116,10 +111,6 @@ NOTE: A motor in the experiment moves the beampath of a laser(actually two motor
 
 ***Pre-processing***
 > * Set-up terminology of lab to describe tool optionality
->* One-hot encode categorical variables
->* Train/test split the data
->* Scale the data
->* Consider using automated feature selection
 
 
 <a id='model_benchmarks'></a>
