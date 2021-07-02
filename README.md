@@ -21,23 +21,36 @@
 ---
 ## Table of Contents
 
-- app.py
-- index.py
-- callbacks.py
-- layouts.py
-
-* [Experiment Details](#experiment_details)
-* [EDA & Pre-Processing](#eda_and_preprocessing)
+* [App Overview](#app_overview)
+* [Background](#background)
+* [Data Processing & Visualization](#processing_and_visualization)
     * [Data Dictionary](#appendix)
-* [Preprocessing](#preprocessing_and_feature_engineering)
 * [Next Steps](#next_steps)
 * [Software Requirements](#software_requirements)
 * [Acknowledgements and Contact](#acknowledgements_and_contact)
 
-<a id='experiment_details'></a>
+<a id='app_overview'></a>
 
 ---
-## Experiment Details: Where does the data come from?
+## App Overview
+
+5 Python files to run the dashboard:
+
+* [`preprocessing.py`]: Read raw data into Pandas DataFrame
+* [`app.py`]: Build the app with variables *app* and *server*
+* [`index.py`]: Entry point for running the app
+* [`callbacks.py`]: Callback definitions for interactivity with Plotly Graph Objects
+* [`layouts.py`]: Dash components define app structure
+
+[Back to Top](#back_to_top)
+
+    
+<a id='background'></a>
+
+---
+## Background
+
+### Where does the data come from?
 
     NOTE: This section is a simplified overview of the UTPS technique. 
     Advanced & curious readers may discover a more thorough overview in the assets folder.
@@ -63,11 +76,11 @@ The response of a molecule to light occurs very, very rapidly so timing is every
     >1. Excitation (pump) Pulse
     >2. Drive BLOCKED
     >3. Probing Pulse
-
-<a id='eda_and_preprocessing'></a>
+    
+<a id='processing_and_visualization'></a>
 
 ---
-## EDA & Pre-Processing
+## Processing & Visualization
 
 [Back to Top](#back_to_top)
 
@@ -91,12 +104,11 @@ The response of a molecule to light occurs very, very rapidly so timing is every
 2. 8-Channels(output) from NIDAQ-National Instruments Data Acquisition (sensors/measurement hardware/programmable software)
 > * 0-indexed from 0-7
 
-#### EDA
-- Missing Values:
+#### Errors
+- An error may consist of a communication error b/w laser-motor system & acquisition computer. Motors will be reinitialized, and the scan is restarted.
 
 #### Data Cleaning
-- Null Value Imputation:
-- Manage Outliers:
+- Raw data is not altered in this dashboard.
 
 ***Pre-processing***
 > * Set-up terminology of lab to describe tool optionality
@@ -106,6 +118,12 @@ The response of a molecule to light occurs very, very rapidly so timing is every
 ---
 ## Next Steps
 [Back to Top](#back_to_top)
+
+1. Create requirements.txt
+2. Generate docstrings for callbacks
+3. Work on data dictionary
+4. Build callback dictionary
+5. Build component dictionary
 
 <a id='software_requirements'></a>
 
