@@ -8,20 +8,18 @@
 > Researchers in the Atomic-Molecular-&-Optical-Sciences Group, within the Chemical Sciences Division at Berkeley Lab (LBNL), have developed a novel technique for investigation of nonlinear physical processes with time-resolved measurements scaled at the molecular level. This project was performed to support automation of redundant data processing tasks and to develop open-source visualization tools that increase effiency of data analysis performed in the laboratory.
 
 #### **Exploration of the following specific goals:**
-* Alleviate restrictive dependencies on generic proprietary visualization software.
-    * Oversee DAQ remotely, from multiple machines.
+1. Alleviate restrictive dependencies on generic proprietary visualization software.
+    * Oversee DAQ remotely, from multiple work stations.
     * Provide flexibility of display through additional control options.
     * Allow for user driven modifications as the technique evolves.<br><br>
-* Quantify quality of data throughout DAQ procedures.<br><br>
-* Visualize data from multiple sources, for direct comparisons.
+2. Visualize data from multiple sources, for direct comparisons.
     * Dynamically generate interactive graph traces of multidimensional data.
-    * Zoom into user defined quadrants of interest.<br><br>
-    * Import datasets from multiple files.
-* Enhance ease of analytic collaboration between researchers.
+    * Zoom into user defined quadrants of interest.
+    * Import datasets from multiple files.<br><br>
+3. Quantify quality of data throughout DAQ procedures.
+4. Enhance ease of analytic collaboration between researchers.
 ---
 ## Table of Contents
-
-* [`Multi-Page Apps and URL Support`] (Dash.Plotly Reference Guide): ([*Structuring a Dash App Layout*](https://dash.plotly.com/urls))
 
 - app.py
 - index.py
@@ -29,33 +27,27 @@
 - layouts.py
 
 * [Experiment Details](#experiment_details)
-* [EDA & Data Cleaning](#eda_and_cleaning)
+* [EDA & Pre-Processing](#eda_and_preprocessing)
     * [Data Dictionary](#appendix)
 * [Preprocessing](#preprocessing_and_feature_engineering)
-* [Benchmarks](#model_benchmarks)
-* [Model Tuning](#model_tuning)
-* [Next Steps](#recommendations_and_next_steps)
+* [Next Steps](#next_steps)
 * [Software Requirements](#software_requirements)
 * [Acknowledgements and Contact](#acknowledgements_and_contact)
 
 <a id='experiment_details'></a>
 
 ---
-## Experiment Details
+## Experiment Details: Where does the data come from?
 
-    NOTE: This section is a simplified overview of the experimental setup. 
-    Advanced & curious readers, interested in a rigorous breakdown, see the assets folder.
+    NOTE: This section is a simplified overview of the UTPS technique. 
+    Advanced & curious readers may discover a more thorough overview in the assets folder.
 
 [Back to Top](#back_to_top)
 
-The raw data are voltage signals representing variations to well characterized laser light after it interacts with a carefully prepared molecular target. The technique requires three laser pulses to arrive on target in a precisely timed sequence. To control the timing, two motors (A.K.A. "delay-axes") are remotely operated to vary the path length of each pulse by directing it through a labrynth of optics. The response of a molecule to light occurs very, very rapidly so timing is everything. The researchers overcome this challenge by conducting a methodical scan of motor positions (which directly converts to time delays) through a series of evenly spaced steps. This scanning process is repeated several times, over the couse of several hours, providing opportunity for equipment malfunction, changes to the laboratory enviornment, etc. This dashboard is used to aid in identification of the optimally timed sequence of interaction-events and to understand fluctuations in the data, as well as to make new discoveries supporting the U.S. Department of Energy's Basic Energy Sciences Program.
+The raw data are voltage signals representing variations to well characterized laser light after it interacts with a carefully prepared molecular target. The technique requires three laser pulses to arrive on target in a precisely timed sequence. To control the timing, two remotely operated motors (A.K.A. "delay-axes") vary the path length of each pulse by directing them through a labrynth of optics.<br><br>
+The response of a molecule to light occurs very, very rapidly so timing is everything. The researchers overcome this challenge by conducting a methodical scan of motor positions (which directly convert to time delays) through a series of evenly spaced steps. This scanning process is repeated several times, over the course of several hours, providing opportunity for equipment malfunction, changes to the laboratory environment, etc. This dashboard is used to aid in identification of the optimally timed sequence of interaction-events and to understand fluctuations in the data, as well as to make new discoveries supported by the U.S. Department of Energy's Basic Energy Sciences Program.
 
 ### Experiment goal: Measure 3rd order nonlinear optical response
-* Q: OKE from Kerr-media sample due to AC laser E-Field
-
-* Q: 2 Optical Delay Stages
->* Time Delay T: "x-time", horizontal axes in the time domain, typically femtoseconds. One femtosecond [fs] equals 1E-15 seconds [secs], Motor-Target_1.<br>
-NOTE: A motor in the experiment moves the beampath of a laser(actually two motors and two beampaths). A laser-pulse moves at the speed of light such that the direction of the beampath requires light to travel twice the distance that the motor-position steps. 
 
 * *Configuration #1 :* "3-Pulse Experiment"
     >1. Excitation (pump) Pulse
@@ -72,10 +64,11 @@ NOTE: A motor in the experiment moves the beampath of a laser(actually two motor
     >2. Drive BLOCKED
     >3. Probing Pulse
 
-<a id='eda_and_cleaning'></a>
+<a id='eda_and_preprocessing'></a>
 
 ---
-## EDA & Data Cleaning
+## EDA & Pre-Processing
+
 [Back to Top](#back_to_top)
 
 ### Datasets
@@ -105,32 +98,13 @@ NOTE: A motor in the experiment moves the beampath of a laser(actually two motor
 - Null Value Imputation:
 - Manage Outliers:
 
-<a id='preprocessing_and_feature_engineering'></a>
-
----
-## Pre-Processing and Feature Engineering
-[Back to Top](#back_to_top)
-
 ***Pre-processing***
 > * Set-up terminology of lab to describe tool optionality
 
-
-<a id='model_benchmarks'></a>
-
----
-## Model Benchmarks and Preparation
-[Back to Top](#back_to_top)
-
-<a id='model_tuning'></a>
+<a id='next_steps'></a>
 
 ---
-## Model Tuning & Assessment
-[Back to Top](#back_to_top)
-
-<a id='recommendations_and_next_steps'></a>
-
----
-## Recommendations and Next Steps
+## Next Steps
 [Back to Top](#back_to_top)
 
 <a id='software_requirements'></a>
@@ -138,6 +112,20 @@ NOTE: A motor in the experiment moves the beampath of a laser(actually two motor
 ---
 ## Software Requirements
 [Back to Top](#back_to_top)
+
+See requirements.txt listed in root directory
+
+#### ADDITIONAL REQUIREMENTS:
+
+* Render dashboard in Jupyter
+
+app.py<br>
+> IMPORT: `from jupyter_dash import JupyterDash`<br>
+> BUILD THE APP: `app = JupyterDash(__name__)`
+
+preprocessing.py<br>
+> IMPORT: `from jupyterthemes import jtplot`<br>
+> STYLE: `jtplot.style(theme='solarizedd', context='notebook', ticks=True, grid=False)`
 
 <a id='acknowledgements_and_contact'></a>
 
@@ -153,7 +141,7 @@ NOTE: A motor in the experiment moves the beampath of a laser(actually two motor
 
 Google folder UTPS Online Analysis that has one example and a header.  
 Starting point - upload example notebook or script (Graphs of 2D time-delay scans), helpful in comparing lab measurements
-
+* [`Multi-Page Apps and URL Support`] (Dash.Plotly Reference Guide): ([*Structuring a Dash App Layout*](https://dash.plotly.com/urls))
 
 
 ### Papers:
