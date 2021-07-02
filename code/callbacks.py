@@ -7,8 +7,7 @@
 import dash
 from dash.dash import no_update
 from dash.exceptions import PreventUpdate
-import preprocessing as pp
-from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps, m1_position_range as xwidth, m2_position_range as ywidth
+from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps, m1_position_range as xwidth, m2_position_range as ywidth, datasets
 from app import app
 import layouts as lay
 
@@ -16,7 +15,6 @@ import layouts as lay
 import pandas as pd
 # Multi-Dimensional Arrays and Matrices Library
 import numpy as np
-from IPython.display import display
 
 # Figures serialized to JSON & rendered by Plotly.js JavaScript library
 import plotly.express as px
@@ -39,15 +37,15 @@ from dash.dependencies import Input, Output, State, ALL, MATCH, ALLSMALLER
 # Set hmap magnification, fixed ratio
 mag_factor = 9
 # Argument-list to unpack and call inside the 'add_subplot' callback definition
-args_active = [f'active_status{idx}' for idx in range(len(pp.datasets))]
+args_active = [f'active_status{idx}' for idx in range(len(datasets))]
 # List of MenuItems (displayed in DropdownMenu) representing filenames of datasets (ready for analysis) in the local directory
-active_file_inputs = [Input(f'filename{idx}', 'active') for idx in range(len(pp.datasets))]
+active_file_inputs = [Input(f'filename{idx}', 'active') for idx in range(len(datasets))]
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Update active DropdownMenuItem in 'files' DropdownMenu
-args_nclicks = [f'nclicks{idx}' for idx in range(len(pp.datasets))]
-@app.callback([Output(f'filename{idx}', 'active') for idx in range(len(pp.datasets))],
-    [Input(f'filename{idx}', 'n_clicks') for idx in range(len(pp.datasets))])
+args_nclicks = [f'nclicks{idx}' for idx in range(len(datasets))]
+@app.callback([Output(f'filename{idx}', 'active') for idx in range(len(datasets))],
+    [Input(f'filename{idx}', 'n_clicks') for idx in range(len(datasets))])
 def update_active_filename(*args_nclicks):
     # Global, DASH defined, variable available only inside callbacks
     # https://dash.plotly.com/dash-html-components/button
@@ -190,22 +188,6 @@ def add_subplot(graph_clicks, active_f, container_children):
     # Assign correct dataset for analysis
     print()
     print('add_subplot')
-    #active_id = '.'
-    #for i in range(len(ctxt)):
-    #    print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-    #    if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-    #        active_id = ctxt[i]['prop_id']
-    #        f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-    #        print('ctxt active_id', active_id)
-    #        print('f equals:', f)
-    ## Find active input ID if active property did not trigger callback
-    #if active_id == '.':
-    #    for input_id in list(ctxi.keys()):
-    #        if ('filename' in input_id) & (ctxi[input_id]==True):
-    #            print('ctxi active_id', input_id)
-    #            active_id = input_id
-    #            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-    #            print('f equals:', f)
     print('active_f', active_f)
     print('active_f type', type(active_f))
     if active_f is None:
@@ -906,8 +888,6 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
             # Counter is keeping track of the number of traces for line color control
             counter+=1
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')#, width=675)
-    #print('width', num_m1steps[f]*mag_factor )
-    #fig.update_traces(line_color=trace_color_picked[trace], selector=trace)
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -1030,33 +1010,7 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
                         specs=[[{'secondary_y':True}]],
                         shared_xaxes = False,
                         shared_yaxes = False)
-
-   # # Global, DASH defined, variable available only inside callbacks
-   # ctx = dash.callback_context
-   # ctxi = ctx.inputs
-   # ctxt = ctx.triggered
-   # # Assign correct dataset for analysis
-   # print()
-   # print('update_heatmap')
-   # active_id = '.'
-   # for i in range(len(ctxt)):
-   #     print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-   #     if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-   #         active_id = ctxt[i]['prop_id']
-   #         f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-   #         print('ctxt active_id', active_id)
-   #         print('f equals:', f)
-   # print()
-   # # Find active input ID if active property did not trigger callback
-   # if active_id == '.':
-   #     print('hmap active not triggered')
-   #     for input_id in list(ctxi.keys()):
-   #         if ('filename' in input_id) & (ctxi[input_id]==True):
-   #             print('ctxi active input_id', input_id)
-   #             active_id = input_id
-   #             f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-   #             print('f equals:', f)
-   # print()
+    # Debugging
     print()
     print('update_heatmap')
     print('active_f:', active_f)

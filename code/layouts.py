@@ -7,7 +7,7 @@
 import dash_html_components as html # Library containing component classes for HTML tags
 import dash_bootstrap_components as dbc # Customise CSS theme & grid layout
 import dash_core_components as dcc # Library of dashboarding components
-import preprocessing as pp
+from preprocessing import datasets
 #=======================================================================================================================================================
 # App layout:
 # 1. Dash-Bootstrap Components(i.e. rows, cols, dropdown menus, radioItems, tabs etc.)
@@ -28,7 +28,7 @@ layout1 = dbc.Container([
             dcc.Store(id='memory-data', storage_type='memory'),
             #dbc.Label( 'filename:', id='datasets1', size='sm', html_for='files1'),
             dbc.DropdownMenu(id = 'files', children = [
-                dbc.DropdownMenuItem(d, id = f'filename{idx}', active=(d==pp.datasets[0])) for idx, d in enumerate(pp.datasets)
+                dbc.DropdownMenuItem(d, id = f'filename{idx}', active=(d==datasets[0])) for idx, d in enumerate(datasets)
                 ],
                 label='Data ', bs_size="sm", direction='down',
                 ),
