@@ -42,11 +42,13 @@
 
 ---
 ## Experiment Details
-    NOTE: This section is a simplified overview of the experimental setup. For advanced readers interested in a rigorous breakdown, see assets folder contents.
+
+    NOTE: This section is a simplified overview of the experimental setup. 
+    Advanced & curious readers, interested in a rigorous breakdown, see the assets folder.
 
 [Back to Top](#back_to_top)
 
-The raw data are voltage signals representing variations to well characterized laser light, after it interacts with molecules in carefully prepared energy states. The process requires three laser pulses to irradiate the molecular target in a precisely timed sequence. Two motors are remotely operated which direct The response of a molecule to light occurs very quickly so timing is everything. The researchers overcome this challenge by conducting a scan. The bottom line is researchers are using two motors 
+The raw data are voltage signals representing variations to well characterized laser light after it interacts with a carefully prepared molecular target. The technique requires three laser pulses to arrive on target in a precisely timed sequence. To control the timing, two motors (A.K.A. "delay-axes") are remotely operated to vary the path length of each pulse by directing it through a labrynth of optics. The response of a molecule to light occurs very, very rapidly so timing is everything. The researchers overcome this challenge by conducting a methodical scan of motor positions (which directly converts to time delays) through a series of evenly spaced steps. This scanning process is repeated several times, over the couse of several hours, providing opportunity for equipment malfunction, changes to the laboratory enviornment, etc. This dashboard is used to aid in identification of the optimally timed sequence of interaction-events and to understand fluctuations in the data, as well as to make new discoveries supporting the U.S. Department of Energy's Basic Energy Sciences Program.
 
 ### Experiment goal: Measure 3rd order nonlinear optical response
 * Q: OKE from Kerr-media sample due to AC laser E-Field
