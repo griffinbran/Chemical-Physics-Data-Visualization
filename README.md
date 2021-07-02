@@ -94,24 +94,21 @@ The response of a molecule to light occurs very, very rapidly so timing is every
 
 **Notes about the data:**
 1. n = Total number of motors moving, through a set of predetermined positions, during each scan.
-> * n = 1: Motor for...
-> * n = 2: Motor for...
+> * n = 1: Motor for Pump-Pulse to Probe-Pulse Delay Axis (T)
+> * n = 2: Motor for Kerr-Gating-Drive-Pulse to Probe-Pulse Delay Axis (Tau)
 > * n = 3: Motor for polarization control (hypothetical future implementation)
 > * n = 4: Motor for sample position control (hypothetical future implementation)
-> * Dimensions of motor position are [mm], with a direct conversion to [fs]
-> * NOTE: 1-femtosecond = 10^-15 [sec]
+> * Dimensions of motor position are millimeters, with a direct conversion to femtoseconds
 
-2. 8-Channels(output) from NIDAQ-National Instruments Data Acquisition (sensors/measurement hardware/programmable software)
-> * 0-indexed from 0-7
+2. The tab separated text files store original research data from 8 independent channels acquired with NIDAQ-National Instruments Data Acquisition software.
+> * Channels are 0-indexed from 0-7
+> * Futre research may incorporate more channels.
 
 #### Errors
 - An error may consist of a communication error b/w laser-motor system & acquisition computer. Motors will be reinitialized, and the scan is restarted.
 
 #### Data Cleaning
-- Raw data is not altered in this dashboard.
-
-***Pre-processing***
-> * Set-up terminology of lab to describe tool optionality
+- Raw data is aggregated by averaging all ACTUAL motor positions, grouped by each TARGET position.
 
 <a id='next_steps'></a>
 
@@ -135,7 +132,7 @@ See requirements.txt listed in root directory
 
 #### ADDITIONAL REQUIREMENTS:
 
-* Render dashboard in Jupyter
+* To render dashboard in Jupyter
 
 app.py<br>
 > IMPORT: `from jupyter_dash import JupyterDash`<br>
@@ -153,14 +150,11 @@ preprocessing.py<br>
 
 
 ### External Resources:
-* [`Title`] (Platform): ([*source*](https://www.URL.com))
 
 * [`Overview of AxesGrid toolkit`] (Documentation): ([*source*](https://matplotlib.org/mpl_toolkits/axes_grid/users/overview.html))
 
-Google folder UTPS Online Analysis that has one example and a header.  
-Starting point - upload example notebook or script (Graphs of 2D time-delay scans), helpful in comparing lab measurements
 * [`Multi-Page Apps and URL Support`] (Dash.Plotly Reference Guide): ([*Structuring a Dash App Layout*](https://dash.plotly.com/urls))
-
+* [`Title`] (Platform): ([*source*](https://www.URL.com))
 
 ### Papers:
 * [`Time-Resolved Ultrafast Transient Polarization Spectroscopy...`](./assets/TimeResolvedUltrafastTransientPolarizationSpectroscopy.pdf) Review of Scientific Instruments: ([*source*](https://aip.scitation.org/doi/10.1063/1.5144482))
@@ -168,9 +162,9 @@ Starting point - upload example notebook or script (Graphs of 2D time-delay scan
 * [*`Title`*](./file_path.pdf) Journal/Blog: ([*source*](https://www.URL.com))
 
 ### Contacts:
-> * Data Analyst: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
-> * Principal Investigator: Richard Thurston  [email](rthurston@lbl.gov)
-> * LBNL Staff Scientist: Daniel Slaughter, PhD  [Website](https://amos.lbl.gov/slaughter/)
+> * Dashboard Creator: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
+> * UTPS Scientist: Richard Thurston, PhD Candidate  [Email](rthurston@lbl.gov)
+> * LBNL Staff Scientist: Daniel Slaughter, PhD  [Website](https://amos.lbl.gov/slaughter/) | [Email](dslaughter@lbl.gov)
 
 <a id='appendix'></a>
 
@@ -179,15 +173,28 @@ Starting point - upload example notebook or script (Graphs of 2D time-delay scan
 
 [Back to Top](#back_to_top)
 
-|Feature Name|Data Type|Dataset|Category|Description|
-|---|---|---|---|---|
-|**Name**|*DType*|Data Source|'Key' : 'Value'|Type of building|
-|**#errors**|*int*|Data Source|'Key' : 'Value'|Miscommunication "connection" error|
-|**scan#**|*int*|Data Source|'Key' : 'Value'|12 scans of all motor positions are averaged together|
-|**motor-target_n**|*float*|Data Source|'Key' : 'Value'|Position targeted by nth motor|
-|**motor-actual_n**|*float*|Data Source|'Key' : 'Value'|Position reported by nth motor|
-|**data_channel_n**|*float*|Data Source|'Key' : 'Value'|Photodiode polarization data (voltages)|
+### Datasets Dictionary
+* Data located in the `relative_path` directory are stored as Pandas DataFrames in the list-object `data_dict`.
 
+|Column|Data Type|Variable|Location|Description|
+|---|---|---|---|---|
+|**#errors**|*int*|data_dict[i]|preprocessing.py|Miscommunication "connection" error flag|
+|**scan#**|*int*|data_dict[i]|preprocessing.py|Name of the trial run for each experiment|
+|**motor-target_n**|*float*|data_dict[i]|preprocessing.py|Position targeted by nth motor|
+|**motor-actual_n**|*float*|data_dict[i]|preprocessing.py|Position reported by nth motor|
+|**data_channel_n**|*float*|data_dict[i]|preprocessing.py|Raw signal from two photodiodes|
+
+### Components Dictionary
+
+|Component ID|Library|Name|Filename|Description|
+|---|---|---|---|---|
+|**add_graph**|*Dash Bootstrap*|Subplots|layouts.py|Appends a duplicate dashboard to existing state|
+
+### Callback Dictionary
+
+|Callback Name|Output|Arguments|Filename|Description|
+|---|---|---|---|---|
+|**update_active_filename**|*filename{idx}*|*args_nclicks|callbacks.py|Based on n-clicks, updates active filename|
 
 [Back to Top](#back_to_top)
 
