@@ -4,33 +4,22 @@
 # In[ ]:
 
 # IMPORTS:
+from app import app
+import layouts as lay
+from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps, m1_position_range as xwidth, m2_position_range as ywidth, datasets
+
 import dash
 from dash.dash import no_update
 from dash.exceptions import PreventUpdate
-from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps, m1_position_range as xwidth, m2_position_range as ywidth, datasets
-from app import app
-import layouts as lay
-
-# Library for importing and filtering datasets in memory
-import pandas as pd
-# Multi-Dimensional Arrays and Matrices Library
-import numpy as np
-
-# Figures serialized to JSON & rendered by Plotly.js JavaScript library
-#import plotly.express as px
-from plotly.express.colors import qualitative as px_colors
-import plotly.graph_objects as go
-
-
+import numpy as np # round arrays element-wise
+from plotly.express.colors import qualitative as px_colors # Select primary colors for plotting traces
+import plotly.graph_objects as go # Interactive Heatmap and Scatter figures
 from plotly.subplots import make_subplots # Display secondary_y axes
 import dash_daq as daq # DAQ component controls
 import dash_core_components as dcc # Library of dashboarding components
-# Library containing component classes for HTML tags
-import dash_html_components as html
-# Bootstrap components for Dash to customise CSS theme & grid layout
+import dash_html_components as html # Library containing component classes for HTML tags
 import dash_bootstrap_components as dbc
-# Library for building component interactivity through callbacks
-from dash.dependencies import Input, Output, State, ALL, MATCH
+from dash.dependencies import Input, Output, State, ALL, MATCH # Component interactivity through callbacks
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set hmap magnification, fixed ratio
 mag_factor = 9
