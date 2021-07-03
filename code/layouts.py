@@ -8,11 +8,8 @@ import dash_html_components as html # Library containing component classes for H
 import dash_bootstrap_components as dbc # Customise CSS theme & grid layout
 import dash_core_components as dcc # Library of dashboarding components
 from preprocessing import datasets
-#=======================================================================================================================================================
+
 # App layout:
-# 1. Dash-Bootstrap Components(i.e. rows, cols, dropdown menus, radioItems, tabs etc.)
-# 2. Any HTML needed in there (i.e Div, H1)
-#=======================================================================================================================================================
 layout1 = dbc.Container([
     dbc.Row([
         dbc.Col(

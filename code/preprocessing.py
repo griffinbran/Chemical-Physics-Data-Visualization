@@ -68,7 +68,6 @@ for d in range(len(datasets)):
     df = df.astype({'scan#':int})
     df = df.astype({'#errors':int})
     data.append(df)
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Count the number of motor positions targeted in each scan for 'files' dpdn menu
 num_m1steps = []
 num_m2steps = []

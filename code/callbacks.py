@@ -17,22 +17,20 @@ import pandas as pd
 import numpy as np
 
 # Figures serialized to JSON & rendered by Plotly.js JavaScript library
-import plotly.express as px
+#import plotly.express as px
+from plotly.express.colors import qualitative as px_colors
 import plotly.graph_objects as go
 
-# Make subplots: In this app this is only used to display secondary_y axes
-from plotly.subplots import make_subplots
 
-# DAQ simplifies integration of data acquisition & controls into Dash
-import dash_daq as daq
-# Library of dashboarding components
-import dash_core_components as dcc
+from plotly.subplots import make_subplots # Display secondary_y axes
+import dash_daq as daq # DAQ component controls
+import dash_core_components as dcc # Library of dashboarding components
 # Library containing component classes for HTML tags
 import dash_html_components as html
 # Bootstrap components for Dash to customise CSS theme & grid layout
 import dash_bootstrap_components as dbc
 # Library for building component interactivity through callbacks
-from dash.dependencies import Input, Output, State, ALL, MATCH, ALLSMALLER
+from dash.dependencies import Input, Output, State, ALL, MATCH
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # Set hmap magnification, fixed ratio
 mag_factor = 9
@@ -533,10 +531,7 @@ def toggle_modal(nclicks_open, nclicks_close, is_open):
     return is_open
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Input n_clicks property from 'add_graph' bttn to dynamically add subplots via pattern-matching callbacks
-# all_inputs_lineout_options = [Input({'type':'slct_time0', 'index':MATCH}, 'value')]
-# all_inputs_lineout_options.extend(active_file_inputs)
-# Chained-Callback determines dropdown options displayed
+# Chained-Callback determines lineout dropdown options displayed
 @app.callback(
     [Output({'type':'slct_lineout', 'index':MATCH}, 'options'),
     Output({'type':'slct_lineout', 'index':MATCH}, 'value'),
@@ -544,28 +539,6 @@ def toggle_modal(nclicks_open, nclicks_close, is_open):
     [Input({'type':'slct_time0', 'index':MATCH}, 'value'),
     Input('memory-data', 'data')])
 def lineout_options(tau_slctd, active_f):
-    ## Global, DASH defined, variable available only inside callbacks
-    #ctx = dash.callback_context
-    #ctxi = ctx.inputs
-    #ctxt = ctx.triggered
-    ## Assign correct dataset for analysis
-    #print()
-    #active_id = '.'
-    #for i in range(len(ctxt)):
-    #    print(f"ctxt[i={i}]['prop_id']", ctxt[i]['prop_id'])
-    #    if ('filename' in ctxt[i]['prop_id']) & (ctxt[i]['value'] == True):
-    #        active_id = ctxt[i]['prop_id']
-    #        f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-    #        print('ctxt active_id', active_id)
-    #        print('f equals:', f)
-    ## Find active input ID if active property did not trigger callback
-    #if active_id == '.':
-    #    for input_id in list(ctxi.keys()):
-    #        if ('filename' in input_id) & (ctxi[input_id]==True):
-    #            print('ctxi active_id', input_id)
-    #            active_id = input_id
-    #            f = int(active_id[len('filename'):-len('.active')]) # ID FORMAT: str(filename{idx}.active)
-    #            print('f equals:', f)
     print()
     print('lineout_options')
     print('active_f:', active_f)
@@ -613,7 +586,8 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     #print('MATCH_index', MATCH_index)
     #FF6692 is too similar to other color options in the 'Plotly' (default) color swatch
     color_index = 6
-    colors = px.colors.qualitative.Plotly[:color_index] + px.colors.qualitative.Plotly[color_index+1:] 
+    #colors = px.colors.qualitative.Plotly[:color_index] + px.colors.qualitative.Plotly[color_index+1:] 
+    colors = px_colors.Plotly[:color_index] + px_colors.Plotly[color_index+1:] 
     num_colors = len(colors)
 
     for tr in range(num_traces):
