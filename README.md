@@ -42,9 +42,13 @@
 * [`callbacks.py`]: Define interactivity of visuals
 * [`layouts.py`]: Dashboard structure
 
+Instructions:
+1. Install packages listed in Python3 Dashboard requirements.txt file located in the root directory of this repository
+2. Assign a relative path for datasets in preprocessing.py (DEFAULT: trial dataset in `data` folder located in the root directory)
+3. Run index.py (see Software Requirements below to alternatively launch app with Jupyter)
+
 [Back to Top](#back_to_top)
 
-    
 <a id='background'></a>
 
 ---
@@ -161,12 +165,12 @@ See requirements.txt listed in root directory
 * [*`Community Forum`*] (User Support): ([*Plotly*](https://community.plotly.com/))
 * [`Charming Data`] (Video Tutorials): ([*YouTube Channel*](https://www.youtube.com/channel/UCqBFsuAz41sqWcFjZkqmJqQ))
 
-### Papers:
+### UTPS Papers:
 * [`Time-Resolved Ultrafast Transient Polarization Spectroscopy...`](./assets/TimeResolvedUltrafastTransientPolarizationSpectroscopy.pdf) Review of Scientific Instruments: ([*source*](https://aip.scitation.org/doi/10.1063/1.5144482))
 * [`Ultrafast Dynamics of Excited Electronic States in Nitrobenzene...`](./assets/UltrafastDynamicsofExcitedElectronicStatesinNitrobenzene.pdf) Journal of Physical Chemistry A: ([*source*](https://pubs.acs.org/doi/10.1021/acs.jpca.0c01943?ref=pdf))
 
 ### Contacts:
-> * Dashboard Creator: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
+> * Data Analyst: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
 > * UTPS Scientist: Richard Thurston, PhD Candidate [Email](rthurston@lbl.gov)
 > * Postdoctoral Researcher: Matthew Brister, PhD [Email](mmbrister@lbl.gov)
 > * LBNL Staff Scientist: Daniel Slaughter, PhD  [Website](https://amos.lbl.gov/slaughter/) | [Email](dslaughter@lbl.gov)
