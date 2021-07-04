@@ -1,7 +1,16 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\UTPS-Visualization",
+    "\\UTPS-Visualization\\Lib",
+    "\\UTPS-Visualization\\Lib\\site-packages",
+    "\\UTPS-Visualization\\Scripts",
+    "\\UTPS-Visualization\\share",
+    "\\UTPS-Visualization\\share\\jupyter",
+    "\\UTPS-Visualization\\share\\jupyter\\labextensions",
+    "\\UTPS-Visualization\\share\\jupyter\\labextensions\\jupyterlab-plotly",
+    "\\UTPS-Visualization\\share\\jupyter\\labextensions\\jupyterlab-plotly\\static"
   ],
-  "SelectedNode": "\\index.py",
+  "SelectedNode": "\\callbacks.py",
   "PreviewInSolutionExplorer": false
 }

@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
 
 # IMPORTS:
 import dash_html_components as html # Library containing component classes for HTML tags

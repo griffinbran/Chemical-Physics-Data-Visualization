@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# coding: utf-8
 
-# IMPORTS
+# IMPORTS:
 import os
 import pandas as pd # Data Manipulation, Wrangling & Analysis Library
 import numpy as np # Multi-Dimensional Arrays and Matrices Library

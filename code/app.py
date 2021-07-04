@@ -1,12 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-# -*- coding: utf-8 -*-
-
-# Run this app with `python app.py` and
-# visit http://127.0.0.1:8050/ in your web browser.
 
 # IMPORTS:
 import dash  # (version == 1.12.0)
@@ -20,4 +12,3 @@ app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheet
 
 # Expose the Flask variable in the file
 server = app.server
-

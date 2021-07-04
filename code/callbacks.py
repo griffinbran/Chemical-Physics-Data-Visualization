@@ -1,16 +1,9 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
 
 # IMPORTS:
 from app import app
-import layouts as lay
 from preprocessing import step1_space, step2_space, step1_time, step2_time, m1_positions, m2_positions, nchannels, data_dict, num_m1steps, num_m2steps, m1_position_range as xwidth, m2_position_range as ywidth, datasets
-
 import dash
-from dash.dash import no_update
-from dash.exceptions import PreventUpdate
 import numpy as np # round arrays element-wise
 from plotly.express.colors import qualitative as px_colors # Select primary colors for plotting traces
 import plotly.graph_objects as go # Interactive Heatmap and Scatter figures
@@ -20,7 +13,7 @@ import dash_core_components as dcc # Library of dashboarding components
 import dash_html_components as html # Library containing component classes for HTML tags
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State, ALL, MATCH # Component interactivity through callbacks
-#+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
 # Set hmap magnification, fixed ratio
 mag_factor = 9
 # Argument-list to unpack and call inside the 'add_subplot' callback definition
@@ -55,7 +48,7 @@ def update_active_filename(*args_nclicks):
         # ID FORMAT: '.' upon initial call
         elif ('filename' not in ctxt[i]['prop_id']):
             # No change was made from user's prior data selection
-            return no_update
+            return dash.dash.no_update
     print()
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -713,8 +706,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                     #loc_t = 'top'
                     loc_s = 'bottom'
                     # Add standoff param when time(xaxis-2) is on the top, for readability
-                    xaxis2_layout = dict(title =
-                        x_ttl_txt_t,
+                    xaxis2_layout = dict(
+                        title = x_ttl_txt_t,
                         title_standoff = stndff,
                         showgrid = (grid_clicks%2 == 0),#True,
                         gridcolor = grid_color,
@@ -722,22 +715,25 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                         zerolinecolor = grid_color,
                         anchor = 'y',
                         overlaying = 'x',
-                        side = 'top')
+                        side = 'top',
+                        ticks = 'outside'
+                        )
                 # Time-Delay axes correspond with xaxis-2, 'bottom'
                 elif nclicks%6==1:
                     #loc_t = 'bottom'
                     loc_s = 'top'
                     # No need for standoff param on bottom xaxis
-                    xaxis2_layout = dict(title =
-                        x_ttl_txt_t,
+                    xaxis2_layout = dict(
+                        title = x_ttl_txt_t,
                         showgrid = (grid_clicks%2 == 0),
                         gridcolor = grid_color,
                         zeroline = (grid_clicks%2 == 0),
                         zerolinecolor = grid_color,
                         anchor = 'y',
                         overlaying = 'x',
-                        side = 'bottom')
-
+                        side = 'bottom',
+                        ticks = 'outside'
+                        )
                 # Add two scatter traces b/c we want to display multiple x-axes
                 fig.add_trace(go.Scatter(
                     x=xdata_s,
@@ -764,8 +760,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                         showlegend = False)) # KEEP FALSE TO HIDE LEGEND
                 if loc_s == 'top':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, title_standoff = stndff, side = loc_s, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline = (grid_clicks%2 == 0), zerolinecolor = grid_color),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline = (grid_clicks%2 == 0), zerolinecolor = grid_color),
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, title_standoff = stndff, side = loc_s, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline = (grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
+                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline = (grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
                                         xaxis2 = xaxis2_layout,
                                         title_text = ttl_txt,
                                         paper_bgcolor = 'rgb(160,160,160)',
@@ -778,8 +774,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                                         )
                 elif loc_s == 'bottom':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, side = loc_s, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, side = loc_s, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
+                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
                                         xaxis2 = xaxis2_layout,
                                         title_text = ttl_txt,
                                         paper_bgcolor = 'rgb(160,160,160)',
@@ -824,8 +820,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                     mode='lines+markers'),) 
                 if loc == 'top':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt, title_standoff = 0, side = loc, showgrid= (grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt, title_standoff = 0, side = loc, showgrid= (grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
+                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
                                         title_text = ttl_txt,
                                         paper_bgcolor = 'rgb(160,160,160)',
                                         plot_bgcolor = bkgnd_color,
@@ -837,8 +833,8 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                                         )
                 elif loc == 'bottom':
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt, side = loc, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color),
+                    fig.update_layout(xaxis = dict(title = x_ttl_txt, side = loc, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
+                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
                                         title_text = ttl_txt,
                                         paper_bgcolor = 'rgb(160,160,160)',
                                         plot_bgcolor = bkgnd_color,
@@ -851,6 +847,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
             # Counter is keeping track of the number of traces for line color control
             counter+=1
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')#, width=675)
+    
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -969,7 +966,6 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
     # Set base figure for subplots
     fig = make_subplots(rows = 1, #Display how many rows of objects 
                         cols = 1, #Display how many side-by-side?
-                        #subplot_titles = [list_of_strings],
                         specs=[[{'secondary_y':True}]],
                         shared_xaxes = False,
                         shared_yaxes = False)
@@ -1056,28 +1052,27 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
     if x2_slctd == 'x2':
         x2_title_txt = '<b>Target Position: Motor 1 [mm]<b>'
         x2_range = [m1_positions[f][0]-(step1_space[f]/2), m1_positions[f][-1]+(step1_space[f]/2)]
-        x2_layout = {'title' : {'text' : x2_title_txt}, 'overlaying':'x', 'side': 'top', 'nticks': 5, 'ticks': 'outside', 'tickson': 'boundaries','color' : 'black','showline': False,'showgrid': False,'zeroline': False, 'range' : x2_range }
+        x_axis2 = {'title' : {'text' : x2_title_txt}, 'overlaying':'x', 'side': 'top', 'nticks': 5, 'ticks': 'outside', 'tickson': 'boundaries','color' : 'black','showline': False,'showgrid': False,'zeroline': False, 'range' : x2_range }
     elif x2_slctd == 'x':
-        x2_layout = None
+        x_axis2 = None
 
     # SECONDARY Y-AXIS, display both Motor-2 Position & Time-Delay: Tau 'Drive-Probe'
     if y2_slctd == 'y2':
         y2_title_txt = '<b>Target Position: Motor 2 [mm]<b>'
         y2_range =  [m2_positions[f][0]-(step2_space[f]/2), m2_positions[f][-1]+(step2_space[f]/2)]
-        yaxis2 = {'title' : {'text' : y2_title_txt},
-                           'overlaying':'y',
-                           'side': 'right',
-                           'nticks': 5,
-                           'ticks': 'outside',
-                           'tickson': 'boundaries',
-                           'color' : 'black',
-                           'showline': False,
-                           'showgrid': False,
-                           'zeroline': False,
-                           'range' : y2_range }
+        y_axis2 = dict(title = y2_title_txt, #{'text' : y2_title_txt},
+            overlaying = 'y',
+            side = 'right',
+            nticks = 5,
+            ticks = 'outside',
+            tickson = 'boundaries',
+            color = 'black',
+            showline = False,
+            showgrid = False,
+            zeroline = False,
+            range = y2_range )
     elif y2_slctd == 'y':
-        yaxis2 = None
-        
+        y_axis2 = None
     # Actions for when RadioItems (options 4 and 6) are selected    
     if (x2_slctd=='x2') | (y2_slctd=='y2'):
         # Only the secondary xaxis was activated
@@ -1122,27 +1117,28 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
     #fig.update_traces(showscale=False, selector=dict(type='heatmap'))
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++        
     # Create axis objects and apply formatting
+    fig.update_layout(
+        xaxis = dict(title = x_title_txt,
+                nticks = 5,
+                ticks = 'outside',
+                side = 'bottom',
+                color = 'black',
+                showline = False,
+                showgrid = False,
+                zeroline = False,
+                range = x_range ),
+        yaxis = dict(title = y_title_txt,
+                nticks = 5,
+                ticks = 'outside',
+                side = 'left',
+                color = 'black',
+                showline = False,
+                showgrid = False,
+                zeroline = False,
+                range = y_range ),)
     fig.update_layout({
-        'xaxis':{'title' : {'text' : x_title_txt},
-                'nticks' : 5,
-                'ticks' : 'outside',
-                'side': 'bottom',
-                'color' : 'black',
-                'showline': False,
-                'showgrid': False,
-                'zeroline': False,
-                'range' : x_range },
-        'yaxis':{'title' : {'text' : y_title_txt},
-                'nticks': 5,
-                'ticks': 'outside',
-                'side': 'left',
-                'color' : 'black',
-                'showline': False,
-                'showgrid': False,
-                'zeroline': False,
-                'range' : y_range },
-        'xaxis2': x2_layout, # None (default) or Dict
-        'yaxis2': yaxis2, # None (default) or Dict
+        'xaxis2': x_axis2, # None (default) or Dict
+        'yaxis2': y_axis2, # None (default) or Dict
         'coloraxis': {'showscale' : False},},
         width = 580, #int(xwidth[f])*mag_factor, 
         height = 530, #int(ywidth[f])*mag_factor,
