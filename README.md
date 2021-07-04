@@ -36,11 +36,11 @@
 
 5 Python files to run the dashboard:
 
-* [`preprocessing.py`]: Read raw data into Pandas DataFrame
-* [`app.py`]: Build the app with variables *app* and *server*
-* [`index.py`]: Entry point for running the app
-* [`callbacks.py`]: Callback definitions for interactivity with Plotly Graph Objects
-* [`layouts.py`]: Dash components define app structure
+* [`preprocessing.py`]: Load raw data with Pandas
+* [`app.py`]: Build the app: Define Dash instance with *app* variable
+* [`index.py`]: Entry point: Run the app
+* [`callbacks.py`]: Define interactivity of visuals
+* [`layouts.py`]: Dashboard structure
 
 [Back to Top](#back_to_top)
 
@@ -58,9 +58,9 @@
 [Back to Top](#back_to_top)
 
 The raw data are voltage signals representing variations to well characterized laser light after it interacts with a carefully prepared molecular target. The technique requires three laser pulses to arrive on target in a precisely timed sequence. To control the timing, two remotely operated motors (A.K.A. "delay-axes") vary the path length of each pulse by directing them through a labrynth of optics.<br><br>
-The response of a molecule to light occurs very, very rapidly so timing is everything. The researchers overcome this challenge by conducting a methodical scan of motor positions (which directly convert to time delays) through a series of evenly spaced steps. This scanning process is repeated several times, over the course of several hours, providing opportunity for equipment malfunction, changes to the laboratory environment, etc. This dashboard is used to aid in identification of the optimally timed sequence of interaction-events and to understand fluctuations in the data, as well as to make new discoveries supported by the U.S. Department of Energy's Basic Energy Sciences Program.
+The response of a molecule to light occurs very, very rapidly so timing is an important challenge faced by the reasearchers. To overcome this hurdle the team conducts a methodical scan over a calculated range of motor positions (which directly convert to time delays) through a series of evenly spaced steps. This scanning process is repeated several times, over the course of several hours, providing a fair amount of opportunity for equipment to malfunction, changes in the laboratory environment to occur, etc. This dashboard is used to aid in identification of the optimally timed sequence of interaction-events and to understand fluctuations in the data, as well as to make new discoveries supported by the U.S. Department of Energy's Basic Energy Sciences Program.
 
-### Experiment goal: Measure 3rd order nonlinear optical response
+### Bottom Line: Measure the 3rd order nonlinear optical response from a molecule.
 
 * *Configuration #1 :* "3-Pulse Experiment"
     >1. Excitation (pump) Pulse
@@ -102,7 +102,7 @@ The response of a molecule to light occurs very, very rapidly so timing is every
 
 2. The tab separated text files store original research data from 8 independent channels acquired with NIDAQ-National Instruments Data Acquisition software.
 > * Channels are 0-indexed from 0-7
-> * Futre research may incorporate more channels.
+> * Future research may incorporate more channels than 8.
 
 #### Errors
 - An error may consist of a communication error b/w laser-motor system & acquisition computer. Motors will be reinitialized, and the scan is restarted.
@@ -116,11 +116,12 @@ The response of a molecule to light occurs very, very rapidly so timing is every
 ## Next Steps
 [Back to Top](#back_to_top)
 
-1. Create requirements.txt
-2. Generate docstrings for callbacks
-3. Work on data dictionary
-4. Build callback dictionary
-5. Build component dictionary
+1. Create a remove subplot feature
+2. Add a box and whisker plot to scan data
+3. Present dataset synopsis on dashboard
+4. Support real-time updates
+5. Include warning response for clearing input
+7. Deploy with Heroku
 
 <a id='software_requirements'></a>
 
@@ -132,15 +133,17 @@ See requirements.txt listed in root directory
 
 #### ADDITIONAL REQUIREMENTS:
 
-* To render dashboard in Jupyter
+* To render dashboard from Jupyter
 
-app.py<br>
-> IMPORT: `from jupyter_dash import JupyterDash`<br>
-> BUILD THE APP: `app = JupyterDash(__name__)`
+1. Edit app.py<br>
+> COMMENT OUT: `app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[themes.SPACELAB])`<br>
+> UNCOMMENT IMPORT: `from jupyter_dash import JupyterDash`<br>
+> UNCOMMENT: `app = JupyterDash(__name__, suppress_callback_exceptions=True, external_stylesheets=[themes.SPACELAB])`<br>
 
-preprocessing.py<br>
-> IMPORT: `from jupyterthemes import jtplot`<br>
-> STYLE: `jtplot.style(theme='solarizedd', context='notebook', ticks=True, grid=False)`
+2. Launch app-jupyter.ipynb
+3. Install additional requirements listed in first cell
+4. Run second cell in place of index.py
+
 
 <a id='acknowledgements_and_contact'></a>
 
@@ -150,20 +153,22 @@ preprocessing.py<br>
 
 
 ### External Resources:
-
-* [`Overview of AxesGrid toolkit`] (Documentation): ([*source*](https://matplotlib.org/mpl_toolkits/axes_grid/users/overview.html))
-
-* [`Multi-Page Apps and URL Support`] (Dash.Plotly Reference Guide): ([*Structuring a Dash App Layout*](https://dash.plotly.com/urls))
-* [`Title`] (Platform): ([*source*](https://www.URL.com))
+* [`Dash Python User Guide`] (Documentation): ([*Dash.Plotly Reference Guide*](https://dash.plotly.com/))
+* [`Dash Bootstrap Components`] (Documentation): ([*source*](https://dash-bootstrap-components.opensource.faculty.ai/docs/))
+* [`Plotly Graphing Library: Creating and Updating Figures`] (Documentation): ([*source*](https://plotly.com/python/reference/layout/))
+* [`Heatmap Graph Object`] (Documentation): ([*Plotly API Reference*](https://plotly.github.io/plotly.py-docs/generated/plotly.graph_objects.Heatmap.html))
+* [`Scatter Graph Object`] (Documentation): ([*Plotly API Reference*](https://plotly.com/python-api-reference/generated/plotly.graph_objects.Scatter.html))
+* [*`Community Forum`*] (User Support): ([*Plotly*](https://community.plotly.com/))
+* [`Charming Data`] (Video Tutorials): ([*YouTube Channel*](https://www.youtube.com/channel/UCqBFsuAz41sqWcFjZkqmJqQ))
 
 ### Papers:
 * [`Time-Resolved Ultrafast Transient Polarization Spectroscopy...`](./assets/TimeResolvedUltrafastTransientPolarizationSpectroscopy.pdf) Review of Scientific Instruments: ([*source*](https://aip.scitation.org/doi/10.1063/1.5144482))
 * [`Ultrafast Dynamics of Excited Electronic States in Nitrobenzene...`](./assets/UltrafastDynamicsofExcitedElectronicStatesinNitrobenzene.pdf) Journal of Physical Chemistry A: ([*source*](https://pubs.acs.org/doi/10.1021/acs.jpca.0c01943?ref=pdf))
-* [*`Title`*](./file_path.pdf) Journal/Blog: ([*source*](https://www.URL.com))
 
 ### Contacts:
 > * Dashboard Creator: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
-> * UTPS Scientist: Richard Thurston, PhD Candidate  [Email](rthurston@lbl.gov)
+> * UTPS Scientist: Richard Thurston, PhD Candidate [Email](rthurston@lbl.gov)
+> * Postdoctoral Researcher: Matthew Brister, PhD [Email](mmbrister@lbl.gov)
 > * LBNL Staff Scientist: Daniel Slaughter, PhD  [Website](https://amos.lbl.gov/slaughter/) | [Email](dslaughter@lbl.gov)
 
 <a id='appendix'></a>
