@@ -137,16 +137,18 @@ See requirements.txt listed in root directory
 
 #### ADDITIONAL REQUIREMENTS:
 
-* To render dashboard from Jupyter
+* [`jupyter-dash==0.4.0`](https://github.com/plotly/jupyterlab-dash)
+* [`jupyterlab-dash==0.1.0a3`](https://github.com/plotly/jupyterlab-dash)
+<br><br>
+
+**To render dashboard from Jupyter**
 
 1. Edit app.py<br>
-> COMMENT OUT: `app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[themes.SPACELAB])`<br>
-> UNCOMMENT IMPORT: `from jupyter_dash import JupyterDash`<br>
-> UNCOMMENT: `app = JupyterDash(__name__, suppress_callback_exceptions=True, external_stylesheets=[themes.SPACELAB])`<br>
-
-2. Launch app-jupyter.ipynb
-3. Install additional requirements listed in first cell
-4. Run second cell in place of index.py
+> COMMENT OUT:<br> `app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[themes.SPACELAB])`<br><br>
+> UNCOMMENT:<br> `from jupyter_dash import JupyterDash`<br>
+> `app = JupyterDash(__name__, suppress_callback_exceptions=True, external_stylesheets=[themes.SPACELAB])`<br>
+2. Install additional requirements listed above
+3. Launch app-jupyter.ipynb in place of index.py
 
 
 <a id='acknowledgements_and_contact'></a>
