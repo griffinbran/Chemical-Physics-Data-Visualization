@@ -153,11 +153,7 @@ def render_child_div(graph_clicks, container_style_states):
         return container_style_states
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Input n_clicks property from 'add_graph' bttn to dynamically add subplots via pattern-matching callbacks
-#all_inputs_add_subplot = [Input('add_graph', 'n_clicks')]
-#all_inputs_add_subplot.extend(active_file_inputs)
-# Add plots to the dashboard
-# NOTE: for container_children = State('container', 'children'), then type =  <class 'dash.dependencies.State'>
+# Input 'n_clicks', from 'add_graph', bttn to dynamically add subplots to the dashboard via pattern-matching callbacks
 @app.callback(Output('container', 'children'), Input('add_graph', 'n_clicks'), [State('memory-data', 'data'), State('container', 'children')] )
 def add_subplot(graph_clicks, active_f, container_children):
 #def add_subplot(graph_clicks, *args_active_add_subplot, container_children):
@@ -170,12 +166,12 @@ def add_subplot(graph_clicks, active_f, container_children):
     print('add_subplot')
     print('active_f', active_f)
     print('active_f type', type(active_f))
+    # Check if user selection was made
     if active_f is None:
         f = 0
         #raise PreventUpdate
     else:
         f = active_f
-
     # Add new graph object to dashboard
     new_graph = dbc.Container(id={'type':'new_graph_container', 'index': graph_clicks},
         style={},       
@@ -207,13 +203,10 @@ def add_subplot(graph_clicks, active_f, container_children):
                             #required = True,
                             step = 0.001, #step1_space, ADD step-size button?
                             type = 'number',
-                            #value=m1_positions[f][-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ), # END 'slct_timeaxis1' dcc.Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
                     ], className='mb-0', size='sm'), # END InputGroup
-                    dbc.Tooltip(#children = f'Scan Range: [{m1_positions[f][0]}, {m1_positions[f][-1]}]', 
-                                target = 'm1', 
-                                id={'type':'delayaxis1_tooltip', 'index':graph_clicks}),
+                    dbc.Tooltip(target = 'm1', id={'type':'delayaxis1_tooltip', 'index':graph_clicks}),
                     dbc.FormText('Pump-Probe Delay', color='secondary'),
                 ] # END of dbc.Col_children = [ slct_timeaxis1 ]
             ), # END of dbc.Col <taxis1> 
@@ -238,13 +231,10 @@ def add_subplot(graph_clicks, active_f, container_children):
                             #required = True,
                             step = 0.001, #step2_space, ADD step-size button?
                             type='number',
-                            #value=m2_positions[f][-1], # None returns error " unsupported operand type(s) for -: 'float' and 'NoneType' "
                         ),  # END 'slct_timeaxis2' dash-core-components-Input
                         #dbc.InputGroupAddon('[mm]', addon_type='append'),
                     ], className='mb-0', size='sm'), # m-margin, b-bottom
-                    dbc.Tooltip(#children = f'Scan Range: [{m2_positions[f][0]}, {m2_positions[f][-1]}]',
-                                target = 'm2',
-                                id={'type':'delayaxis2_tooltip', 'index':graph_clicks}),
+                    dbc.Tooltip(target = 'm2', id={'type':'delayaxis2_tooltip', 'index':graph_clicks}),
                     dbc.FormText('Drive-Probe Delay', color='secondary'),
                 ] # END of dbc.Col children = [ slct_timeaxis2 ]
             ), # END of <taxis2> dbc.Col
@@ -257,18 +247,21 @@ def add_subplot(graph_clicks, active_f, container_children):
                 active_tab='tab-1',
                 children=[
                     #===========================================================================================================================================================================
-                    # Tab-1 Layout
+                    # Tab-1 Layout: HEATMAP
                     #===========================================================================================================================================================================
-                    dbc.Tab(id={'type':'hmap', 'index':graph_clicks}, label='2D Heatmap', tab_id='tab-1', tabClassName='ml-auto', children = [# tab_id(dbc.Tab) == value(dcc.Tab)  tab_style={'margin-top':-10},
+                    dbc.Tab(id={'type':'hmap', 'index':graph_clicks},
+                        label='2D Heatmap',
+                        tab_id='tab-1',
+                        tabClassName='ml-auto',
+                        children = [
                         # FIRST ROW
                         dbc.Row(
-                            [
+                            children = [
                                 # FIRST COL
                                 dbc.Col(
                                     # Channel Select Dropdown Menu for TAB-1
                                     dcc.Dropdown(
                                         id={'type': 'slct_channel', 'index': graph_clicks},
-                                        #options=[{'label': f'Channel {ch}', 'value': ch} for ch in range(nchannels[f])],
                                         multi=False,
                                         value=0,
                                         clearable = False,
@@ -283,10 +276,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     dcc.Dropdown(
                                         id={'type': 'slct_scan', 'index': graph_clicks},
                                         options=[],
-                                        #{'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'), 
-                                        #    'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
                                         multi=False,
-                                        #value=list(data_dict[f].keys())[0],
                                         clearable = False,
                                         persistence = True,
                                         persistence_type = 'memory',
@@ -296,12 +286,11 @@ def add_subplot(graph_clicks, active_f, container_children):
                             ], justify='start', style={'padding':5}, # END ROW children  'start', 'center', 'end', 'stretch', 'baseline'
                         ), # END FIRST ROW
                         # START SECOND ROW
-                        dbc.Row([ # html.Div([
+                        dbc.Row(children = [
                             # FIRST COL
-                            dbc.Col([ # html.Div([
+                            dbc.Col(children = [
                                 # This is where the 2D Heatmap is displayed
                                 dcc.Graph(id={'type': '2d_scan_surf', 'index': graph_clicks}, figure={}),
-                            #], className='five columns', style={'display':'inline-block', 'vertical-align':'top'}),
                             ], width='auto', align='center'),
                             # SEC COL
                             dbc.Col([
@@ -312,7 +301,6 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     updatemode='drag',
                                     allowCross= False,
                                     included = True,
-                                    #dots = True,
                                     tooltip = {'always_visible':False, 'placement':'topLeft'},
                                     vertical=True,
                                     verticalHeight = 460,# For some reason callback not updating
@@ -337,7 +325,6 @@ def add_subplot(graph_clicks, active_f, container_children):
                                             persistence_type = 'session',
                                             persisted_props = ['value'],
                                             style={'padding-bottom':0, 'margin-top':8, 'fontSize':14},
-                                            #className = 'mt-40',
                                         ),
                                     ], width='auto'),
                                     dbc.Col([
@@ -357,10 +344,13 @@ def add_subplot(graph_clicks, active_f, container_children):
                         ]), # END Last ROW TAB-1
                     ]), # END TAB-1 children, and END dcc.Tab 'hmap'
                     #===========================================================================================================================================================================
-                    # Tab-2 Layout
+                    # Tab-2 Layout: Scatter with Lines + Markers
                     #===========================================================================================================================================================================
-                    # NEW ROW
-                    dbc.Tab(id={'type':'sctr', 'index':graph_clicks}, label='1D Time-Scan' , tab_id='tab-2', tabClassName = 'mt-n50', tab_style={'margin-top': '-50'}, children = [
+                    dbc.Tab(id={'type':'sctr', 'index':graph_clicks},
+                        label='1D Time-Scan',
+                        tab_id='tab-2',
+                        tabClassName = 'mt-n50',
+                        children = [
                         # FormGroup places lineout selection Dropdown menu horizontally inline with a label
                         dbc.Form([
                             dbc.FormGroup([
@@ -368,7 +358,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                                 dbc.Label('Select Lineout:', html_for={'type': 'slct_lineout', 'index': graph_clicks}, width=3),#className = 'mr-2',
                                 dbc.Col(
                                     dbc.ButtonGroup([
-                                        # ROW-1: 'slct_time0' & 'slct_motor1' side-by-side
+                                        # Side-by-Side: 'slct_time0' & 'slct_motor1'
                                         html.Div([
                                         # Add 1D-Lineout RadioItems at fixed Motor-1(2) Positions
                                             dbc.RadioItems(id={'type': 'slct_time0', 'index': graph_clicks},
@@ -406,10 +396,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     # Add scan selection dropdown menu
                                     dcc.Dropdown(id={'type': 'slct_scans', 'index': graph_clicks},
                                         options=[],
-                                        #{'label': list(data_dict[f].keys())[scn].replace('#', ': #').capitalize().replace('_avg', ': AVG'),
-                                        #    'value': list(data_dict[f].keys())[scn]} for scn in range(len(data_dict[f]))
                                         multi=True,
-                                        #value=[list(data_dict[f].keys())[0], list(data_dict[f].keys())[1], list(data_dict[f].keys())[-1]],
                                         clearable = True,
                                         placeholder = 'Select a scan to display...',
                                         persistence = True,
@@ -426,7 +413,6 @@ def add_subplot(graph_clicks, active_f, container_children):
                                     id={'type': 'channel_check', 'index': graph_clicks},
                                     inline = True,
                                     switch = True,
-                                    #options=[{'label': f'{ch}', 'value': ch} for ch in range(nchannels[f])],
                                     value = [1],
                                     persistence = True,
                                     persistence_type = 'memory',
@@ -438,7 +424,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                         ], className='p-10'), # END Form
                         # Initialize an empty graph object, The 'figure={}' argument is optional, it will hold the app.callback output
                         dcc.Graph(id={'type': 'scatter', 'index': graph_clicks}, figure={}),
-                        # NEW ROW
+                        # Display Options ROW
                         dbc.Form([dbc.FormGroup([
                             dbc.Label('Display Options:', html_for={'type':'bkgnd_color', 'index': graph_clicks}, width=dict(size='auto'), align = 'center'),
                             # FIRST COL
@@ -484,7 +470,7 @@ def add_subplot(graph_clicks, active_f, container_children):
                 ), # END dcc.Tabs component
             # Add an 'HTML5 content division element, <div>' w/ the 'Div' wrapper
             html.Div( id={'type': 'tabs-content', 'index': graph_clicks} ),
-            # END TABS LAYOUT +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            # END TABS LAYOUT
         ] # END 'new_graph' <dbc.Container> children = []
     ) # END 'new_graph' <dbc.Container> 
     container_children.append(new_graph)
@@ -513,7 +499,7 @@ def toggle_modal(nclicks_open, nclicks_close, is_open):
     return is_open
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
-# Chained-Callback determines lineout dropdown options displayed
+# Chained-callback determines options displayed for lineout dropdown 
 @app.callback(
     [Output({'type':'slct_lineout', 'index':MATCH}, 'options'),
     Output({'type':'slct_lineout', 'index':MATCH}, 'value'),
@@ -526,9 +512,10 @@ def lineout_options(tau_slctd, active_f):
     print('active_f:', active_f)
     print('active_f type:', type(active_f))
     print()
-
+    # Check if user has NOT made a selection yet
     if active_f is None:
         f = 0
+    # Check if user HAS made a selection
     elif active_f is not None:
         f = active_f
     if tau_slctd:
@@ -549,6 +536,7 @@ def lineout_options(tau_slctd, active_f):
               Input({'type':'channel_check', 'index' : MATCH}, 'value')],
               )
 def populate_legend_modal_list(scn_slctd, ch_slctd):
+    # Determine the number of traces required to display all user selections
     num_traces = len(scn_slctd)*len(ch_slctd)
     trace_items = []
     pop_overs=[]
@@ -618,13 +606,12 @@ def populate_legend_modal_list(scn_slctd, ch_slctd):
     Input('memory-data', 'data')])
 def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_slctd, taxis2_slctd, bkgnd_switch, nclicks, close_clicks, lgnd_modal_child, grid_clicks, active_f):
     # Set base figure for subplots
-    fig = make_subplots(rows = 1, #Display how many rows of objects
-                        cols = 1, #Display how many side-by-side?
-                        #subplot_titles = [list_of_strings],
-                        specs=[[{'secondary_y':True}]],
-                        shared_xaxes = False,
-                        shared_yaxes = False)
-
+    fig = make_subplots(
+        rows = 1, #Display how many rows of objects
+        cols = 1, #Display how many side-by-side?
+        specs = [ [{'secondary_y':True}] ],
+        shared_xaxes = False,
+        shared_yaxes = False)
     # Global, DASH defined, variable available only inside callbacks
     ctx = dash.callback_context
     ctxi = ctx.inputs
@@ -649,7 +636,6 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
             print('ctxi active_id', active_id)
             active_id2 = key.split('.')[0]
             print('ctxi active_id 2', active_id2)
-
     # Counter helps to map the trace numbers and colors in a controlled order
     counter = 0
     badge_colors =[]
@@ -658,7 +644,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
             #print('Vals of pop child dict', element['props']['children'][0]['props']['children']['props'])
             badge_colors.append(element['props']['children'][0]['props']['children']['props']['value']['hex']) # popover children
     #print(badge_colors)
-    
+
     # Set the scatter plot background color to black or white
     if bkgnd_switch:
         bkgnd_color = 'white'
@@ -675,7 +661,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
             # Update color used for each trace
             trace_color = badge_colors[counter]
 
-            if time0_slctd == False:
+            if (time0_slctd == False):
                 xdata_t = np.round( ((dff[ch].index-taxis2_slctd)/step2_space[f])*step2_time[f], 1)
                 xdata_s = dff[ch].index
                 ydata = dff[ch].loc[:,[line_slctd]][line_slctd] #<--NO INTERPOLATION/NO CURVE FIT
@@ -684,7 +670,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                 ttl_txt = f'<b>Lineout: M-1= {line_slctd} [mm], T= {time_conversion} [fs]<b>'
                 x_ttl_txt_t = '<b>Drive-Probe (\N{MATHEMATICAL BOLD ITALIC SMALL TAU}) Delay [fs]<b>'
                 x_ttl_txt_s = '<b>Target-Position: Motor 2 [mm]<b>'
-            elif time0_slctd == True:
+            elif (time0_slctd == True):
                 xdata_t = np.round( ((dff[ch].columns-taxis1_slctd)/step1_space[f])*step1_time[f], 1)
                 xdata_s = dff[ch].columns
                 ydata = dff[ch].loc[[line_slctd]].T[line_slctd]
@@ -702,8 +688,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
             # Display both time-delay and motor-position on scatter
             if (nclicks%6==0) | (nclicks%6==1):
                 # Time-Delay(xaxis2) on 'top', motor-position on 'bottom'
-                if nclicks%6==0:
-                    #loc_t = 'top'
+                if (nclicks%6==0):
                     loc_s = 'bottom'
                     # Add standoff param when time(xaxis-2) is on the top, for readability
                     xaxis2_layout = dict(
@@ -719,7 +704,7 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                         ticks = 'outside'
                         )
                 # Time-Delay axes correspond with xaxis-2, 'bottom'
-                elif nclicks%6==1:
+                elif (nclicks%6==1):
                     #loc_t = 'bottom'
                     loc_s = 'top'
                     # No need for standoff param on bottom xaxis
@@ -746,7 +731,9 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                     xaxis = 'x',
                     name= f'[{ch}]   - {lgnd_ttl[5:]}',
                     legendgroup = str(ch),
-                    mode='lines+markers'),)
+                    mode='lines+markers'),
+                ) # END fig.add_trace
+                # The very last trace added is to display a second axis
                 if (ch == channels_slctd[-1]) & (scn == scans_slctd[-1]):
                     fig.add_trace(go.Scatter(
                         x=xdata_t,
@@ -757,51 +744,80 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                         opacity = 0, # KEEP ZERO HIDE TRACE
                         line_color = 'white',
                         marker_color = 'white',
-                        showlegend = False)) # KEEP FALSE TO HIDE LEGEND
-                if loc_s == 'top':
+                        showlegend = False) # KEEP FALSE TO HIDE LEGEND
+                    ) # END fig.add_trace
+                if (loc_s == 'top'):
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, title_standoff = stndff, side = loc_s, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline = (grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline = (grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
-                                        xaxis2 = xaxis2_layout,
-                                        title_text = ttl_txt,
-                                        paper_bgcolor = 'rgb(160,160,160)',
-                                        plot_bgcolor = bkgnd_color,
-                                        font_color = 'black',
-                                        margin_autoexpand = True,
-                                        margin_l = 110,
-                                        #margin_r = 120,
-                                        margin_t = 120,
-                                        )
-                elif loc_s == 'bottom':
+                    fig.update_layout(
+                        xaxis = dict(
+                            title = x_ttl_txt_s,
+                            title_standoff = stndff,
+                            side = loc_s,
+                            showgrid=(grid_clicks%2 == 0),
+                            gridcolor = grid_color,
+                            zeroline = (grid_clicks%2 == 0),
+                            zerolinecolor = grid_color,
+                            ticks = 'outside'
+                        ),
+                        yaxis = dict(
+                            title = y_ttl_txt,
+                            showgrid=False,
+                            zeroline = (grid_clicks%2 == 0),
+                            zerolinecolor = grid_color,
+                            ticks = 'outside'
+                        ),
+                        xaxis2 = xaxis2_layout,
+                        title_text = ttl_txt,
+                        paper_bgcolor = 'rgb(160,160,160)',
+                        plot_bgcolor = bkgnd_color,
+                        font_color = 'black',
+                        margin_autoexpand = True,
+                        margin_l = 110,
+                        margin_t = 120,
+                    )
+                elif (loc_s == 'bottom'):
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt_s, side = loc_s, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
-                                        xaxis2 = xaxis2_layout,
-                                        title_text = ttl_txt,
-                                        paper_bgcolor = 'rgb(160,160,160)',
-                                        plot_bgcolor = bkgnd_color,
-                                        font_color = 'black',
-                                        margin_autoexpand = True,
-                                        margin_l = 110,
-                                        #margin_r = 120,
-                                        margin_t = 120,
-                                        )
-
+                    fig.update_layout(
+                        xaxis = dict(
+                            title = x_ttl_txt_s,
+                            side = loc_s,
+                            showgrid = (grid_clicks%2 == 0),
+                            gridcolor = grid_color,
+                            zeroline = (grid_clicks%2 == 0),
+                            zerolinecolor = grid_color,
+                            ticks = 'outside'
+                        ),
+                        yaxis = dict(
+                            title = y_ttl_txt,
+                            showgrid = False,
+                            zeroline = (grid_clicks%2 == 0),
+                            zerolinecolor = grid_color,
+                            ticks = 'outside'
+                        ),
+                        xaxis2 = xaxis2_layout,
+                        title_text = ttl_txt,
+                        paper_bgcolor = 'rgb(160,160,160)',
+                        plot_bgcolor = bkgnd_color,
+                        font_color = 'black',
+                        margin_autoexpand = True,
+                        margin_l = 110,
+                        margin_t = 120,
+                    )
             # All the button options for single-axis displays
             else:
-                if nclicks%6==2:
+                if (nclicks%6==2):
                     xdata = xdata_t
                     loc = 'top'
                     x_ttl_txt = x_ttl_txt_t
-                elif nclicks%6==3:
+                elif (nclicks%6==3):
                     xdata = xdata_t
                     loc = 'bottom'
                     x_ttl_txt = x_ttl_txt_t
-                elif nclicks%6==4:
+                elif (nclicks%6==4):
                     xdata = xdata_s
                     loc = 'top'
                     x_ttl_txt = x_ttl_txt_s
-                elif nclicks%6==5:
+                elif (nclicks%6==5):
                     xdata = xdata_s
                     loc = 'bottom'
                     x_ttl_txt = x_ttl_txt_s
@@ -817,37 +833,67 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
                     showlegend = True, # TRUE SHOWS TRACE IN LEGEND
                     name = f'[{ch}]   - {lgnd_ttl[5:]}',
                     legendgroup = str(ch),
-                    mode='lines+markers'),) 
-                if loc == 'top':
+                    mode='lines+markers'),
+                ) # END fig.add_trace
+                if (loc == 'top'):
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt, title_standoff = 0, side = loc, showgrid= (grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
-                                        title_text = ttl_txt,
-                                        paper_bgcolor = 'rgb(160,160,160)',
-                                        plot_bgcolor = bkgnd_color,
-                                        font_color = 'black',
-                                        margin_autoexpand = True,
-                                        margin_l = 110,
-                                        #margin_r = 120,
-                                        margin_t = 120,
-                                        )
-                elif loc == 'bottom':
+                    fig.update_layout(
+                        xaxis = dict(
+                            title = x_ttl_txt,
+                            title_standoff = 0,
+                            side = loc,
+                            showgrid = (grid_clicks%2 == 0),
+                            gridcolor = grid_color,
+                            zeroline = (grid_clicks%2 == 0),
+                            zerolinecolor = grid_color,
+                            ticks = 'outside'
+                        ),
+                        yaxis = dict(
+                            title = y_ttl_txt,
+                            showgrid = False,
+                            zeroline = (grid_clicks%2 == 0),
+                            zerolinecolor = grid_color,
+                            ticks = 'outside'
+                        ),
+                        title_text = ttl_txt,
+                        paper_bgcolor = 'rgb(160,160,160)',
+                        plot_bgcolor = bkgnd_color,
+                        font_color = 'black',
+                        margin_autoexpand = True,
+                        margin_l = 110,
+                        margin_t = 120,
+                    )
+                elif (loc == 'bottom'):
                     # Create axis objects and apply formatting
-                    fig.update_layout(xaxis = dict(title = x_ttl_txt, side = loc, showgrid=(grid_clicks%2 == 0), gridcolor = grid_color, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
-                                        yaxis = dict(title = y_ttl_txt, showgrid=False, zeroline=(grid_clicks%2 == 0), zerolinecolor = grid_color, ticks = 'outside'),
-                                        title_text = ttl_txt,
-                                        paper_bgcolor = 'rgb(160,160,160)',
-                                        plot_bgcolor = bkgnd_color,
-                                        font_color = 'black',
-                                        margin_autoexpand = True,
-                                        margin_l = 110,
-                                        #margin_r = 120,
-                                        margin_t = 120,
-                                        )
+                    fig.update_layout(
+                        xaxis = dict(
+                            title = x_ttl_txt,
+                            side = loc,
+                            showgrid = (grid_clicks%2 == 0),
+                            gridcolor = grid_color,
+                            zeroline = (grid_clicks%2 == 0),
+                            zerolinecolor = grid_color,
+                            ticks = 'outside'
+                        ),
+                        yaxis = dict(
+                            title = y_ttl_txt,
+                            showgrid = False,
+                            zeroline = (grid_clicks%2 == 0),
+                            zerolinecolor = grid_color,
+                            ticks = 'outside'
+                        ),
+                        title_text = ttl_txt,
+                        paper_bgcolor = 'rgb(160,160,160)',
+                        plot_bgcolor = bkgnd_color,
+                        font_color = 'black',
+                        margin_autoexpand = True,
+                        margin_l = 110,
+                        margin_t = 120,
+                    )
             # Counter is keeping track of the number of traces for line color control
-            counter+=1
+            counter += 1
     fig.update_layout(legend_title_text = '<b>Trace: [Ch] - Scan<b>')#, width=675)
-    
+    # Return to Output: dcc.Graph( id = 'scatter' ) figure object
     return fig
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -856,7 +902,6 @@ def update_scatter(scans_slctd, channels_slctd, time0_slctd, line_slctd, taxis1_
               Input({'type':'color-picker', 'index':MATCH}, 'value')
               )
 def update_badge_color(color_pckd):
-    #return [color_pckd[i]['hex'] for i in range(len(color_pckd))]
     return color_pckd['hex']
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -933,6 +978,8 @@ def update_rangeslider(channel_slctd, scan_slctd, active_f):
     print('active_f:', active_f)
     print('active_f type:', type(active_f))
     print()
+    # Number of decimals to display
+    num_dec = 4
     if active_f is None:
         f = 0
     elif active_f is not None:
@@ -942,11 +989,20 @@ def update_rangeslider(channel_slctd, scan_slctd, active_f):
     dff = dff[scan_slctd][channel_slctd]
     
     # Identify Min/Max/Range for SLider callbacks
-    min_min = round(dff.min().min(), 6)
-    max_max = round(dff.max().max(), 6)
+    min_min = round(dff.min().min(), num_dec)
+    max_max = round(dff.max().max(), num_dec)
     vals = [min_min, max_max]
     sig_step = round((max_max - min_min)/100,7)
-    range_marks={min_min:{'label':'Sig Min: '+str(min_min), 'style':{'color':'blue', 'font-weight':'bold', 'right':'40px'} }, max_max:{'label':'Sig Max: '+str(max_max), 'style':{'color':'#f50', 'font-weight':'bold', 'vertical-align':'text-top','right':'40px'}}}
+    range_marks = {
+        min_min:{
+            'label':'Sig Min: '+str(min_min),
+            'style':{'color':'blue', 'font-weight':'bold', 'right':40}
+            },
+        max_max:{
+            'label':'Sig Max: '+str(max_max),
+            'style':{'color':'#f50', 'font-weight':'bold', 'vertical-align':'text-top','right':40}
+            }
+        }
     # 'signal_range' verticalHeight
     range_height = 30 # num_m2steps[f]*(mag_factor+5)
     return min_min, max_max, sig_step, vals, range_marks, range_height
@@ -964,11 +1020,13 @@ def update_rangeslider(channel_slctd, scan_slctd, active_f):
     Input('memory-data', 'data')])
 def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slctd, y2_slctd, cbar_range, active_f):    
     # Set base figure for subplots
-    fig = make_subplots(rows = 1, #Display how many rows of objects 
-                        cols = 1, #Display how many side-by-side?
-                        specs=[[{'secondary_y':True}]],
-                        shared_xaxes = False,
-                        shared_yaxes = False)
+    fig = make_subplots(
+        rows = 1, #Display how many rows of objects 
+        cols = 1, #Display how many side-by-side?
+        specs=[[{'secondary_y':True}]],
+        shared_xaxes = False,
+        shared_yaxes = False
+    )
     # Debugging
     print()
     print('update_heatmap')
@@ -1024,35 +1082,47 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
         y_title_txt = '<b>Drive-Probe (\N{MATHEMATICAL BOLD ITALIC SMALL TAU}) Delay [fs]<b>'
         x_range = [time_ax1[0]-(step1_time[f]/2), time_ax1[-1]+(step1_time[f]/2)]
         y_range = [time_ax2[0]-(step2_time[f]/2), time_ax2[-1]+(step2_time[f]/2)]
-##############################################################################################################################################################################################      
-    # https://plotly.com/python/builtin-colorscales/
+
+    # Visit https://plotly.com/python/builtin-colorscales/ for more color options
     palettes = ['Viridis', 'Magma', 'haline', 'Plasma','thermal', 'Hot', 'RdBu_r','RdYlBu_r', 'Spectral_r','PRGn', 'curl', 'delta', 'Tropic', 'Blackbody', 'oxy']
     palette = palettes[1]
 
     # Plotly Graph Objects (GO)
-    fig.add_trace(go.Heatmap(x=xdata,
-            y = ydata,
-            z = dff,
-            xaxis = 'x',
-            yaxis = 'y',
-            xgap = 1,
-            ygap = 1,
-            zmin = cbar_range[0],
-            #zmid = 0,
-            #hover_name = channel_slctd,#hname,
-            zmax = cbar_range[1],
-            visible = True,
-            opacity = 1.0,
-            colorbar_title = f'<b>Signal<b>',
-            # colorbar_tickcolor = 'black',
-            colorbar_len = 1.06,
-            colorscale=palette,), secondary_y = False)
+    fig.add_trace(go.Heatmap(
+        x = xdata,
+        y = ydata,
+        z = dff,
+        xaxis = 'x',
+        yaxis = 'y',
+        xgap = 1,
+        ygap = 1,
+        zmin = cbar_range[0],
+        #hover_name = channel_slctd,#hname,
+        zmax = cbar_range[1],
+        visible = True,
+        opacity = 1.0,
+        colorbar_title = f'<b>Signal<b>',
+        colorbar_len = 1.06,
+        colorscale = palette,
+    ), secondary_y = False )
     
     # SECONDARY X-AXIS, display both Motor-1 Position & Time-Delay: T 'Pump-Probe'
     if x2_slctd == 'x2':
         x2_title_txt = '<b>Target Position: Motor 1 [mm]<b>'
         x2_range = [m1_positions[f][0]-(step1_space[f]/2), m1_positions[f][-1]+(step1_space[f]/2)]
-        x_axis2 = {'title' : {'text' : x2_title_txt}, 'overlaying':'x', 'side': 'top', 'nticks': 5, 'ticks': 'outside', 'tickson': 'boundaries','color' : 'black','showline': False,'showgrid': False,'zeroline': False, 'range' : x2_range }
+        x_axis2 = dict(
+            title = x2_title_txt,
+            overlaying = 'x',
+            side = 'top',
+            nticks = 5,
+            ticks = 'outside',
+            tickson = 'boundaries',
+            color = 'black',
+            showline = False,
+            showgrid = False,
+            zeroline = False,
+            range = x2_range
+        )
     elif x2_slctd == 'x':
         x_axis2 = None
 
@@ -1060,7 +1130,8 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
     if y2_slctd == 'y2':
         y2_title_txt = '<b>Target Position: Motor 2 [mm]<b>'
         y2_range =  [m2_positions[f][0]-(step2_space[f]/2), m2_positions[f][-1]+(step2_space[f]/2)]
-        y_axis2 = dict(title = y2_title_txt, #{'text' : y2_title_txt},
+        y_axis2 = dict(
+            title = y2_title_txt,
             overlaying = 'y',
             side = 'right',
             nticks = 5,
@@ -1070,7 +1141,8 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
             showline = False,
             showgrid = False,
             zeroline = False,
-            range = y2_range )
+            range = y2_range
+        )
     elif y2_slctd == 'y':
         y_axis2 = None
     # Actions for when RadioItems (options 4 and 6) are selected    
@@ -1090,59 +1162,80 @@ def update_heatmap(channel_slctd, scan_slctd, taxis1_slctd, x2_slctd, taxis2_slc
             xdata2 = dff.columns
             ydata2 = dff.index
         # Add a HEATMAP trace
-        fig.add_trace(go.Heatmap(x = xdata2,
-                       y = ydata2,
-                       z = dff,
-                       xaxis = x2_slctd, # 'x'(default) or 'x2': Secondary x-axis for Motor-1
-                       yaxis = y2_slctd, # 'y'(default) or 'y2': Secondary y-axis for Motor-2
-                       xgap = 1,
-                       ygap = 1,
-                       zmin =  cbar_range[0], # Defaults to DF min
-                       #zmid = 0,
-                       #hover_name = channel_slctd,#hname,
-                       zmax =  cbar_range[1], # Defaults to DF max
-                       visible = True,
-                       opacity = 0.0, # Hide overlayed trace, only want 2nd axis display
-                       colorbar_title = f'<b>Signal<b>',
-                       colorbar_len = 1.06,
-                       colorscale =palette,
-                       ))
-    #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        fig.add_trace(go.Heatmap(
+            x = xdata2,
+            y = ydata2,
+            z = dff,
+            xaxis = x2_slctd, # 'x'(default) or 'x2': Secondary x-axis for Motor-1
+            yaxis = y2_slctd, # 'y'(default) or 'y2': Secondary y-axis for Motor-2
+            xgap = 1,
+            ygap = 1,
+            zmin =  cbar_range[0], # Defaults to DF min
+            #hover_name = channel_slctd,#hname,
+            zmax =  cbar_range[1], # Defaults to DF max
+            visible = True,
+            opacity = 0.0, # Hide overlayed trace, only want 2nd axis display
+            colorbar_title = f'<b>Signal<b>',
+            colorbar_len = 1.06,
+            colorscale =palette,
+            )
+        ) # END fig.add_trace
+
     # Removes title when top axis is displayed
-    if (taxis1_slctd !=None) & (x2_slctd=='x2'): #Opt 3 safety, if reassigned from None above.
+    if (taxis1_slctd != None) & (x2_slctd == 'x2'): #Opt 3 safety, if reassigned from None above.
         ttl_txt = ''
     else:
         ttl_txt = '<b>2D Scan Intensities<b>'
-        
-    #fig.update_traces(showscale=False, selector=dict(type='heatmap'))
-    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++        
+
     # Create axis objects and apply formatting
     fig.update_layout(
-        xaxis = dict(title = x_title_txt,
-                nticks = 5,
-                ticks = 'outside',
-                side = 'bottom',
-                color = 'black',
-                showline = False,
-                showgrid = False,
-                zeroline = False,
-                range = x_range ),
-        yaxis = dict(title = y_title_txt,
-                nticks = 5,
-                ticks = 'outside',
-                side = 'left',
-                color = 'black',
-                showline = False,
-                showgrid = False,
-                zeroline = False,
-                range = y_range ),)
-    fig.update_layout({
+        xaxis = dict(
+            title = x_title_txt,
+            nticks = 5,
+            ticks = 'outside',
+            side = 'bottom',
+            color = 'black',
+            showline = False,
+            showgrid = False,
+            zeroline = False,
+            range = x_range
+        ),
+        yaxis = dict(
+            title = y_title_txt,
+            nticks = 5,
+            ticks = 'outside',
+            side = 'left',
+            color = 'black',
+            showline = False,
+            showgrid = False,
+            zeroline = False,
+            range = y_range
+        ),
+    ) # END fig.update_layout
+    fig.update_layout(
+        {
         'xaxis2': x_axis2, # None (default) or Dict
         'yaxis2': y_axis2, # None (default) or Dict
-        'coloraxis': {'showscale' : False},},
+        'coloraxis': {'showscale' : False},
+        },
         width = 580, #int(xwidth[f])*mag_factor, 
         height = 530, #int(ywidth[f])*mag_factor,
-        coloraxis_colorbar_xpad = 300,coloraxis_colorbar_ypad = 300,coloraxis_colorbar_bgcolor = 'black',coloraxis_colorbar_bordercolor = 'black',coloraxis_colorbar_outlinecolor = 'black',coloraxis_colorbar_tickcolor = 'black',paper_bgcolor = 'rgb(160,160,160)',plot_bgcolor = 'black',title_text = ttl_txt,font_color = 'black',margin_autoexpand = True,margin_l = 110,margin_r = 120,margin_t = 120,autosize = False)
+        coloraxis_colorbar_xpad = 300,
+        coloraxis_colorbar_ypad = 300,
+        coloraxis_colorbar_bgcolor = 'black',
+        coloraxis_colorbar_bordercolor = 'black',
+        coloraxis_colorbar_outlinecolor = 'black',
+        coloraxis_colorbar_tickcolor = 'black',
+        paper_bgcolor = 'rgb(160,160,160)',
+        plot_bgcolor = 'black',
+        title_text = ttl_txt,
+        font_color = 'black',
+        margin_autoexpand = True,
+        margin_l = 110,
+        margin_r = 120,
+        margin_t = 120,
+        autosize = False
+    ) # END fig.update_layout
     #==============================================================================================
     # What is returned here will actually go to the output
     # First:  'component_property = children'

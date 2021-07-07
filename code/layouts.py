@@ -21,17 +21,18 @@ layout1 = dbc.Container([
         dbc.Col([
             dcc.Store(id='memory-data', storage_type='memory'),
             #dbc.Label( 'filename:', id='datasets1', size='sm', html_for='files1'),
-            dbc.DropdownMenu(id = 'files', children = [
-                dbc.DropdownMenuItem(d, id = f'filename{idx}', active=(d==datasets[0])) for idx, d in enumerate(datasets)
+            dbc.DropdownMenu(id = 'files', label='Data ', bs_size="sm", direction='down',
+                children =
+                [
+                    dbc.DropdownMenuItem(d, id = f'filename{idx}', active=(d==datasets[0])) for idx, d in enumerate(datasets)
                 ],
-                label='Data ', bs_size="sm", direction='down',
-                ),
+            ),
             #dbc.FormText(f'Available Data', color='secondary'),
             ], width={'size':'auto', 'order':'first'} # END of dbc.Col children = [ datasets, files, filename{idx} ]
         ) # END of COL
     ]),
     # All graphs/components go into this empty list: 'children'
-    html.Div(id='container', children=[])
+    html.Div(id='container', children = [])
     ], fluid=True) # END of app.layout(...)
 #+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 # END layouts.py
