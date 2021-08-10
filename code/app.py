@@ -11,7 +11,7 @@ from dash_bootstrap_components import themes
 # Dashboard entry through index.py
 app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[themes.SPACELAB])
 
-# Alternatively: Render Dashboard with Jupyter
+# Alternatively: Render Dashboard in Jupyter Lab
 #from jupyter_dash import JupyterDash
 #app = JupyterDash(__name__, suppress_callback_exceptions=True, external_stylesheets=[themes.SPACELAB])
 
