@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # IMPORTS:
-from app import app
+from app import app, server
 from layouts import layout1
 import callbacks
 
