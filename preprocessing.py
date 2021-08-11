@@ -31,7 +31,8 @@ header_names = ['#errors',
 
 # Assign relative path
 #relative_path = '../../UTPS-Data/'
-relative_path = '../data/'
+#relative_path = '../data/'
+relative_path = './data/'
 
 # List of files in relative path directory
 datasets = os.listdir(relative_path)
