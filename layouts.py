@@ -15,7 +15,7 @@ layout1 = dbc.Container([
         ),
         dbc.Col(
             # Adds button for dynamic callback to make subplot
-            html.Div([ dbc.Button('Subplots', id='add_graph', n_clicks=0, outline = False, size='sm') ] ), width={'size': 'auto', 'order': 2, 'offset': 0},
+            html.Div([ dbc.Button('Add Subplot', id='add_graph', n_clicks=0, outline = False, size='sm') ] ), width={'size': 'auto', 'order': 2, 'offset': 0},
             ),
         # Dataset Dropdown Column
         dbc.Col([
