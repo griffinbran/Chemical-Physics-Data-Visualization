@@ -172,7 +172,7 @@ See requirements.txt listed in root directory
 * [`Ultrafast Dynamics of Excited Electronic States in Nitrobenzene...`](./assets/UltrafastDynamicsofExcitedElectronicStatesinNitrobenzene.pdf) Journal of Physical Chemistry A: ([*source*](https://pubs.acs.org/doi/10.1021/acs.jpca.0c01943?ref=pdf))
 
 ### Contacts:
-> * Data Analyst: Brandon Griffin [GitHub](https://github.com/griffinbran) | [LinkedIn](https://www.linkedin.com/in/griffinbran/) | [Twitter](https://twitter.com/GriffinBran) | [Medium](https://griffinbran.medium.com)
+> * Dashboard Creator: Brandon Griffin [Website](https://griffinbran.github.io/) | [Email](branjgriffin@gmail.com)
 > * UTPS Scientist: Richard Thurston, PhD Candidate [Email](rthurston@lbl.gov)
 > * Postdoctoral Researcher: Matthew Brister, PhD [Email](mmbrister@lbl.gov)
 > * LBNL Staff Scientist: Daniel Slaughter, PhD  [Website](https://amos.lbl.gov/slaughter/) | [Email](dslaughter@lbl.gov)
